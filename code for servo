@@ -1,0 +1,27 @@
+#include <Servo.h>
+Servo servoMain;
+int led = 13;
+long int winCount = 0;
+
+void setup() {         
+    Serial.begin(9600);
+  pinMode(led, OUTPUT);
+   servoMain.attach(5); // servo on digital pin 5
+}
+
+void loop()
+
+{
+  servoMain.write(120);
+   delay(10);
+   while (Serial.available() > 0) {
+    int winCount = Serial.parseInt(); //manual serial input for how many times it needs to dispense
+    while (winCount>0) {
+      servoMain.write(40);  // Turn Servo Left to 45 degrees
+      delay(170);          // Wait 1 second
+      servoMain.write(120);   // Turn Servo Left to 0 degrees
+      delay(170);          // Wait 1 second
+      winCount--;  // wait for a second
+    }
+  }
+}
