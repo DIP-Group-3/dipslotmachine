@@ -31,7 +31,7 @@ void setup() {
 
 void loop() {
   // Gerenerate Random Index
-  int RandIndex = rand() % 5;
+  int RandIndex = rand() % 10;
 
   // Characterise Selected String
   char *str = combo[RandIndex].c_str();
