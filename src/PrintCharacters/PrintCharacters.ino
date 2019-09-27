@@ -31,22 +31,22 @@ void setup() {
 
 void loop() {
   // Gerenerate Random Index
-  //int RandIndex = rand() % 5;
+  int RandIndex = rand() % 5;
 
   // Characterise Selected String
-  char *str = combo[3].c_str();
-  
-  // FILL SCREEN 'black'  
+  char *str = combo[RandIndex].c_str();
+
+  // FILL SCREEN 'black'
   matrix.fillScreen(matrix.Color333(0, 0, 0));
 
   // DRAW TEXT
   matrix.setTextSize(3);        // size 1 == 8 pixels high
   matrix.setTextWrap(false);    // Don't wrap at end of line - will do ourselves
   matrix.setCursor(1, 5);       // start at top left, with 8 pixel of spacing
-  
+
   uint8_t w = 0;                //Color based on position
   uint8_t space = 24;           //Gap between each character
-  
+
   for (w=0; w<3; w++) {
     matrix.setTextColor(Wheel(w));
     matrix.print(str[w]);           // Print Character
@@ -54,7 +54,7 @@ void loop() {
     space += space;                 // Next x-position
   }
   delay(2000);                      // Time delay for next set of combinations to be printed
-  
+
 }
 
 
