@@ -53,7 +53,7 @@ void loop() {
     matrix.setCursor(space, 5);     // Position for next character
     space += space;                 // Next x-position
   }
-  delay(2000);                  // T
+  delay(2000);                      // Time delay for next set of combinations to be printed
   
 }
 
