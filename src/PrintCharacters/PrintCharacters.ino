@@ -15,7 +15,7 @@
 #define B2  29
 
 //ARRAY OF COMBOS & SELECT
-String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "EEE", "NBS"};
+String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE","SCE"};
 
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 
