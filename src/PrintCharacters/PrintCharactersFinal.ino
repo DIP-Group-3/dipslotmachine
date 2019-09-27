@@ -37,13 +37,13 @@ void setup() {
   matrix.setTextSize(3);        // size 1 == 8 pixels high
   matrix.setTextWrap(false);    // Don't wrap at end of line - will do ourselves
   Serial.begin(9600);
-  randomSeed(analogRead(15));
+  //randomSeed(analogRead(15));
 }
 
 void loop() {
     if (isSpinning == true) {
-      startingFrame = random(300) % 10; //choose start frame
-      endingFrame = random(300) % 10; //choose end frame
+      startingFrame = rand() % 10; //choose start frame
+      endingFrame = random() % 10; //choose end frame
       Serial.println(startingFrame);
       playAnimation(startingFrame, endingFrame, numberOfRotations);
 
