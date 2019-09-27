@@ -107,6 +107,9 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     drawFrame(currentXPos, 10, endingFrame);
     matrix.fillScreen(matrix.Color333(0,0,0));
     drawFrame(currentXPos, 4, endingFrame);
+    drawFrame(currentXPos, 10, endingFrame);
+    matrix.fillScreen(matrix.Color333(0,0,0));
+    drawFrame(currentXPos, 4, endingFrame);
     matrix.fillScreen(matrix.Color333(0,0,0));
     drawFrame(currentXPos, 6, endingFrame);
 
