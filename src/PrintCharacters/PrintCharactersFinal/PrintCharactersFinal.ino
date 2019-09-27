@@ -18,56 +18,43 @@
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE","SCE"};
 
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
-
+int spdWeights[] = {1,1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.9, 1.9, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1};
 // Draw Character:  matrix.drawChar(x-pos, y-pos, character, color, background, size);
 // Set Text Color:  matrix.Color333(r, g, b)
 // Set Text Size:   matrix.setText(int)
 // Set Text Wrap:   matrix.setTextWrap(boolean)
 // Set Position:    matrix.setCursor(x-margin, y-margin)
 
-/*
-  int currentXPos = 0;
-  int currentYPos = 0;
-  int startXPos = 1;
-  int startYPos = -21; //5; //starting pos = outside frame
-  int ySpeed = 10;
+  int numberOfRotations = 20;
   int startingFrame;
   int endingFrame;
-  int RandIndex = 0; //to delete
-  int numberOfRotations = 10;
-  bool outsideFrame = true;
-*/
+  int ySpeed = 10;
 
-  int numberOfRotations = 10;
-  int startingFrame;
-  int endingFrame;
-  int ySpeed = 10;
-  //to modify
   bool isSpinning = true;
 
 void setup() {
   matrix.begin();
   matrix.setTextSize(3);        // size 1 == 8 pixels high
   matrix.setTextWrap(false);    // Don't wrap at end of line - will do ourselves
- /*
-  currentXPos = startXPos;
-  currentYPos = startYPos; */
+  Serial.begin(9600);
 }
 
 void loop() {
     if (isSpinning == true) {
-      startingFrame = rand() % 10;//selectFrame(combo); //potential bug**
-      endingFrame = rand() % 10;//selectFrame(combo);
-
+      startingFrame = rand() % 10; //choose start frame
+      endingFrame = rand() % 10; //choose end frame
+      Serial.println(startingFrame);
       playAnimation(startingFrame, endingFrame, numberOfRotations);
 
     }
     isSpinning = false;
-    //matrix.print("END");
+
 }
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     //temp variables
     bool outsideFrame = true;
+
+    int currentFrame;
     int currentXPos = 0;
     int currentYPos = 0;
     int startXPos = 1;
@@ -76,44 +63,67 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     //initial conditions
     currentXPos = startXPos;
     currentYPos = startYPos;
+    currentFrame = startingFrame;
 
     //start animation
     if (outsideFrame == true){
       currentYPos++; //shift by 1 row down, now img enters frame
       outsideFrame = false;
-      char *str = combo[startingFrame].c_str();
+      char *str = combo[startingFrame].c_str(); //to remove?
     }
-    
-    //animating...
-    for (int counter = 0; counter< numberOfRotations; ){
-      // Characterise Selected String
-      char *str = combo[startingFrame].c_str();
 
+    //animating... rolling...
+    for (int counter = 0; counter< numberOfRotations; ){
       //FILL SCREEN 'black'
       matrix.fillScreen(matrix.Color333(0,0,0));
-
-      // DRAW Text
-      uint8_t w = 0;
-      uint8_t space = 24;
-      matrix.setCursor(currentXPos, currentYPos);
-      for (w=0; w<3; w++) { // 3 = number of characters
-        matrix.setTextColor(Wheel(w));
-        matrix.print(str[w]);
-        matrix.setCursor(space, currentYPos);
-        space += space;
-      }
+      drawFrame(currentXPos, currentYPos, currentFrame);
       delay(0);
-      currentYPos += ySpeed;
+      currentYPos += ySpeed*spdWeights[counter]; //move frame down
 
       //check if img exited endingFrame
       if (currentYPos >= matrix.height() + 21) { //text ht = 21
         currentYPos = startYPos; //wrap around/reset start Position
         outsideFrame = true;
+
+        currentFrame = (currentFrame+1)%10; // swap to next frame
         counter++;
       }
     }
+
+    //ending animation
+    int endYPos = 6;
+    for (int yPos = currentYPos; yPos <= endYPos; ){
+      //print ROW of IMAGES
+      matrix.fillScreen(matrix.Color333(0,0,0));
+      yPos += ySpeed;
+      drawFrame(currentXPos, yPos, endingFrame);
+    }
+
+    //jitter/shake . hardcoded
+    matrix.fillScreen(matrix.Color333(0,0,0));
+    drawFrame(currentXPos, 10, endingFrame);
+    matrix.fillScreen(matrix.Color333(0,0,0));
+    drawFrame(currentXPos, 4, endingFrame);
+    matrix.fillScreen(matrix.Color333(0,0,0));
+    drawFrame(currentXPos, 6, endingFrame);
+
 }
 
+void drawFrame(int currentXPos, int currentYPos, int frame){
+  // DRAW Text
+  uint8_t w = 0;
+  uint8_t space = 24;
+  // Characterise Selected String, extract String from String Array
+  char *str = combo[frame].c_str();
+
+  matrix.setCursor(currentXPos, currentYPos);
+  for (w=0; w<3; w++) { // 3 = number of characters
+    matrix.setTextColor(Wheel(w));
+    matrix.print(str[w]);
+    matrix.setCursor(space, currentYPos);
+    space += space;
+  }
+}
 
 // Input a value 0 to 24 to get a color value.
 // The colours are a transition r - g - b - back to r.
