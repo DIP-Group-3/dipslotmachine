@@ -37,12 +37,13 @@ void setup() {
   matrix.setTextSize(3);        // size 1 == 8 pixels high
   matrix.setTextWrap(false);    // Don't wrap at end of line - will do ourselves
   Serial.begin(9600);
+  randomSeed(analogRead(15));
 }
 
 void loop() {
     if (isSpinning == true) {
-      startingFrame = rand() % 10; //choose start frame
-      endingFrame = rand() % 10; //choose end frame
+      startingFrame = random(300) % 10; //choose start frame
+      endingFrame = random(300) % 10; //choose end frame
       Serial.println(startingFrame);
       playAnimation(startingFrame, endingFrame, numberOfRotations);
 
@@ -50,6 +51,8 @@ void loop() {
     isSpinning = false;
 
 }
+
+
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     //temp variables
     bool outsideFrame = true;
@@ -80,7 +83,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       delay(0);
       currentYPos += ySpeed*spdWeights[counter]; //move frame down
 
-      //check if img exited endingFrame
+      //check if img/frame exited matrix
       if (currentYPos >= matrix.height() + 21) { //text ht = 21
         currentYPos = startYPos; //wrap around/reset start Position
         outsideFrame = true;
