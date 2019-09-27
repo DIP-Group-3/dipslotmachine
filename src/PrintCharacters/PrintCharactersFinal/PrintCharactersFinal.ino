@@ -1,5 +1,7 @@
 #include <RGBmatrixPanel.h>
 
+
+//PIN DEFINITIONS
 #define CLK 11    // USE THIS ON ARDUINO MEGA
 #define OE   9    // OUTPUT ENABLE
 #define LAT 10    // LATCH SIGNAL MARKS THE END OF A ROW OF DATA
@@ -14,49 +16,55 @@
 #define G2  28
 #define B2  29
 
-//ARRAY OF COMBOS & SELECT
+//ARRAY OF COMBOS & SELECT, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE","SCE"};
 
-RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
+//Array to determine scroll speed
+//ySpeed, or scroll speed is proportional to weights (20)
 int spdWeights[] = {1,1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.9, 1.9, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1};
-// Draw Character:  matrix.drawChar(x-pos, y-pos, character, color, background, size);
-// Set Text Color:  matrix.Color333(r, g, b)
-// Set Text Size:   matrix.setText(int)
-// Set Text Wrap:   matrix.setTextWrap(boolean)
-// Set Position:    matrix.setCursor(x-margin, y-margin)
 
-  int numberOfRotations = 20;
-  int startingFrame;
-  int endingFrame;
-  int ySpeed = 10;
+//construct 64x32 LED MATRIX panel
+RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 
-  bool isSpinning = true;
+//Global Variables
+int numOfFrames = 10;
+int numberOfRotations = 20;
+int ySpeed = 10; //vertical scrollSpeed
+
+
+
+
 
 void setup() {
+
+  //Set-up code for matrix
   matrix.begin();
-  matrix.setTextSize(3);        // size 1 == 8 pixels high
+  //set text properties
+  matrix.setTextSize(3);        // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
   matrix.setTextWrap(false);    // Don't wrap at end of line - will do ourselves
-  Serial.begin(9600);
+
+  // *MUST SEED using Analog input from UNUSED_PIN. analogRead(**UNUSED_PIN**). Pin15 is used here temporarily
   randomSeed(analogRead(15));
 }
 
 void loop() {
-    if (isSpinning == true) {
-      startingFrame = random(300) % 10; //choose start frame
-      endingFrame = random(300) % 10; //choose end frame
-      Serial.println(startingFrame);
-      playAnimation(startingFrame, endingFrame, numberOfRotations);
 
-    }
-    isSpinning = false;
+  //Example code on how to implement rolling animation
+  //{...before}: spin button is pressed
+  bool isSpinning = true; //spin button sets isSpinning = true
 
+  if (isSpinning == true) {
+    int startingFrame = random(300) % numOfFrames; //choose random start frame
+    int endingFrame = random(300) % numOfFrames; //choose random end frame
+
+    playAnimation(startingFrame, endingFrame, numberOfRotations);
+  }
+  isSpinning = false;
 }
 
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
-    //temp variables
-    bool outsideFrame = true;
-
+    bool outsideMatrix = true;
     int currentFrame;
     int currentXPos = 0;
     int currentYPos = 0;
@@ -68,27 +76,33 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     currentYPos = startYPos;
     currentFrame = startingFrame;
 
+
+    //9:49PM 27/9/2019 FRIDAY, Nadine: outsideMatrix variable isn't necessary for wrapping logic
+    //check if it's really the case on LED before removing
+
     //start animation
-    if (outsideFrame == true){
-      currentYPos++; //shift by 1 row down, now img enters frame
-      outsideFrame = false;
-      char *str = combo[startingFrame].c_str(); //to remove?
+    if (outsideMatrix == true){
+      currentYPos++; //shift by 1 row down, now img enters matrix
+      outsideMatrix = false; //frame is in matrix
+
+      // Characterise Selected String, extract String from String Array
+      char *str = combo[startingFrame].c_str(); //maybe not needed. to remove? remove aft testing if really not req
     }
 
-    //animating... rolling...
-    for (int counter = 0; counter< numberOfRotations; ){
-      //FILL SCREEN 'black'
-      matrix.fillScreen(matrix.Color333(0,0,0));
+    //animating...is rolling...for numberOfRotations times
+    for (int counter = 0; counter < numberOfRotations; ){
+
+      matrix.fillScreen(matrix.Color333(0,0,0)); //FILL SCREEN 'black'
       drawFrame(currentXPos, currentYPos, currentFrame);
       delay(0);
-      currentYPos += ySpeed*spdWeights[counter]; //move frame down
+      currentYPos += ySpeed*spdWeights[counter]; //move frame down by scrollSpeed scaled by weights
 
-      //check if img/frame exited matrix
+      //check if frame exited matrix
       if (currentYPos >= matrix.height() + 21) { //text ht = 21
-        currentYPos = startYPos; //wrap around/reset start Position
-        outsideFrame = true;
+        currentYPos = startYPos; //wrap around/reset to start Position
+        outsideMatrix = true;
 
-        currentFrame = (currentFrame+1)%10; // swap to next frame
+        currentFrame = (currentFrame+1)%numOfFrames; // swap to next frame
         counter++;
       }
     }
@@ -102,11 +116,12 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       drawFrame(currentXPos, yPos, endingFrame);
     }
 
-    //jitter/shake . hardcoded
+    //jitter/shake stop animation, hardcoded
     matrix.fillScreen(matrix.Color333(0,0,0));
     drawFrame(currentXPos, 10, endingFrame);
     matrix.fillScreen(matrix.Color333(0,0,0));
     drawFrame(currentXPos, 4, endingFrame);
+    matrix.fillScreen(matrix.Color333(0,0,0));
     drawFrame(currentXPos, 10, endingFrame);
     matrix.fillScreen(matrix.Color333(0,0,0));
     drawFrame(currentXPos, 4, endingFrame);
