@@ -1,6 +1,6 @@
 int buzzer = 4; // default pin 4
 
-void CoinInsert() {
+void CoinInsertSFX() {
   tone(buzzer, 1000);
   delay(50);
   tone(buzzer, 1500);
@@ -9,14 +9,14 @@ void CoinInsert() {
   delay(2000);
 }
 
-void BetIncrement() {
+void BetIncrementSFX() {
   tone(buzzer, 500);
   delay(100);
   noTone(buzzer);
   delay(2000);
 }
 
-void SpinActivate() {
+void SpinActivateSFX() {
   tone(buzzer, 600);
   delay(50);
   tone(buzzer, 800);
@@ -33,7 +33,7 @@ void SpinActivate() {
   delay(2000);
 }
 
-void WinCondition() {
+void WinConditionSFX() {
   tone(buzzer, 800);
   delay(80);
   tone(buzzer, 600);
@@ -46,7 +46,7 @@ void WinCondition() {
   delay(2000);
 }
 
-void Jackpot() {
+void JackpotSFX() {
   tone(buzzer, 800);
   delay(50);
   tone(buzzer, 1000);
@@ -72,11 +72,11 @@ void Jackpot() {
 }
 
 void setup() {
-  //CoinInsert();
-  //BetIncrement();
-  //SpinActivate();
-  //WinCondition();
-  Jackpot();
+  //CoinInsertSFX();
+  //BetIncrementSFX();
+  //SpinActivateSFX();
+  //WinConditionSFX();
+  JackpotSFX();
 }
 
 void loop() {
