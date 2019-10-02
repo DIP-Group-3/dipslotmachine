@@ -36,7 +36,7 @@ void setup()
   //Set-up code for matrix
   matrix.begin();
   //set text properties
-  matrix.setTextSize(3) assa; // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
+  matrix.setTextSize(3); // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
   matrix.setTextWrap(false);  // Don't wrap at end of line - will do ourselves
 
   // *MUST SEED using Analog input from UNUSED_PIN. analogRead(**UNUSED_PIN**). Pin15 is used here temporarily
@@ -66,7 +66,8 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   int currentFrame;
   int currentXPos = 0;
   int currentYPos = 0;
-  int startXPos = 1;
+  int startXPos = 1; //todo: missing animation: OXO -> OOX -> X00
+  int yPosCenter = 6;
   int startYPos = -21; //starting pos = outside frame
 
   //initial conditions
