@@ -52,7 +52,7 @@ void loop()
   betPress = digitalRead(betBtn);
   spinPress = digitalRead(spinBtn);
   if(betAvail()){                               //Check if bet increment could be done
-    updateBet()
+    updateBet();
   }else if(spinAvail()){                        //Ceck if spin could be done
     //Spin Frames
   }
@@ -64,10 +64,10 @@ void updateCredit(int addAmt){       //Method: Update Credit Amount
     creditAmt += addAmt;
     coinInsert = !coinInsert;  
   }else if(addAmt>0){                //Scenario 2: Coin inserted when current credit !=0
-    creditAmt += amt;
+    creditAmt += addAmt;
     coinInsert = !coinInsert;  
   }else{                             //Scenario 3: Credit deducted when played
-    creditAmt += amt;               
+    creditAmt += addAmt;               
     if(creditAmt <= 0){                   //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                //Message Type 2: When credit greater than 0
