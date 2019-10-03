@@ -10,10 +10,13 @@ int isObstaclePin = 7;
 int isObstacle = HIGH;
 
 //Buttons Declared Variable
-int betBtn = 12;
-int betPress = HIGH;
-int spinBtn = 13;
-int spinPress = HIGH;
+const int betBtn = 12;
+int betState = LOW;
+bool betPressed = false;
+
+const int spinBtn = 13;
+int spinState = LOW;
+bool spinPressed = false;
 
 //Server Motor Variable
 #define MotorPin 5
@@ -24,6 +27,7 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x3F for a 20 chars
 int creditAmt =0, betAmt=0;
 long int winCount = 0;
 bool coinInsert = false;
+
 
 void setup()
 {
@@ -41,20 +45,19 @@ void loop()
   lcd.backlight();
   isObstacle = digitalRead(isObstaclePin);
   if(isObstacle == LOW) {                       // Obstacle detected
-    Serial.println("On");
+    //Serial.println("On");
     coinInsert = true;
   } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
-    Serial.println("Off");
+    //Serial.println("Off");
     updateCredit(1);                            // Incremeent Credit Amt
     LcdMessage(1);
   }
-  
-  betPress = digitalRead(betBtn);
-  spinPress = digitalRead(spinBtn);
+
   if(betAvail()){                               //Check if bet increment could be done
     updateBet();
   }else if(spinAvail()){                        //Ceck if spin could be done
     //Spin Frames
+   activateSpin();
   }
 }
 
@@ -77,27 +80,58 @@ void updateCredit(int addAmt){       //Method: Update Credit Amount
 }
 void updateBet(){                   //Method: Update Bet Amount when Bet Button Pressed
   if(betAmt>=3 || betAmt >= creditAmt){                    //Scenario 1: Current bet amount equal to/greater than 3
+    Serial.println("Bet = 1");
+    Serial.println(betAmt);
     betAmt = 1;
   }else{                            //Scenario 2: Current bet amount less than 3
-     betAmt++;
+    Serial.println("Increase Bet");
+    Serial.println(betAmt);
+    betAmt++;
   }
+  betPressed = false;
+  LcdMessage(1);
 }
 
 bool betAvail(){
-  if(betBtn == LOW && creditAmt > 0){   //Bet Btn Pressed && credit Amt greater than 0
+  betState = digitalRead(betBtn);                                   //Read Bet Btn Input 
+  if(betState == HIGH){
+    betPressed = true;
+    return false;
+  }else if(betState == LOW && creditAmt > 0 && betPressed){        //Bet Btn Pressed && credit Amt greater than 0   
+    Serial.println("Bet to increase");
     return true;
   }else{
+    betPressed = false;
     return false;
+  }
+  
+}
+
+void activateSpin(){
+  spinPressed = false;
+  creditAmt -= betAmt;
+  betAmt = 1;
+  if(creditAmt <=0){
+    LcdMessage(0);
+  }else{
+    LcdMessage(1);
   }
 }
 
 bool spinAvail(){
-  if(spinBtn == LOW && betAmt > 0){     //Spin Btn Pressed && Bet Amt greater than 0
+  spinState = digitalRead(spinBtn);        //Read  Spin Btn Input
+  if(spinState == HIGH){
+    spinPressed = true;
+  }else if (spinState == LOW && creditAmt > 0 && spinPressed){
+    Serial.println("Spin");
     return true;
   }else{
+    spinPressed = false;
     return false;
   }
 }
+
+
 
 void LcdMessage(int scenario){
   lcd.clear();                          //Clear current displayed frame
