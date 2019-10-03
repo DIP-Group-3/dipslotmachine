@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
-    "sketch": "src\\PrintCharactersFinal.ino",
+    "sketch": "src\\PrintCharactersFinal\\PrintCharactersFinal.ino",
     "port": "COM4"
 }
