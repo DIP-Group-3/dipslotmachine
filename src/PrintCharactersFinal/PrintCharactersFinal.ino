@@ -53,8 +53,9 @@ void loop()
 
   //Example code on how to implement rolling animation
   //{...before}: spin button is pressed
-  
 
+  
+ 
   if (isSpinning == true)
   {
     startingFrame = random(300) % numOfFrames; //choose random start frame
@@ -63,16 +64,13 @@ void loop()
     playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
   isSpinning = false;
+
+  
 }
 
-//may have problems
-String getFrameContent(int frame){
-  return combo[frame];
-}
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 {
-  bool outsideMatrix = true;
   int currentFrame;
   int currentXPos = 0;
   int currentYPos = 0;
@@ -95,17 +93,15 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     drawFrame(currentXPos, currentYPos, currentFrame, matrix.Color333(255,0,0));
     delay(0);
     currentYPos += round(ySpeed * spdWeights[counter]); //move frame down by scrollSpeed scaled by weights
-
+    
     //check if frame exited matrix
-    if (currentYPos >= matrix.height() + 21)
-    {                          //text ht = 21
+    if (currentYPos >= matrix.height() + 21) //text ht = 21
+    {                          
       currentYPos = yPosTop; //wrap around/reset to start Position
-
 
       currentFrame = (currentFrame + 1) % numOfFrames; // swap to next frame
       counter++;
-
-      tone(piezoPin, 1000, 100);
+      tone(piezoPin, 1000, 100); //beep sfx as frame enters matrix
     }
   }
 
@@ -114,7 +110,6 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   for (; currentYPos <= endYPos;)
   {
     //print ROW of IMAGES
-    //tone(piezoPin, 2000, 100);
     matrix.fillScreen(matrix.Color333(0, 0, 0));
     currentYPos += ySpeed;
     drawFrame(currentXPos, currentYPos, endingFrame, matrix.Color333(255,0,0));
@@ -135,9 +130,11 @@ void jitterAnimation(int endingFrame, int currentXPos, int currentYPos){
     Serial.print("JACKPOT, IEM\n");
     colour = matrix.Color333(0, 255, 245);
   }
+  // EEE
   else if (!strcmp(eee, frameStr)) {
     Serial.print("EEE\n");
     colour = matrix.Color333(76, 255, 56);
+  // OTHERS
   } else {
     colour = matrix.Color333(0, 254, 0);
   }
@@ -155,9 +152,6 @@ void jitterAnimation(int endingFrame, int currentXPos, int currentYPos){
   
   }
 
-   
-  // EEE
-  // LOSE
 }
 
 
