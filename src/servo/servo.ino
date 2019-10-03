@@ -27,5 +27,5 @@ void loop(){
   while(Serial.available() > 0){
     int winCount = Serial.parseInt();
     dispenseCoins(winCount);
-  }W
+  }
 }
