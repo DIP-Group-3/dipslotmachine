@@ -15,12 +15,14 @@
 #define G2 28
 #define B2 29
 
+#define piezoPin 4
+
 //ARRAY OF COMBOS & SELECT, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
 
 //Array to determine scroll speed
 //ySpeed, or scroll speed is proportional to weights (20)
-int spdWeights[] = {1, 1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.9, 1.9, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1};
+float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.5, 1.5, 1.5, 1.5, 1.5, 1.4, 1.3, 1.2, 1.1, 1.1, 1.0, 1.0, 1};
 
 //construct 64x32 LED MATRIX panel
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
@@ -28,11 +30,14 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 //Global Variables
 int numOfFrames = 10;
 int numberOfRotations = 20;
-int ySpeed = 10; //vertical scrollSpeed
+float ySpeed = 10; //vertical scrollSpeed
+bool isSpinning = true; //spin button to trigger status;
+int startingFrame; 
+int endingFrame;
 
 void setup()
 {
-
+  
   //Set-up code for matrix
   matrix.begin();
   //set text properties
@@ -48,16 +53,21 @@ void loop()
 
   //Example code on how to implement rolling animation
   //{...before}: spin button is pressed
-  bool isSpinning = true; //spin button sets isSpinning = true
+  
 
   if (isSpinning == true)
   {
-    int startingFrame = random(300) % numOfFrames; //choose random start frame
-    int endingFrame = random(300) % numOfFrames;   //choose random end frame
+    startingFrame = random(300) % numOfFrames; //choose random start frame
+    endingFrame = random(300) % numOfFrames;   //choose random end frame
 
     playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
   isSpinning = false;
+}
+
+//may have problems
+String getFrameContent(int frame){
+  return combo[frame];
 }
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
@@ -68,51 +78,49 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   int currentYPos = 0;
   int startXPos = 1; //todo: missing animation: OXO -> OOX -> X00
   int yPosCenter = 6;
-  int startYPos = -21; //starting pos = outside frame
+  int yPosTop = -21; //starting pos = outside frame
+
+  
+  
 
   //initial conditions
   currentXPos = startXPos;
-  currentYPos = startYPos;
+  currentYPos = yPosCenter;//startYPos;
   currentFrame = startingFrame;
 
-  //9:49PM 27/9/2019 FRIDAY, Nadine: outsideMatrix variable isn't necessary for wrapping logic
-  //check if it's really the case on LED before removing
-
-  //start animation
-  if (outsideMatrix == true)
-  {
-    currentYPos++;         //shift by 1 row down, now img enters matrix
-    outsideMatrix = false; //frame is in matrix
-
-    // Characterise Selected String, extract String from String Array
-    char *str = combo[startingFrame].c_str(); //maybe not needed. to remove? remove aft testing if really not req
-  }
-
-  //animating...is rolling...for numberOfRotations times
+  
+  //begin animation...is rolling...for numberOfRotations times
   for (int counter = 0; counter < numberOfRotations;)
   {
 
     matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
     drawFrame(currentXPos, currentYPos, currentFrame);
     delay(0);
-    currentYPos += ySpeed * spdWeights[counter]; //move frame down by scrollSpeed scaled by weights
+    currentYPos += round(ySpeed * spdWeights[counter]); //move frame down by scrollSpeed scaled by weights
 
     //check if frame exited matrix
     if (currentYPos >= matrix.height() + 21)
     {                          //text ht = 21
-      currentYPos = startYPos; //wrap around/reset to start Position
-      outsideMatrix = true;
+      currentYPos = yPosTop; //wrap around/reset to start Position
+
 
       currentFrame = (currentFrame + 1) % numOfFrames; // swap to next frame
       counter++;
+
+      tone(piezoPin, 1000, 100);
     }
   }
 
-  //ending animation
+  // JACKPOT
+  // EEE
+  // LOSE
+
+  //ending animation 
   int endYPos = 6;
   for (; currentYPos <= endYPos;)
   {
     //print ROW of IMAGES
+    //tone(piezoPin, 2000, 100);
     matrix.fillScreen(matrix.Color333(0, 0, 0));
     currentYPos += ySpeed;
     drawFrame(currentXPos, currentYPos, endingFrame);
@@ -126,22 +134,13 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     matrix.fillScreen(matrix.Color333(0, 0, 0));
     currentYPos = yPositionsJitter[i];
     drawFrame(currentXPos, currentYPos, endingFrame);
+    tone(piezoPin, 5000, 50);
+
   }
 
   //blinking animation
-  blinkFrameAnimation(currentXPos, currentYPos, endingFrame);
-  /*
-    matrix.fillScreen(matrix.Color333(0,0,0));
-    drawFrame(currentXPos, 10, endingFrame);
-    matrix.fillScreen(matrix.Color333(0,0,0));
-    drawFrame(currentXPos, 4, endingFrame);
-    matrix.fillScreen(matrix.Color333(0,0,0));
-    drawFrame(currentXPos, 10, endingFrame);
-    matrix.fillScreen(matrix.Color333(0,0,0));
-    drawFrame(currentXPos, 4, endingFrame);
-    matrix.fillScreen(matrix.Color333(0,0,0));
-    drawFrame(currentXPos, 6, endingFrame);
-    */
+  //blinkFrameAnimation(currentXPos, currentYPos, endingFrame);
+
 }
 
 void blinkFrameAnimation(int currentXPos, int currentYPos, int endingFrame)
@@ -150,11 +149,14 @@ void blinkFrameAnimation(int currentXPos, int currentYPos, int endingFrame)
   for (int i = 0; i < numberOfBlinks; i++)
   {
     matrix.fillScreen(matrix.Color333(0, 0, 0));
+    matrix.setTextColor(matrix.Color333(221,255,0));
     drawFrame(currentXPos, currentYPos, endingFrame);
 
     //todo: change colour
+   
     //todo: blink sfx
-    delay(50);
+    tone(piezoPin, 2000, 100);
+    delay(150); 
   }
 }
 
@@ -169,7 +171,7 @@ void drawFrame(int currentXPos, int currentYPos, int frame)
   matrix.setCursor(currentXPos, currentYPos);
   for (w = 0; w < 3; w++)
   { // 3 = number of characters
-    matrix.setTextColor(Wheel(w));
+    matrix.setTextColor(Wheel(w*8-4));
     matrix.print(str[w]);
     matrix.setCursor(space, currentYPos);
     space += space;
