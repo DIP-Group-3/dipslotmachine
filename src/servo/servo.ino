@@ -18,8 +18,8 @@ void dispenseCoins(int numOfCoins) {
     delay(200);
     servoMain.write(servoEndAngle);
     delay(200);
-    servoMain.write(servoStartAngle);
-    delay(200);
+    //servoMain.write(servoStartAngle); //not needed
+    //(200);
   }
 }
 void loop(){
