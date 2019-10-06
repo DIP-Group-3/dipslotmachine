@@ -30,9 +30,11 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 //Global Variables
 int numOfFrames = 10;
 int numberOfRotations = 20;
-float ySpeed = 10; //vertical scrollSpeed
+//float ySpeed = 10; //vertical scrollSpeed
+float ySpeeds[] = {10, 5, 6}; //ySpeed for cylinder 1, 2 and 3 respectively
+
 bool isSpinning = true; //spin button to trigger status;
-int startingFrame; 
+int startingFrame;
 int endingFrame;
 
 void setup()
@@ -41,8 +43,8 @@ void setup()
   //Set-up code for matrix
   matrix.begin();
   //set text properties
-  matrix.setTextSize(3); // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
-  matrix.setTextWrap(false);  // Don't wrap at end of line - will do ourselves
+  matrix.setTextSize(3);     // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
+  matrix.setTextWrap(false); // Don't wrap at end of line - will do ourselves
 
   // *MUST SEED using Analog input from UNUSED_PIN. analogRead(**UNUSED_PIN**). Pin15 is used here temporarily
   randomSeed(analogRead(15));
@@ -54,8 +56,6 @@ void loop()
   //Example code on how to implement rolling animation
   //{...before}: spin button is pressed
 
-  
- 
   if (isSpinning == true)
   {
     startingFrame = random(300) % numOfFrames; //choose random start frame
@@ -64,98 +64,142 @@ void loop()
     playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
   isSpinning = false;
-
-  
 }
-
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 {
   int currentFrame;
   int currentXPos = 0;
-  int currentYPos = 0;
+
+  //int currentYPos = 0;
+  int currentYPositions[] = {0, 0, 0}; //yPos for cylinder 1, 2 & 3 respectively
+
   int startXPos = 1; //todo: missing animation: OXO -> OOX -> X00
   int yPosCenter = 6;
-  int yPosTop = -21; //starting pos = outside frame
+  int yPosTop = -21; //yPos where character is outside of matrix
 
-
-  //initial conditions
+  //initialise initial conditions
   currentXPos = startXPos;
-  currentYPos = yPosCenter;//startYPos;
   currentFrame = startingFrame;
+  //initial yPos of each character of each cylinder = center of matrix
+  for (int i = 0; i < 3; i++)
+  {
+    currentYPositions[i] = yPosCenter;
+  }
 
-  
   //begin animation...is rolling...for numberOfRotations times
   for (int counter = 0; counter < numberOfRotations;)
   {
 
     matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
-    drawFrame(currentXPos, currentYPos, currentFrame, matrix.Color333(255,0,0));
+    drawCharacter(currentXPos, currentYPositions, currentFrame, matrix.Color333(255, 0, 0));
     delay(0);
-    currentYPos += round(ySpeed * spdWeights[counter]); //move frame down by scrollSpeed scaled by weights
-    
-    //check if frame exited matrix
-    if (currentYPos >= matrix.height() + 21) //text ht = 21
-    {                          
-      currentYPos = yPosTop; //wrap around/reset to start Position
 
-      currentFrame = (currentFrame + 1) % numOfFrames; // swap to next frame
-      counter++;
-      tone(piezoPin, 1000, 100); //beep sfx as frame enters matrix
+    //move each character in cylinder 1, 2, 3 respectively by its own ySpeed
+    for (int i = 0; i < 3; i++)
+    {
+      currentYPositions[i] += round(ySpeeds[i] * spdWeights[counter]); //move frame down by scrollSpeed scaled by weights
+
+      //check if each character of each cylinder has exited matrix
+      if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
+      {
+        currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
+
+        currentFrame = (currentFrame + 1) % numOfFrames; // swap to next frame
+        counter++;
+        tone(piezoPin, 1000, 100); //beep sfx as frame enters matrix
+      }
     }
   }
 
-  //ending animation 
-  int endYPos = 6;
-  for (; currentYPos <= endYPos;)
+  //todo: check logic
+  //ending animation, for each character of each cylinder, pull it down to the center Yposition
+
+  /*
+  for (int i = 0; i < 3; i++)
   {
-    //print ROW of IMAGES
-    matrix.fillScreen(matrix.Color333(0, 0, 0));
-    currentYPos += ySpeed;
-    drawFrame(currentXPos, currentYPos, endingFrame, matrix.Color333(255,0,0));
+    int endYPos = 6;
+    while (currentYPositions[i] <= endYPos)
+    {
+      //print ROW of IMAGES
+      matrix.fillScreen(matrix.Color333(0, 0, 0));
+      currentYPositions[i] += ySpeeds[i];
+      drawCharacter(currentXPos, currentYPositions, endingFrame, matrix.Color333(255, 0, 0));
+    }
+  } */
+  
+  //todo: refactor and test code
+  //ending animation: currently, each character are at the top of of matrix
+  //the following code aims to pull it down to the center of the matrix
+  //idea: counter keeps track of the number of characters that has reached endYPos (middle of matrix)
+  //stop pulling the a char of a cylinder down if all 3 characters has reached the middle
+  int counter = 0; 
+  while (counter < 3)
+  {
+    for (int i = 0; i < 3; i++) //for each character of each cylinder,
+    {
+      if (currentYPositions[i] <= endYPos) //if character hasn't reached middle (endYPos) of matrix
+      {
+        matrix.fillScreen(matrix.Color333(0, 0, 0));
+        currentYPositions[i] += ySpeeds[i]; //move character down by its respective speed in ySpeed[]
+        //print that character
+        drawCharacter(currentXPos, currentYPositions, endingFrame, matrix.Color333(255, 0, 0));
+      }
+      else { //else, character has reached middle of matrix, don't move it down futher
+        counter++; //++ to number of characters that has reached the center
+      }
+    }
   }
 
-  jitterAnimation(endingFrame, currentXPos, currentYPos);
+  //jitter shake animation for each character in each cylinder
+  for (int i = 0; i < 3; i++)
+  {
+    jitterAnimation(endingFrame, currentXPos, currentYPositions); //todo: fix referencing bugs
+  }
 }
 
-void jitterAnimation(int endingFrame, int currentXPos, int currentYPos){
+void jitterAnimation(int endingFrame, int currentXPos, int[] currentYPositions)
+{
   char *frameStr = combo[endingFrame].c_str();
-  char * iem = "IEM";
-  char * eee = "EEE";
+  char *iem = "IEM";
+  char *eee = "EEE";
 
   uint16_t colour;
-  
+
+  // Choose final frame colour
   // JACKPOT
-  if (!strcmp(iem, frameStr)) {
+  if (!strcmp(iem, frameStr))
+  {
     Serial.print("JACKPOT, IEM\n");
     colour = matrix.Color333(0, 255, 245);
   }
   // EEE
-  else if (!strcmp(eee, frameStr)) {
+  else if (!strcmp(eee, frameStr))
+  {
     Serial.print("EEE\n");
     colour = matrix.Color333(76, 255, 56);
-  // OTHERS
-  } else {
+    // OTHERS
+  }
+  else
+  {
     colour = matrix.Color333(0, 254, 0);
   }
 
-    //jitter/shake stop animation
+  //jitter/shake stop animation
   int yPositionsJitter[] = {10, 4, 10, 4, 6};
 
   for (int i = 0; i < 5; i++)
   {
     matrix.fillScreen(matrix.Color333(0, 0, 0));
-    currentYPos = yPositionsJitter[i];
-    drawFrame(currentXPos, currentYPos, endingFrame, colour);
+    currentYPositions[i] = yPositionsJitter[i];
+    drawCharacter(currentXPos, currentYPositions, endingFrame, colour);
     Serial.print(colour);
     tone(piezoPin, 5000, 50);
-  
   }
-
 }
 
-
-void drawFrame(int currentXPos, int currentYPos, int frame, uint16_t color)
+//todo: fix referencing bugs
+void drawCharacter(int currentXPos, int[] currentYPositions, int frame, uint16_t color)
 {
   // DRAW Text
   uint8_t w = 0;
@@ -164,12 +208,13 @@ void drawFrame(int currentXPos, int currentYPos, int frame, uint16_t color)
   char *str = combo[frame].c_str();
 
   matrix.setCursor(currentXPos, currentYPos);
-  for (w = 0; w < 3; w++)
-  { // 3 = number of characters
+
+  for (w = 0; w < 3; w++) //for character 1, 2, 3 or cylinder 1, 2 & 3 in this order:
+  {                       // 3 = number of characters
     //matrix.setTextColor(Wheel(w*8-4));
     matrix.setTextColor(color);
     matrix.print(str[w]);
-    matrix.setCursor(space, currentYPos);
+    matrix.setCursor(space, currentYPositions[w]);
     space += space;
   }
 }
