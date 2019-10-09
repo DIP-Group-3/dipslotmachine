@@ -63,7 +63,9 @@ int creditAmt =0, betAmt=0;
 bool coinInsert = false;
 
 //Server Motor Variable
-Servo servoMain;
+Servo myservo;
+int totalCoinsInside = 3;
+int intermediateSpinPos = 90;
 
 void setup()
 {
@@ -109,9 +111,11 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
   if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
     betAmt = 1;
     creditAmt += addAmt;
+    totalCoinsInside += addAmt;
     coinInsert = !coinInsert;  
   }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
     creditAmt += addAmt;
+    totalCoinsInside += addAmt;
     coinInsert = !coinInsert;  
   }else{                                        //Scenario 3: Credit deducted when played
     creditAmt += addAmt;               
@@ -276,6 +280,15 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   }
 
   jitterAnimation(endingFrame, currentXPos, currentYPos);
+
+  // dispense coins 
+  if(endingFrame == 0){
+    dispenseCoin(2 * betAmt);   // calculate the amount 
+    totalCoinsInside -= (a * betAmt);
+  }else if (endingFrame == 2){
+    dispenseCoin(totalCoinsInside); // calculate the amount, dispense all
+    totalCoinsInside = 0;
+  }
 }
 
 void jitterAnimation(int endingFrame, int currentXPos, int currentYPos){
@@ -321,5 +334,15 @@ void drawFrame(int currentXPos, int currentYPos, int frame, uint16_t colour){
     matrix.print(str[w]);
     matrix.setCursor(space, currentYPos);
     space += space;
+  }
+}
+
+void dispenseCoin(int amount){
+  for(int i = 0; i < amount; i++){
+    myservo.write(0);
+    delay(180);
+    myservo.write(intermediateSpinPos);
+    delay(180);
+    myservo.write(0);
   }
 }
