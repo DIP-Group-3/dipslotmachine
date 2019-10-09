@@ -114,7 +114,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     for (int i = 0; i < 3; i++)
     {
       //extract character from character pointer
-      String characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
+      char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, matrix.Color333(255, 0, 0));
     }
     delay(0);
@@ -166,12 +166,13 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
         frameArrivedAtCenter[i] = true;
       }
       //draw characters
-      String characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
+      char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, matrix.Color333(255, 0, 0));
     }
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2])
       break;
   }
+  
   /*
   //todo: fix logic bugs
   //jitter shake animation for each character in each cylinder
@@ -181,10 +182,40 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   } */
 }
 
-/*
+
 //todo: fix logic bugs
-void oscillateAnimation(int endingFrame, int currentXPos, int[] currentYPositions)
-{
+void oscillateWithDecreasingEnergyAnimation (int currentXPositions[], int currentYPositions[], int currentCharacter[], int endingFrame)//(int endingFrame, int currentXPos, int[] currentYPositions)
+{ 
+
+  String frameToPrint = combo[endingFrame];
+  uint16_t colour;
+
+  //set character colour
+  if (frameToPrint.equalsIgnoreCase("IEM")){ //JACKPOT
+      colour = matrix.Color333(0, 255, 245);
+  }
+  else if (frameToPrint.equalsIgnoreCase("EEE")){ //EEE
+      colour = matrix.Color333(76, 255, 56);
+  }
+
+  else { //OTHERS
+      colour = matrix.Color333(76, 255, 56);
+  }
+
+  //oscillateAnimation
+  int yPositionsOscillate[] = {10, 4, 10, 4, 6};
+
+  for (int i = 0; i < 3; i++){ //for each character in cylinder 1, 2, 3 respectively
+    //update yPos
+    currentYPositions[i] = yPositionsOscillate[i];
+    //drawFrame
+    char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
+    drawCharacter(currentXPositions[i], currentYPositions[i], charToDraw, colour);
+    //buzz SFX
+    tone(piezoPin, 5000, 50);
+  }
+
+  /*
   char *frameStr = combo[endingFrame].c_str();
   char *iem = "IEM";
   char *eee = "EEE";
@@ -220,16 +251,16 @@ void oscillateAnimation(int endingFrame, int currentXPos, int[] currentYPosition
     drawCharacter(currentXPositions[i], currentYPositions[i], endingFrame, colour);
     Serial.print(colour);
     tone(piezoPin, 5000, 50);
-  }
-} */
+  } */
+} 
 
-String extractCharFromFrameList(int rowNumber, int colNumber)
+char extractCharFromFrameList(int rowNumber, int colNumber)
 {
-  return String(combo[rowNumber].charAt(colNumber)); //eg. combo[1] returns "NBS". combo[1].at(2) returns "B".
+  return combo[rowNumber].charAt(colNumber); //eg. combo[1] returns "NBS". combo[1].at(2) returns "B".
 }
 
 //todo: test logic
-void drawCharacter(int xPos, int yPos, String characterToPrint, uint16_t color)
+void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 {
   // DRAW Text
   uint8_t w = 0;
