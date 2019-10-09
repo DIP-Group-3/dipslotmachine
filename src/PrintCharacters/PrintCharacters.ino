@@ -31,8 +31,7 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 int numOfFrames = 10;
 int numberOfRotations = 20;
 //float ySpeed = 10; //vertical scrollSpeed
-float ySpeedsConstant[] = {10,7,8};
-float ySpeeds[] ={0,0,0} ;
+float ySpeeds[] = {10, 7, 8}; //ySpeed for cylinder 1, 2 and 3 respectively
 
 bool isSpinning = true; //spin button to trigger status;
 int startingFrame;
@@ -53,6 +52,7 @@ void setup()
 
 void loop()
 {
+
   //Example code on how to implement rolling animation
   //{...before}: spin button is pressed
 
@@ -63,11 +63,14 @@ void loop()
     
     playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
-  //isSpinning = false;
+  isSpinning = false;
 }
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 {
+  //int currentFrame;
+  //int currentXPos = 0;
+
   // currentCharacter[] rationale explained:
   // This array stores 3 pointers that points to each character in a frame.
   // This pointers keep track of what character to display according to the following data structure:
@@ -80,7 +83,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   // currentCharacter[0] = 0: 'E', currentCharacter[1] = 0: 'E', currentCharacter[2] = 0: 'E'
   int currentCharacter[] = {0, 0, 0};
 
-  int currentXPositions[] = {1, 24, 47}; //xPos for character 1, 2 & 3 respectively
+  int currentXPositions[] = {0, 0, 0}; //xPos for character 1, 2 & 3 respectively
   //int currentYPos = 0;
   int currentYPositions[] = {0, 0, 0}; //yPos for character 1, 2 & 3 respectively
 
@@ -89,19 +92,18 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   int yPosTop = -21; //yPos where character is outside of matrix
 
   // initialise initial conditions
- 
+  // currentXPos = startXPos;
+  // currentFrame = startingFrame;
   for (int i = 0; i < 3; i++)
   {
     // initial yPos of each character of each cylinder = center of matrix
     currentYPositions[i] = yPosCenter;
-    //initial char to display
+    // xPos of each character of each character of cylinder 1, 2, 3 = startXPos, startXPos + 20, startXPos + 20*2
+    currentXPositions[i] = startXPos + 20 * i;
+
+    //initial frame to display
     currentCharacter[i] = startingFrame;
-    ySpeeds[i] = ySpeedsConstant[i];
-    
   }
-//  ySpeeds[0]= 10;
-//  ySpeeds[1]= 7;
-//  ySpeeds[2]=8;
 
   //begin animation...is rolling...for numberOfRotations times
   for (int counter = 0; counter < numberOfRotations;)
@@ -127,7 +129,8 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
         counter++;
-        
+        tone(piezoPin, 1000, 100); //beep sfx as character exits matrix
+
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
       }
@@ -139,7 +142,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   {
     currentCharacter[i] = endingFrame; //char pointer to point at endingFrame
   }
-  
+  //todo: refactor and test code
   //ending animation: draw ending frame
   //the following code aims to pull character to the center of the matrix
   //idea: frameArrivedAtCenter[] keeps track of whether the characters that has reached middle of matrix
@@ -159,16 +162,16 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       {
         //this character has arrived/passed at/the center
         //oscillate about center
-
-        //update character status: char has reached or passed the center
+        
         frameArrivedAtCenter[i] = true;
         if(frameArrivedAtCenter[i]==true){
-          currentYPositions[i] = 4; //force to middle - 2 position
-          ySpeeds[i] = 2; //for oscillating logic
+          currentYPositions[i] = 4;
+          ySpeeds[i] = 2;
         }
-        currentYPositions[i] -= ySpeeds[i];
-        
-        
+        currentYPositions[i] -= ySpeeds[i]; //todo: test value
+        Serial.print(ySpeeds[i]);
+        Serial.print("\n");
+        //update character status: char has reached or passed the center
         
       }
       //draw characters
@@ -180,10 +183,18 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       break; 
   }
   
+  /*
+  //todo: fix logic bugs
+  //jitter shake animation for each character in each cylinder
+  for (int i = 0; i < 3; i++)
+  {
+    oscillateAnimation(endingFrame, currentXPos, currentYPositions); //todo: fix referencing bugs
+  } */
+
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
 }
 
-
+//todo: fix logic bugs
 void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int currentYPositions[], int currentCharacter[], int endingFrame) //(int endingFrame, int currentXPos, int[] currentYPositions)
 {
 
@@ -206,21 +217,59 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   }
 
   //oscillateAnimation
-  int yPositionsOscillate[] = {6,8,4,8,6};//};//8};//,4,8,6};//4,2,3,6};//{10, 4, 10, 4, 6};
-  for (int j = 0; j < 5; j++)
+  int yPositionsOscillate[] = {10, 4, 10, 4, 6};
+  for (int i = 0; i < 5; i++)
   {
     matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
     for (int i = 0; i < 3; i++)
-    { //for each character in cylinder 1, 2, 3 respectively      
+    { //for each character in cylinder 1, 2, 3 respectively
+      //update yPos
+      currentYPositions[i] = yPositionsOscillate[i];
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
-      drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
-      Serial.print(yPositionsOscillate[i]);
-      Serial.print("\n");
+      drawCharacter(currentXPositions[i], yPositionsOscillate[i], charToDraw, colour);
+      
       //buzz SFX
       tone(piezoPin, 5000, 50);
     }
   }
+  /*
+  char *frameStr = combo[endingFrame].c_str();
+  char *iem = "IEM";
+  char *eee = "EEE";
+
+  uint16_t colour;
+
+  // Choose final frame colour
+  // JACKPOT
+  if (!strcmp(iem, frameStr))
+  {
+    Serial.print("JACKPOT, IEM\n");
+    colour = matrix.Color333(0, 255, 245);
+  }
+  // EEE
+  else if (!strcmp(eee, frameStr))
+  {
+    Serial.print("EEE\n");
+    colour = matrix.Color333(76, 255, 56);
+    // OTHERS
+  }
+  else
+  {
+    colour = matrix.Color333(0, 254, 0);
+  }
+
+  //jitter/shake stop animation
+  int yPositionsJitter[] = {10, 4, 10, 4, 6};
+
+  for (int i = 0; i < 5; i++)
+  {
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    currentYPositions[i] = yPositionsJitter[i];
+    drawCharacter(currentXPositions[i], currentYPositions[i], endingFrame, colour);
+    Serial.print(colour);
+    tone(piezoPin, 5000, 50);
+  } */
 }
 
 char extractCharFromFrameList(int rowNumber, int colNumber)
@@ -233,9 +282,28 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 {
   // DRAW Text
   uint8_t w = 0;
+  //uint8_t space = 24; //todo: fix spacing logic
+
+  // Characterise Selected String, extract String from String Array
+  //char *str = combo[frame].c_str();
+  // extract character to print frome frame
+  //char characterToPrint = str[cylinderNumber];
   matrix.setTextColor(color);
   matrix.setCursor(xPos, yPos);
   matrix.print(characterToPrint);
+
+  /*
+  matrix.setCursor(currentXPos, currentYPos);
+
+  for (w = 0; w < 3; w++) 
+  {                       // 3 = number of characters
+    //matrix.setTextColor(Wheel(w*8-4));
+    matrix.setTextColor(color);
+    matrix.print(str[w]);
+    matrix.setCursor(space, currentYPositions[w]);
+    space += space;
+  }
+  */
 }
 
 // Input a value 0 to 24 to get a color value.
