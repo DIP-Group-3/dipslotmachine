@@ -58,18 +58,23 @@ void loop()
   startingFrame = random(300) % numOfFrames; //choose random start frame
   endingFrame = random(300) % numOfFrames;   //choose random end frame
 
-  //displayStartingFrame(startingFrame);
+  
   if (isSpinning == true)
   {
-    //playAnimation(startingFrame, endingFrame, numberOfRotations);
+    displayStartingFrame(startingFrame);
+    delay(2000);
+    playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
-  //isSpinning = false;
+  isSpinning = false;
 }
 
-/*
 //todo: fix logic
 void displayStartingFrame(int startingFrame)
 {
+  //initialise initial conditions:
+  //lazy... hardcoded:
+  int xPos[] = {1, 24, 47};
+  int yPos[] = {6, 6, 6};
   int currentCharacter[] = {0, 0, 0};
   for (int i = 0; i < 3; i++)
   {
@@ -80,9 +85,9 @@ void displayStartingFrame(int startingFrame)
   for (int i = 0; i < 3; i++)
   {
     char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
-      drawCharacter(currentXPositions[i], yPositionsOscillate[i], charToDraw, matrix.Color333(255, 0, 0);
+    drawCharacter(xPos[i], yPos[i], charToDraw, matrix.Color333(255, 0, 0));
   }
-} */
+}
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 {
@@ -131,7 +136,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, matrix.Color333(255, 0, 0));
     }
     delay(0);
-    
+
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
     for (int i = 0; i < 3; i++)
@@ -142,29 +147,29 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
       {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
-        
+
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
-        if (slowestMovingCharIndex == i) { //limited by slowest moving character
+        if (slowestMovingCharIndex == i)
+        { //counter value limited by slowest moving character
           counter++;
         }
       }
     }
-
   }
 
   //PRINT ENDING FRAME
   for (int i = 0; i < 3; i++)
   {
-    currentCharacter[i] = endingFrame; //char pointer to point at endingFrame
+    currentCharacter[i] = endingFrame; //set each char pointer to point at endingFrame
   }
 
   //ending animation: draw ending frame
   //the following code aims to pull character to the center of the matrix
   //idea: frameArrivedAtCenter[] keeps track of whether the characters that has reached middle of matrix
   //if it has reached the center, oscillate about the center until all 3 characters reached the center
-
+  //this code will be significant if speed diff is huge for each character
   bool frameArrivedAtCenter[] = {false, false, false}; //for cylinders 1, 2, 3 respectively
   uint16_t colour;
   while (true)
@@ -175,7 +180,6 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       //UPDATE COORDINATES
       if (currentYPositions[i] <= yPosCenter) //if character hasn't reached middle of matrix
       {
-        matrix.fillScreen(matrix.Color333(0, 0, 0));
         currentYPositions[i] += currentYSpeeds[i]; //move character down by its respective speed in ySpeed[]
       }
       else //this character has arrived/passed at/the center. Proceed to oscillate about center
@@ -189,7 +193,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
         }
         currentYPositions[i] -= currentYSpeeds[i];
       }
-      
+
       //CHOOSE COLOUR OF CHARACTERS TO PRINT
       if (frameArrivedAtCenter[i] == true) //if char has passed the center, print winning condition colour
       {
@@ -204,17 +208,21 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, colour);
     }
 
-    if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2])
-      break;
-  }
+    if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
+      break; //exit
+  } 
 
+  //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
 }
-int minimum(float array[], int size){ //return index of min value in array
+int minimum(float array[], int size) //return index of min value in array
+{ 
   float min = array[0];
   int index;
-  for (int i = 1; i < size; i++){
-    if (min > array[i]){
+  for (int i = 1; i < size; i++)
+  {
+    if (min > array[i])
+    {
       min = array[i];
       index = i;
     }
@@ -250,8 +258,8 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   uint16_t colour = getColourToPrintBasedOnEndingFrame(endingFrame);
 
   //oscillateAnimation
-  int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6}; 
-  for (int j = 0; j < 5; j++)
+  int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
+  for (int j = 0; j < 6; j++)
   {
     matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
     for (int i = 0; i < 3; i++)
