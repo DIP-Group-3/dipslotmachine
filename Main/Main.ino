@@ -52,8 +52,8 @@ uint16_t blueColor = matrix.Color333(0, 255, 245);
 uint16_t greenColor = matrix.Color333(76, 255, 56);
 
 //LED WINING CONDITION
-const final String Jackpot = "IEM";
-const final String Win = "EEE";
+const String Jackpot = "IEM";
+const String Win = "EEE";
 
 //LCD Display Variable
 int isObstacle = HIGH;
@@ -75,6 +75,7 @@ bool coinInsert = false;
 
 //Server Motor Variable
 Servo myservo;
+const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
 int intermediateSpinPos = 90;
 int winRate = 2;
@@ -82,7 +83,7 @@ int winRate = 2;
 void setup()
 {
   Serial.begin(9600);
-  servoMain.attach(MotorPin); 
+  myservo.attach(MotorPin); 
   lcd.init();                                    // Initialize the LCD 
   pinMode(isObstaclePin, INPUT);
   pinMode(betBtn, INPUT);
@@ -104,7 +105,7 @@ void setup()
 void loop()
 { 
   lcd.backlight();
-  if(totalCoinInside >= 3){
+  if(totalCoinsInside >= minCoinsRequired){
     isObstacle = digitalRead(isObstaclePin);
   
     if(isObstacle == LOW) {                       // Obstacle detected 
@@ -330,7 +331,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   //begin animation...is rolling...for numberOfRotations times
   int slowestMovingCharIndex;
   for (int counter = 0; counter < numberOfRotations;){
-    matrix.fillScreen(); //FILL SCREEN 'black'
+    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS : By cylinder/character 1, 2, 3 respectively, draw character
@@ -460,7 +461,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, finalColour);
       
       //buzz SFX
-      tone(piezoPin, 5000, 50);
+      tone(speakerPin, 5000, 50);
     }
   }
 }
@@ -498,7 +499,7 @@ void machineUpdates(String endingFrame){
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
     LcdMessage(3);
-    dispense(currentBetAmt*winRate);
+    dispenseCoin(currentBetAmt*winRate);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
