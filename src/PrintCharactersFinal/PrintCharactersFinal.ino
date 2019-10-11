@@ -15,7 +15,6 @@
 #define G2 28
 #define B2 29
 
-#define piezoPin 4
 
 //ARRAY OF COMBOS & SELECT, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
@@ -80,7 +79,7 @@ void displayStartingFrame(int startingFrame)
     //initial char to display
     currentCharacter[i] = startingFrame;
   }
-
+  //DRAW CHARACTERS
   for (int i = 0; i < 3; i++)
   {
     char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
