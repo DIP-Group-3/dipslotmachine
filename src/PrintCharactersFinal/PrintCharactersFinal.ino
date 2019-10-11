@@ -31,8 +31,8 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 int numOfFrames = 10;
 int numberOfRotations = 20;
 //float ySpeed = 10; //vertical scrollSpeed
-float ySpeedsConstant[] = {10, 7, 8};
-float currentYSpeeds[] = {0, 0, 0};
+const float ySpeedsConstant[] = {10, 7, 8}; //original ySpeed
+float currentYSpeeds[] = {0, 0, 0}; 
 
 bool isSpinning = true; //spin button to trigger status;
 int startingFrame;
@@ -116,7 +116,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     currentYPositions[i] = yPosCenter;
     //initial char to display
     currentCharacter[i] = startingFrame;
-    currentYSpeeds[i] = ySpeedsConstant[i];
+    currentYSpeeds[i] = ySpeedsConstant[i]; 
   }
 
   //begin animation...is rolling...for numberOfRotations times
@@ -179,7 +179,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       //DRAW CHARACTERS
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, colour);
-      
+
       //UPDATE COORDINATES
       if (currentYPositions[i] <= yPosCenter) //if character hasn't reached middle of matrix
       {
