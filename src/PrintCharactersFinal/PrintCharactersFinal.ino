@@ -58,7 +58,6 @@ void loop()
   startingFrame = random(300) % numOfFrames; //choose random start frame
   endingFrame = random(300) % numOfFrames;   //choose random end frame
 
-  
   if (isSpinning == true)
   {
     displayStartingFrame(startingFrame);
@@ -177,6 +176,10 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     matrix.fillScreen(matrix.Color333(0, 0, 0));
     for (int i = 0; i < 3; i++) //for each character of each cylinder,
     {
+      //DRAW CHARACTERS
+      char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
+      drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, colour);
+      
       //UPDATE COORDINATES
       if (currentYPositions[i] <= yPosCenter) //if character hasn't reached middle of matrix
       {
@@ -203,20 +206,17 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       {
         colour = matrix.Color333(255, 0, 0);
       }
-      //DRAW CHARACTERS
-      char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
-      drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, colour);
     }
 
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
-      break; //exit
-  } 
+      break;                                                                           //exit
+  }
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
 }
 int minimum(float array[], int size) //return index of min value in array
-{ 
+{
   float min = array[0];
   int index;
   for (int i = 1; i < size; i++)
