@@ -1,6 +1,9 @@
-# dipslotmachine
-Arduino Mega Project <br>
-Line Break added
-branch readme
+# Interactive Slot Machine
+An Arduino Mega Project <br>
 
-4:15test 123
+The Bill of materials are as follows:<br>
+
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
