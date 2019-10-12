@@ -25,7 +25,7 @@ uint16_t waterfallColor2 = matrix.Color333(0, 202, 202);
 uint16_t waterfallColor3 = matrix.Color333(161, 0, 202);
 
 int radiationRotations = 20;
-uint16_t radiatoinColors[4] = {matrix.Color333(213, 0, 64), matrix.Color333(206, 0, 185),
+uint16_t radiationColors[4] = {matrix.Color333(213, 0, 64), matrix.Color333(206, 0, 185),
                                matrix.Color333(161, 0, 202), matrix.Color333(99, 0, 198)};
 
 void setup() {
@@ -99,13 +99,13 @@ void radiation(){
       for(int y = 0; y < 31; y++){
         int d = (int) sqrt((x - 15)^2 + (y-31)^2);
         if(d <= 5){
-          drawPixel(x, y, radiatoinColors[(0+i)%4]);
+          matrix.drawPixel(x, y, radiationColors[(0+i)%4]);
         }else if (d <= 10){
-          drawPixel(x, y, radiatoinColors[(1+i)%4]);
+          matrix.drawPixel(x, y, radiationColors[(1+i)%4]);
         }else if(d <= 15){
-          drawPixel(x, y, radiatoinColors[(2+i)%4]);
+          matrix.drawPixel(x, y, radiationColors[(2+i)%4]);
         }else{
-          drawPixel(x, y, radiatoinColors[(3+i)%4]);
+          matrix.drawPixel(x, y, radiationColors[(3+i)%4]);
         }
       }
     }
@@ -116,7 +116,7 @@ void radiation(){
 void radiation1(){ 
   for(int i = 0; i < radiationRotations; i++){
     // section 1 circle
-    matrix.fillCircle(15,31,5,radiatoinColors[(0+i)%4]);
+    matrix.fillCircle(15,31,5,radiationColors[(0+i)%4]);
     
     // section 2 circle
     for(int r = 6; r < 11; r++){
