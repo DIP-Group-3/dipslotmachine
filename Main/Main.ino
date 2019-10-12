@@ -152,7 +152,7 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
+  if(betAmt>= maxBet || betAmt >= creditAmt || (betAmt*winRate >= totalCoinsInside)){             //Scenario 1: Current bet amount equal to/greater than 3
     Serial.println("Bet = 1");
     Serial.println(betAmt);
     betAmt = 1;
