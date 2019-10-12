@@ -68,7 +68,7 @@ int spinState = LOW;
 bool spinPressed = false;
 
 //Credit, Bet variable
-int creditAmt =0, betAmt=0, currentBetAmt=0;
+int creditAmt =0, betAmt=0, currentBetAmt=0, maxBet=3;
 
 //IR sensor variable
 bool coinInsert = false;
@@ -105,7 +105,7 @@ void setup()
 void loop()
 { 
   lcd.backlight();
-  if(totalCoinsInside >= minCoinsRequired){
+  if(totalCoinsInside >= minCoinsRequired || totalCoinsInside >= winRate ){
     isObstacle = digitalRead(isObstaclePin);
   
     if(isObstacle == LOW) {                       // Obstacle detected 
@@ -121,6 +121,10 @@ void loop()
       activateSpin();                                 //Call Method to start LED Matrix animation
     }
   }else{
+    LcdMessage(6);
+    delay(1500);
+    dispenseCoin(totalCoinsInside);
+    delay(1500);
     LcdMessage(5);
   }
 }
@@ -148,11 +152,11 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  if(betAmt>=3 || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
+  if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     Serial.println("Bet = 1");
     Serial.println(betAmt);
     betAmt = 1;
-  }else{                                            //Scenario 2: Current bet amount less than 3
+  }else{                                                  //Scenario 2: Current bet amount less than 3
     Serial.println("Increase Bet");
     Serial.println(betAmt);
     betAmt++;
@@ -253,6 +257,12 @@ void LcdMessage(int scenario){
               lcd.print("TEMPORARILY");
               lcd.setCursor(3,2);
               lcd.print("OUT OF SERVICE");
+              break;
+
+    case 6:   lcd.setCursor(6,1);
+              lcd.print("REFUND OF");
+              lcd.setCursor(3,2);
+              lcd.print("BALANCE CREDIT");
               break;
 
     //Default Message Frame
