@@ -105,7 +105,7 @@ void setup()
 void loop()
 { 
   lcd.backlight();
-  if(totalCoinsInside >= minCoinsRequired || totalCoinsInside >= winRate ){
+  if(totalCoinsInside >= winRate ){
     isObstacle = digitalRead(isObstaclePin);
   
     if(isObstacle == LOW) {                       // Obstacle detected 
