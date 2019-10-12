@@ -108,7 +108,8 @@ void loop()
   if(totalCoinsInside >= minCoinsRequired){
     isObstacle = digitalRead(isObstaclePin);
   
-    if(isObstacle == LOW) {                       // Obstacle detected 
+    if(isObstacle == LOW) {                       // Obstacle detected
+      // TODO: IDLE STATE ANIMATION
       coinInsert = true;
     } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
       updateCredit(1);                            // Incremeent Credit Amt
@@ -121,6 +122,7 @@ void loop()
       activateSpin();                                 //Call Method to start LED Matrix animation
     }
   }else{
+    // TODO: OUT OF SERVICE ANIMATION
     LcdMessage(5);
   }
 }
@@ -181,7 +183,7 @@ void activateSpin(){                                            //Method: Activa
   spinPressed = false;                                              
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   creditAmt -= betAmt;                                              //Deducted credit based on bet amount
-  if(creditAmt <=0){
+  if(creditAmt <= 0){
     creditAmt = 0;                                                  //Credit amount set back to 0
     betAmt = 0;                                                     //Bet amount set back to 0
     LcdMessage(0);                                                  //Display "Insert Coin" Message when credit less than 0    
@@ -189,6 +191,7 @@ void activateSpin(){                                            //Method: Activa
     betAmt = 1;                                                     //Bet amount set to 1
     LcdMessage(1);                                                  //Display remaining credit and bet amounts in LCD
   }
+  // TODO: STARTING ANIMATION
   activateLED();
 }
 
@@ -197,7 +200,10 @@ bool spinAvail(){
   spinState = digitalRead(spinBtn);                               //Read  Spin Btn Input
   if(spinState == HIGH){
     spinPressed = true;
-  }else if (spinState == LOW && creditAmt > 0 && spinPressed){
+  }else if (spinState == LOW && creditAmt > 0 && spinPressed) {
+    if(totalCoinsInside < (winRate * betAmt)){
+      LcdMessage(6);
+    }
     Serial.println("Spin");
     return true;
   }else{
@@ -255,6 +261,13 @@ void LcdMessage(int scenario){
               lcd.print("OUT OF SERVICE");
               break;
 
+    case 6:   lcd.setCursor(3,1);
+              lcd.print("MAXIMUM: ");
+              lcd.print(totalCoinsInside);
+              lcd.setCursor(2,2);
+              lcd.print("YOU CAN WIN");
+              break;
+
     //Default Message Frame
     default:  lcd.setCursor(1,1);  
               lcd.print("Credit : ");
@@ -271,6 +284,7 @@ void activateLED(){
   startingFrame = random(300) % numOfFrames; //choose random start frame
   endingFrame = random(300) % numOfFrames;   //choose random end frame
 
+  displayStartingFrame(startingFrame);
   playAnimation(startingFrame, endingFrame, numberOfRotations);
 }
 
@@ -495,10 +509,12 @@ void dispenseCoin(int amount){
 void machineUpdates(String endingFrame){
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     LcdMessage(4);
+    // TODO: JACKPOT ANIMATION
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
     LcdMessage(3);
+    // TODO: WIN ANIMATION
     dispenseCoin(currentBetAmt*winRate);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
@@ -507,6 +523,7 @@ void machineUpdates(String endingFrame){
     }
   }else{
     LcdMessage(2);
+    // TODO: LOSE ANIMATION
     delay(2000);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
