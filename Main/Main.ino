@@ -1,4 +1,4 @@
-#include <Wire.h> 
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
 #include <RGBmatrixPanel.h>
@@ -40,9 +40,9 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 int numOfFrames = 10;
 int numberOfRotations = 20;
 const float ySpeedsConstant[] = {10, 7, 8};   //original ySpeed
-float currentYSpeeds[] = {0, 0, 0}; 
+float currentYSpeeds[] = {0, 0, 0};
 bool isSpinning = true;                       //spin button to trigger status;
-int startingFrame; 
+int startingFrame;
 int endingFrame;
 
 //LED DESIGN GLOBAL VARIABLE;
@@ -83,12 +83,12 @@ int winRate = 2;
 void setup()
 {
   Serial.begin(9600);
-  myservo.attach(MotorPin); 
-  lcd.init();                                    // Initialize the LCD 
+  myservo.attach(MotorPin);
+  lcd.init();                                    // Initialize the LCD
   pinMode(isObstaclePin, INPUT);
   pinMode(betBtn, INPUT);
   pinMode(spinBtn, INPUT);
-  
+
   //Set-up code for matrix
   matrix.begin();
   //set text properties
@@ -103,18 +103,20 @@ void setup()
 }
 
 void loop()
-{ 
+{
   lcd.backlight();
   if(totalCoinsInside >= winRate ){
     isObstacle = digitalRead(isObstaclePin);
-  
-    if(isObstacle == LOW) {                       // Obstacle detected 
+
+    //TODO: IDLE STATE ANIMATION
+
+    if(isObstacle == LOW) {                       // Obstacle detected
       coinInsert = true;
     } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
       updateCredit(1);                            // Incremeent Credit Amt
       LcdMessage(1);                              // Display Message in LCD
     }
-    
+
     if(betAvail()){                               //Check if bet increment could be done
       updateBet();                                    //Call method to update bet amt
     }else if(spinAvail()){                        //Ceck if spin could be done
@@ -126,6 +128,7 @@ void loop()
     dispenseCoin(totalCoinsInside);
     delay(1500);
     LcdMessage(5);
+    //TODO: OUT OF SERVICE ANIMATION
   }
 }
 
@@ -135,13 +138,13 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     betAmt = 1;
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
-    coinInsert = !coinInsert;  
+    coinInsert = !coinInsert;
   }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
-    coinInsert = !coinInsert;  
+    coinInsert = !coinInsert;
   }else{                                        //Scenario 3: Credit deducted when played
-    creditAmt += addAmt;               
+    creditAmt += addAmt;
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
@@ -167,11 +170,11 @@ void updateBet(){                               //Method: Update Bet Amount when
 
 //BET BTN METHOD: CHECK IF INCREMENT COULD BE ALLOWED
 bool betAvail(){
-  betState = digitalRead(betBtn);                                   //Read Bet Btn Input 
+  betState = digitalRead(betBtn);                                   //Read Bet Btn Input
   if(betState == HIGH){
     betPressed = true;
     return false;
-  }else if(betState == LOW && creditAmt > 0 && betPressed){        //Bet Btn Pressed && credit Amt greater than 0   
+  }else if(betState == LOW && creditAmt > 0 && betPressed){        //Bet Btn Pressed && credit Amt greater than 0
     Serial.println("Bet to increase");
     return true;
   }else{
@@ -182,21 +185,23 @@ bool betAvail(){
 
 //SPIN BTN METHOD: ACTIVATE LED MATRIX, UPDATE NECESSARY FIELDS AND DISPLAY
 void activateSpin(){                                            //Method: Activate LED Matrix
-  spinPressed = false;                                              
+  spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   creditAmt -= betAmt;                                              //Deducted credit based on bet amount
   if(creditAmt <=0){
     creditAmt = 0;                                                  //Credit amount set back to 0
     betAmt = 0;                                                     //Bet amount set back to 0
-    LcdMessage(0);                                                  //Display "Insert Coin" Message when credit less than 0    
+    LcdMessage(0);                                                  //Display "Insert Coin" Message when credit less than 0
   }else{
     betAmt = 1;                                                     //Bet amount set to 1
     LcdMessage(1);                                                  //Display remaining credit and bet amounts in LCD
   }
+
+  //TODO: STARTING ANIMATION
   activateLED();
 }
 
-//SPIN BTN METHOD: CHECK IF BTN COULD ACTIVATE LED TO SPIN 
+//SPIN BTN METHOD: CHECK IF BTN COULD ACTIVATE LED TO SPIN
 bool spinAvail(){
   spinState = digitalRead(spinBtn);                               //Read  Spin Btn Input
   if(spinState == HIGH){
@@ -214,11 +219,11 @@ bool spinAvail(){
 void LcdMessage(int scenario){
   lcd.clear();                                                    //Clear current displayed frame
   switch(scenario){
-    
+
     //Idle State || Credit 0 Message Frame
     case 0 :  lcd.setCursor(7,1);
               lcd.print("INSERT");
-              lcd.setCursor(8,2);  
+              lcd.setCursor(8,2);
               lcd.print("COIN");
               break;
 
@@ -226,11 +231,11 @@ void LcdMessage(int scenario){
     case 1:   lcd.setCursor(1,1);
               lcd.print("Credit : ");
               lcd.print(creditAmt);
-              lcd.setCursor(1,2);   
+              lcd.setCursor(1,2);
               lcd.print("Bet    : ");
               lcd.print(betAmt);
               break;
-    
+
     //Lose Condition Message Frame    - "NBS", "SCE", "ADM"
     case 2:   lcd.setCursor(6,1);
               lcd.print("NICE TRY");
@@ -266,10 +271,10 @@ void LcdMessage(int scenario){
               break;
 
     //Default Message Frame
-    default:  lcd.setCursor(1,1);  
+    default:  lcd.setCursor(1,1);
               lcd.print("Credit : ");
               lcd.print(creditAmt);
-              lcd.setCursor(1,2);   
+              lcd.setCursor(1,2);
               lcd.print("Bet : ");
               lcd.print(betAmt);
               break;
@@ -281,6 +286,8 @@ void activateLED(){
   startingFrame = random(300) % numOfFrames; //choose random start frame
   endingFrame = random(300) % numOfFrames;   //choose random end frame
 
+  displayStartingFrame(startingFrame);
+  delay(2000);
   playAnimation(startingFrame, endingFrame, numberOfRotations);
 }
 
@@ -291,12 +298,12 @@ void displayStartingFrame(int startingFrame){
   int xPos[] = {1, 24, 47};
   int yPos[] = {6, 6, 6};
   int currentCharacter[] = {0, 0, 0};
-  
+
   for (int i = 0; i < 3; i++){
     //initial char to display
     currentCharacter[i] = startingFrame;
   }
-  
+
   //Draw Characters
   for (int i = 0; i < 3; i++){
     char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
@@ -304,22 +311,22 @@ void displayStartingFrame(int startingFrame){
   }
 }
 
-//LED MATRIX METHOD: INITIALISE ANIMATION 
+//LED MATRIX METHOD: INITIALISE ANIMATION
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   /* currentCharacter[] stores 3 pointers that points to each character in a frame.
       This pointers keep track of what character to display according to the following data structure:
       Define a frame to be "EEE", or "SCE". These frames are stored in the array combo[]
-      
+
       Eg. combo[] contains {"EEE", "SCE", "IEM"...}
       Index 0 keeps track of the 1st character in frame, index 1 keeps track of 2nd character, index 2 keeps track of 3rd character
-      
+
       Eg. for the frame "SCE" at combo[1],
       currentCharacter[0] = 1 points at 'S', currentCharacter[1] = 1: 'C',currentCharacter[2] = 1: 'E'.
-  
+
       For the frame "EEE" and combo[0],
       currentCharacter[0] = 0: 'E', currentCharacter[1] = 0: 'E', currentCharacter[2] = 0: 'E'
   */
-  
+
   int currentCharacter[] = {0, 0, 0};
   int currentXPositions[] = {1, 24, 47};      //xPos for character 1, 2 & 3 respectively
   int currentYPositions[] = {0, 0, 0};        //yPos for character 1, 2 & 3 respectively
@@ -332,10 +339,10 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   for (int i = 0; i < 3; i++){
     // initial yPos of each character of each cylinder = center of matrix
     currentYPositions[i] = yPosCenter;
-    
+
     //initial char to display
     currentCharacter[i] = startingFrame;
-    currentYSpeeds[i] = ySpeedsConstant[i]; 
+    currentYSpeeds[i] = ySpeedsConstant[i];
   }
 
   //begin animation...is rolling...for numberOfRotations times
@@ -357,7 +364,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     for (int i = 0; i < 3; i++){
       //Move character by scrollSpeed scaled by weights
       currentYPositions[i] += round(currentYSpeeds[i] * spdWeights[counter]);
-      
+
       //Check if current character has exited matrix
       if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
       {
@@ -383,7 +390,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
               if it has reached the center, oscillate about the center until all 3 characters reached the center
               this code will be significant if speed diff is huge for each character
   */
-  
+
   bool frameArrivedAtCenter[] = {false, false, false}; //for cylinders 1, 2, 3 respectively
   uint16_t colour;
   while (true){
@@ -402,7 +409,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
         if (frameArrivedAtCenter[i] == true){
           currentYPositions[i] = 4;                               //force to (matrix center - 2) position. Position hardcoded, need to draw to visualise.
           currentYSpeeds[i] = 2;                                  //for oscillating logic. Char will osscilate about center of matrix w amplitude = 2 (+/- 2 about center)
-        }        
+        }
         currentYPositions[i] -= currentYSpeeds[i];
       }
 
@@ -413,9 +420,9 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
         colour = redColor;
       }
     }
-    
+
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]){        //if all frames has arrived at the center
-      break;                                                                                   //Escape from while loop 
+      break;                                                                                   //Escape from while loop
     }
   }
 
@@ -428,7 +435,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
 int minimum(float array[], int size){
   float min = array[0];
   int index;
-  
+
   for (int i = 1; i < size; i++){
     if (min > array[i]){
       min = array[i];
@@ -441,16 +448,16 @@ int minimum(float array[], int size){
 //LED MATRIX METHOD: SET COLOR BASED ON COMBINATIONS
 uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame){
   String frameToPrint = combo[endingFrame];
-  
+
   if (frameToPrint.equalsIgnoreCase(Jackpot)){                            //JACKPOT
     return blueColor;
-    
+
   }else if (frameToPrint.equalsIgnoreCase(Win)){                      //EEE
     return greenColor;
-    
+
   }else{                                                                //OTHERS
     return greenColor;
-    
+
   }
 }
 
@@ -464,12 +471,12 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
   for (int j = 0; j < 6; j++){
     matrix.fillScreen(blackColor);              //Fill screen 'black'
-    
+
     for (int i = 0; i < 3; i++){                              //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, finalColour);
-      
+
       //buzz SFX
       tone(speakerPin, 5000, 50);
     }
@@ -505,10 +512,12 @@ void dispenseCoin(int amount){
 void machineUpdates(String endingFrame){
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     LcdMessage(4);
+    //TODO: JACKPOT ANIMATION
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
     LcdMessage(3);
+    //TODO: WIN ANIMATION
     dispenseCoin(currentBetAmt*winRate);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
@@ -517,6 +526,7 @@ void machineUpdates(String endingFrame){
     }
   }else{
     LcdMessage(2);
+    //TODO: LOSE ANIMATION
     delay(2000);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
