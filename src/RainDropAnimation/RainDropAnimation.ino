@@ -31,20 +31,51 @@ void playRainDropAnimation()
     int currentYStarts[];
     int currentYEnds[];
     int ySpeeds[];
+    int lineLength;
+    int numOfRainDrops = 32;
 
     //initialise VARIABLES, create 32 rain drops
-    for (int i = 0 ; i<32; i++){ 
-        currentXStarts[i] = i*2;
+    for (int i = 0; i < numOfRainDrops; i++)
+    {
+        currentXStarts[i] = i * 2; //print raindrop every even interval
         currentYStarts[i] = 0;
-        int length = rand (5,9); //generate length between 5&9 inclusive? todo: check
-        currentYEnds[i] = currentYStarts[i] + length;
-        ySpeeds[i] = rand(5,10);
+        lineLength = rand(5, 9); //generate length between 5&9 inclusive? todo: check
+        currentYEnds[i] = currentYStarts[i] + lineLength;
+        ySpeeds[i] = rand(5, 10);
+    }
+
+    //DRAW
+    for (int i = 0; i < numOfRainDrops; i++)
+    {
+        //drawline
+        drawLine(currentXStarts[i], currentYStarts[i], currentYEnds[i])
+    }
+    //MOVE COORDINATES
+    for (int i = 0; i < numOfRainDrops; i++)
+    {
+        currentYStarts[i] += ySpeeds[i];
+        currentYEnds[i] += ySpeeds[i];
+
+        if (currentYStarts > matrix.height())
+        { //reset line pos
+            currentYStarts[i] = 0 - lineLength;
+            currentYEnds[i] = 0;
+        }
+    }
+}
+
+void drawLine(int currentXStart, int currentYStart, int currentYEnds)
+{
+    for (int i = yPos, i < lineLength, i++)
+    { //todo: lineLength or lineLength+1?
+        uint16_t colour = Wheel(i + currentXStart);
+        int yPos = i;
+        matrix.drawPixel(currentXStart, yPos, colour);
     }
 }
 
 void setup()
 {
-
 }
 
 void loop()
