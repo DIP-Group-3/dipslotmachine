@@ -22,7 +22,7 @@
 #define B A1
 #define C A2
 #define D A3
-
+#define reservePin 15
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 void playCombAnimation()
 {
@@ -122,6 +122,8 @@ void drawLine(int xStart, int yStart, int length)
 
 void setup()
 {
+    matrix.begin();
+    randomSeed(analogRead(reservePin));
 }
 
 void loop()
