@@ -1,0 +1,347 @@
+[33mcommit 74ecfa10233b1b18069de04334cd8ff173d32e89[m[33m ([m[1;36mHEAD -> [m[1;32mnadine[m[33m, [m[1;31morigin/nadine[m[33m)[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 22:00:29 2019 +0800
+
+    Cleaned code. Added comments for clarity, yet to test for bugs
+
+[33mcommit ccbab91f4241c52ec714578d76fc3b2ef14ba57d[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 18:46:10 2019 +0800
+
+    6:45pm 27/9/2019, fixed issue where finalFrame isn't randomised
+
+[33mcommit 1e3441ebcc2500fa7a4ede3aaf85ae5e9ef88ee5[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 18:31:05 2019 +0800
+
+    6:30pm 27/9/2019
+
+[33mcommit 9e6f7978b047b09db91f1cd19a6c9876368dce90[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 17:47:46 2019 +0800
+
+    rolling animation
+
+[33mcommit 2d4cb7761731670502c8bcbf47b957921a313d2c[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 16:17:39 2019 +0800
+
+    rolling animation + logic. to implement stopping animation & refinements
+
+[33mcommit b713255d70942ea5da3e5807eeb546d6439a92fc[m
+Merge: 908927f 9f42cdb
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 13:48:09 2019 +0800
+
+    Merge remote-tracking branch 'origin/KYCher' into nadine
+
+[33mcommit 908927ffed7e5d7f9669a459cf1317cdea7fd633[m
+Merge: e514259 27c0407
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Fri Sep 27 13:42:45 2019 +0800
+
+    Merge remote-tracking branch 'origin/KYCher' into nadine
+
+[33mcommit 9f42cdb1ef9797fcc2eb53cd924f2523a2ca187a[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Fri Sep 27 13:41:30 2019 +0800
+
+    Edit Comments
+
+[33mcommit 155a068be0fe8a840ccb867e79000921d845c768[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Fri Sep 27 13:40:06 2019 +0800
+
+    Code for Print Character
+
+[33mcommit e5142594ab7eb0ea8dd3b7908af9616593063674[m
+Merge: 8f43ed2 cc196d5
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 25 20:05:17 2019 +0800
+
+    Merge branch 'master' into nadine
+
+[33mcommit cc196d5dd6987d7627cbfd27cef7f2b9372ae16d[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 25 19:48:54 2019 +0800
+
+    fixed main src code file extension
+
+[33mcommit 27c0407f9e5d4e7386408b35e991600240d4291a[m[33m ([m[1;32mKYCher[m[33m)[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Wed Sep 25 15:29:03 2019 +0800
+
+    Personalise
+
+[33mcommit aff3d5146457d71ffc6dc6f0333db7d0c231b41f[m[33m ([m[1;31morigin/emily[m[33m)[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 25 14:57:51 2019 +0800
+
+    main code
+
+[33mcommit 7ddf2b35a3c9b4a9a9ce886392cf238cc6710b37[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 25 14:56:28 2019 +0800
+
+    main code
+
+[33mcommit 5ed62b5820431596fab4ce4557dce80ceb268f86[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 25 14:51:14 2019 +0800
+
+    test code
+
+[33mcommit af9c2324c93fe371c0bdb78ed973439ea8cf68d5[m
+Author: lmorocks <46553746+lmorocks@users.noreply.github.com>
+Date:   Wed Sep 25 14:47:18 2019 +0800
+
+    Delete src
+
+[33mcommit 9e0daa4d65ad8051d7de039e527f9764038a6d07[m
+Author: lmorocks <46553746+lmorocks@users.noreply.github.com>
+Date:   Wed Sep 25 14:45:40 2019 +0800
+
+    Create src
+    
+    all software code goes here
+
+[33mcommit b71e44d70b8d8775aaba91a8f0a318c0bf7f204e[m
+Merge: 90c24a8 36719e0
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 20:57:48 2019 +0800
+
+    Merge pull request #7 from DIP-Group-3/testbranch
+    
+    Added Items to be included in the Project
+
+[33mcommit 36719e09777fa4c4f35d3fa03a334db47b5cdba5[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 20:56:47 2019 +0800
+
+    Added Items to be included in the Project
+
+[33mcommit 8f43ed2ba55cde6bce3310ff29f8c80e23a032d3[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 18 17:00:56 2019 +0800
+
+    500pm
+
+[33mcommit 90c24a808639eaa89e230a8361d429cabbba193c[m
+Merge: 7456448 520ac02
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 16:57:46 2019 +0800
+
+    Merge pull request #6 from DIP-Group-3/testbranch
+    
+    merge 2 file zhi ler create
+
+[33mcommit 520ac0269fa7c58621f7f8188640c7707cdbff0a[m[33m ([m[1;32mtestbranch[m[33m)[m
+Merge: 0eba959 25531c6
+Author: Zhi Ler Tan <zhiler>
+Date:   Wed Sep 18 16:49:56 2019 +0800
+
+    Merge branch 'testbranch' of https://github.com/DIP-Group-3/dipslotmachine into testbranch
+
+[33mcommit 0eba9591e7367f166a18bef2f9eb2ccf7d27db87[m
+Author: Zhi Ler Tan <zhiler>
+Date:   Wed Sep 18 16:46:05 2019 +0800
+
+    hello
+
+[33mcommit 745644812ce58a794d5586b5aeff46dd8312f57a[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 16:40:19 2019 +0800
+
+    test 123 added
+
+[33mcommit fa1223c5db73632ecbe223f5a16fd10a13aa933e[m
+Author: Zhi Ler Tan <zhiler>
+Date:   Wed Sep 18 16:35:31 2019 +0800
+
+    hellO
+
+[33mcommit 74de82d1deea63d34ef7e14b98963804339a472b[m
+Merge: 61703e6 8bef6f9
+Author: lmorocks <46553746+lmorocks@users.noreply.github.com>
+Date:   Wed Sep 18 16:34:08 2019 +0800
+
+    Merge pull request #5 from DIP-Group-3/nadine
+    
+    Nadine
+
+[33mcommit 8bef6f9e6b937089c94c427245506090f59d5ee7[m
+Merge: 20e0844 61703e6
+Author: lmorocks <46553746+lmorocks@users.noreply.github.com>
+Date:   Wed Sep 18 16:33:57 2019 +0800
+
+    Merge branch 'master' into nadine
+
+[33mcommit 61703e64f59103b59e651e4c78bd1c458456f3bb[m
+Merge: 9774f46 25531c6
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 16:29:41 2019 +0800
+
+    Merge pull request #4 from DIP-Group-3/testbranch
+    
+    Attempt to merge coded
+
+[33mcommit 25531c692f08cfeacdb27b0525542414b6275622[m
+Merge: 6f22a9a 9774f46
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 16:29:25 2019 +0800
+
+    Merge branch 'master' into testbranch
+
+[33mcommit 6f22a9ad3223d23953c03c78d6a509a0514d2956[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Wed Sep 18 16:16:07 2019 +0800
+
+    Test
+
+[33mcommit 14bb1d0559d4deff7c5aeae224c29c55b61e3bc3[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Wed Sep 18 16:14:14 2019 +0800
+
+    KY last line
+
+[33mcommit e27d68f2504f49605ebbc66d05104e736bde01b2[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Wed Sep 18 16:13:09 2019 +0800
+
+    KY Test
+
+[33mcommit 7051e12670b509d675736a448712c636911d4d83[m
+Author: ThskXjy <thskxjy@gmail.com>
+Date:   Wed Sep 18 16:10:54 2019 +0800
+
+    king yio last line
+
+[33mcommit b6a61a6747ed514f64cecb4bb5cfa4a87dde0526[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 16:03:36 2019 +0800
+
+    added time on last line
+
+[33mcommit 20e0844f9a3654c74b1b28f6d99770389afbd0d1[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 18 15:54:11 2019 +0800
+
+    3:54pm test test
+
+[33mcommit 478ae9740081b643ea212db82a6806dfefce580c[m
+Merge: 0a03f2f ca69f4c
+Author: emily <emilyysee@gmail.com>
+Date:   Wed Sep 18 15:51:18 2019 +0800
+
+    Merge remote-tracking branch 'origin/testbranch' into testbranch
+
+[33mcommit 0a03f2f907fb5a64e3f5a5d5fc947d0cf0ac95d1[m
+Merge: 39a2aad 346cbe9
+Author: emily <emilyysee@gmail.com>
+Date:   Wed Sep 18 15:51:06 2019 +0800
+
+    Merge remote-tracking branch 'origin/testbranch' into testbranch
+
+[33mcommit ca69f4c70f0f5d43abc592460fbc651b5000d621[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 18 15:49:38 2019 +0800
+
+    3:49pm nadine
+
+[33mcommit 346cbe90f11c7093bdaa0e593ed0e8bf2e6087c5[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 18 15:46:52 2019 +0800
+
+    test
+
+[33mcommit 688e419d95982b089571bd8588ed6e23aefee9af[m
+Merge: 0396eda 301d705
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 18 15:39:23 2019 +0800
+
+    Merge branch 'testbranch' of https://github.com/DIP-Group-3/dipslotmachine into testbranch
+
+[33mcommit 0396eda104575f5af77eaa61f527fa91b85219e1[m
+Author: lmorocks <NHENG003@ntu.edu.sg>
+Date:   Wed Sep 18 15:37:41 2019 +0800
+
+    test 1
+
+[33mcommit 39a2aad0e8caa88688488658116ca2ac79729743[m
+Author: emily <emilyysee@gmail.com>
+Date:   Wed Sep 18 15:35:48 2019 +0800
+
+    emily test
+
+[33mcommit 301d705381ef3e32b17d79468df994a57a68b37a[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Wed Sep 18 15:29:39 2019 +0800
+
+    test commit
+
+[33mcommit f3a4435e7467eb2592ac404233d09d75811299fc[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:34:59 2019 +0800
+
+    added 2 files and folder for testing
+
+[33mcommit 9774f463a5760f7d5fd593fb2a7b537d1c00841d[m
+Merge: 8bcf9dd cd1bea5
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:27:37 2019 +0800
+
+    Merge pull request #2 from dneo007/revert-1-testbranch
+    
+    Revert "test branch commit"
+
+[33mcommit cd1bea550391df73c5af8fa276fb44c67e516ebb[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:26:18 2019 +0800
+
+    Revert "test branch commit"
+
+[33mcommit 8bcf9ddb1556001f84051cfb0e4c03832ea27f69[m
+Merge: e74c67d 1ac1628
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:25:27 2019 +0800
+
+    Merge pull request #1 from dneo007/testbranch
+    
+    test branch commit
+
+[33mcommit 1ac1628e3ad6c68a0070667d3612075029d54037[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:20:17 2019 +0800
+
+    test branch commit
+
+[33mcommit e74c67d86269fc77aa8af7b4d8527495e641d4e1[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:13:04 2019 +0800
+
+    Amended Merge Conflict
+
+[33mcommit 185cab24d29954c8c5d041dd83011b06b5d06152[m
+Merge: c369e9b 0d8e2c2
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:08:31 2019 +0800
+
+    Merge branch 'master' of https://github.com/dneo007/dipslotmachine
+
+[33mcommit c369e9b5e19fcb87a82d259568808330517add48[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:07:23 2019 +0800
+
+    Added linebreak
+
+[33mcommit 0d8e2c2ff38efc26d01c428bc8d584254a2a9562[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 04:01:24 2019 +0800
+
+    Added Timeline to readme
+
+[33mcommit 5d41010b6aacf57e0a1cb75987b21f8d0d4e72f6[m
+Author: dneo007 <55409272+dneo007@users.noreply.github.com>
+Date:   Tue Sep 17 03:58:30 2019 +0800
+
+    Initial commit
