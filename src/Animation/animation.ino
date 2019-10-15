@@ -46,6 +46,7 @@ void setup()
   radiation();  // Tedious but gaurantee will work
   radiation1(); // Simple but not sure if it will cause any problem
   triangleSpinning();
+  comb();
 }
 
 void loop()
@@ -53,6 +54,7 @@ void loop()
   // put your main code here, to run repeatedly:
 }
 
+// ANIMATION 1: WATERFALL
 void waterfall()
 {
   // Generate waterfall columns             This gives the X0, X1
@@ -124,6 +126,7 @@ void waterfall()
   }
 }
 
+// ANIMATION 2: RADIATION
 void radiation()
 {
   for (int i = 0; i < radiationRotations; i++)
@@ -155,6 +158,7 @@ void radiation()
   }
 }
 
+// ANIMATION 2 (1): RADIATION
 void radiation1()
 {
   for (int i = 0; i < radiationRotations; i++)
@@ -182,6 +186,7 @@ void radiation1()
   }
 }
 
+// ANIMATION 3: TRIANGLE SPINNING
 void triangleSpinning()
 {
   for (int i = 0; i < triangleNumberofRotations; i++)
@@ -215,4 +220,119 @@ void triangleSpinning()
       matrix.drawLine(x3, y3, x1, y1, color);
     }
   }
+}
+
+// ANIMATION 4: COMB 
+void comb()
+{
+    //VARIABLES - Raindrop properties
+    //common parameters
+    int minLineLength = 5;
+    int maxLineLength = 8;
+    int lineLengths[32];
+    int ySpeed = 10;
+    int numOfRainDrops = 32;
+
+    //falling Rectangles parameters
+    int fallingRectXStarts[numOfRainDrops];
+    int fallingRectYHeads[numOfRainDrops];
+    int fallingRectYEnds[numOfRainDrops];
+
+    //rising rectangles parameters
+    int risingRectXStarts[numOfRainDrops];
+    int risingRectYHeads[numOfRainDrops];
+    int risingRectYEnds[numOfRainDrops];
+
+    //CYLINDER/PANEL PROPERTY
+    int rectHeight = matrix.height(); //32-1;
+    int rectWidth = 64 - 1;
+
+    //initialise VARIABLES, create 32 rain drops
+    for (int i = 0; i < numOfRainDrops; i++)
+    {
+        //XPOS of rects
+        fallingRectXStarts[i] = i * 2;    //print raindrop every even interval
+        risingRectXStarts[i] = i * 2 + 1; //every odd interval
+
+        lineLengths[i] = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
+
+        //YPos of rects
+        fallingRectYHeads[i] = 0 - lineLengths[i] * 2;
+        fallingRectYEnds[i] = fallingRectYHeads[i] + lineLengths[i];
+
+        risingRectYEnds[i] = rectHeight + 2 * lineLengths[i];
+        risingRectYHeads[i] = risingRectYEnds[i] - lineLengths[i];
+    }
+
+    //DRAW ALL RAINDROPS/RECTANGLES
+    for (int i = 0; i < numOfRainDrops; i++)
+    {
+        //draw falling rect
+        drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
+        //draw rising rect
+        drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
+    }
+    int longestLineIndex = minimum(lineLengths, numOfRainDrops);
+
+    //MOVE COORDINATES
+    bool longestLineInMatrix = true;
+    do
+    {
+        for (int i = 0; i < numOfRainDrops; i++)
+        {
+            //move falling rect
+            fallingRectYHeads[i] += ySpeed;
+            fallingRectYEnds[i] += ySpeed;
+            //move rising rect
+            risingRectYHeads[i] -= ySpeed;
+            risingRectYEnds[i] -= ySpeed;
+
+            if (fallingRectYHeads[longestLineIndex] > matrix.height())
+            {
+                longestLineInMatrix = false;
+            }
+        }
+    } while (longestLineInMatrix == true);
+}
+int minimum(int array[], int size) //return index of min value in array
+{
+    float min = array[0];
+    int index;
+    for (int i = 1; i < size; i++)
+    {
+        if (min > array[i])
+        {
+            min = array[i];
+            index = i;
+        }
+    }
+    return index;
+}
+void drawLine(int xStart, int yStart, int length)
+{
+    for (int i = yStart; i < length; i++)
+    { //todo: length or length+1?
+        uint16_t colour = Wheel((i + xStart) % 24);
+        int currentYPos = i;
+        matrix.drawPixel(xStart, currentYPos, colour);
+    }
+}
+// Input a value 0 to 24 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint16_t Wheel(byte WheelPos)
+{
+    if (WheelPos < 8)
+    {
+        return matrix.Color333(7 - WheelPos, WheelPos, 0);
+    }
+    else if (WheelPos < 16)
+    {
+        WheelPos -= 8;
+        return matrix.Color333(0, 7 - WheelPos, WheelPos);
+    }
+    else
+    {
+        WheelPos -= 16;
+        return matrix.Color333(WheelPos, 0, 7 - WheelPos);
+    }
 }
