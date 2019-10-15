@@ -26,51 +26,76 @@
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 void playRainDropAnimation()
 {
-    //VARIABLES
-    int currentXStarts[];
-    int currentYStarts[];
-    int currentYEnds[];
-    int ySpeeds[];
+    //VARIABLES: Raindrop properties
+    int fallingRectXStarts[32];
+    int fallingRectYStarts[32];
+    int fallingRectYEnds[32];
+
+    int risingRectXStarts[32];
+    int risingRectYStarts[32];
+    int risingRectYEnds[32];
+
+    int ySpeed = 10;
     int lineLength;
+    int minLineLength = 5;
+    int maxLineLength = 8;
+
     int numOfRainDrops = 32;
+
+    //CYLINDER/PANEL PROPERTY
+    int rectHeight = matrix.height(); //32-1;
+    int rectWidth = 64 - 1;
 
     //initialise VARIABLES, create 32 rain drops
     for (int i = 0; i < numOfRainDrops; i++)
     {
-        currentXStarts[i] = i * 2; //print raindrop every even interval
-        currentYStarts[i] = 0;
-        lineLength = rand(5, 9); //generate length between 5&9 inclusive? todo: check
-        currentYEnds[i] = currentYStarts[i] + lineLength;
-        ySpeeds[i] = rand(5, 10);
+        //XPOS of rects
+        fallingRectXStarts[i] = i * 2;    //print raindrop every even interval
+        risingRectXStarts[i] = i * 2 + 1; //every odd interval
+
+        lineLength = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
+
+        //YPos of rects
+        fallingRectYStarts[i] = 0 - lineLength * 2;
+        fallingRectYEnds[i] = fallingRectYStarts[i] + lineLength;
+
+        risingRectYStarts[i] = rectHeight + 2 * lineLength;
+        risingRectYEnds[i] = risingRectYStarts[i] - lineLength;
     }
 
     //DRAW
     for (int i = 0; i < numOfRainDrops; i++)
     {
-        //drawline
-        drawLine(currentXStarts[i], currentYStarts[i], currentYEnds[i])
+        //draw falling rect
+        drawLine(fallingRectXStarts[i], fallingRectYStarts[i], fallingRectYEnds[i]);
+        //draw rising rect
+        drawLine(risingRectXStarts[i], risingRectYStarts[i], risingRectYEnds[i]);
     }
     //MOVE COORDINATES
+    int counter;
     for (int i = 0; i < numOfRainDrops; i++)
     {
-        currentYStarts[i] += ySpeeds[i];
-        currentYEnds[i] += ySpeeds[i];
+        //move falling rect
+        fallingRectYStarts[i] += ySpeed;
+        fallingRectYEnds[i] += ySpeed;
+        //move rising rect
+        risingRectYStarts[i] += ySpeed;
+        risingRectYEnds[i] += ySpeed;
 
-        if (currentYStarts > matrix.height())
+        if (fallingRectYStarts > matrix.height())
         { //reset line pos
-            currentYStarts[i] = 0 - lineLength;
-            currentYEnds[i] = 0;
+            counter++; //todo: loop logic
         }
     }
 }
 
-void drawLine(int currentXStart, int currentYStart, int currentYEnds)
+void drawLine(int xStart, int yStart, int yEnd)
 {
-    for (int i = yPos, i < lineLength, i++)
-    { //todo: lineLength or lineLength+1?
-        uint16_t colour = Wheel(i + currentXStart);
-        int yPos = i;
-        matrix.drawPixel(currentXStart, yPos, colour);
+    for (int i = yStart; i < yEnd; i++)
+    { //todo: yEnd or yEnd+1?
+        uint16_t colour = Wheel((i + xStart) % 24);
+        int currentYPos = i;
+        matrix.drawPixel(xStart, currentYPos, colour);
     }
 }
 
