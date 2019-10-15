@@ -85,8 +85,8 @@ void playRainDropAnimation()
             fallingRectYHeads[i] += ySpeed;
             fallingRectYEnds[i] += ySpeed;
             //move rising rect
-            risingRectYHeads[i] += ySpeed;
-            risingRectYEnds[i] += ySpeed;
+            risingRectYHeads[i] -= ySpeed;
+            risingRectYEnds[i] -= ySpeed;
 
             if (fallingRectYHeads[longestLineIndex] > matrix.height())
             {
