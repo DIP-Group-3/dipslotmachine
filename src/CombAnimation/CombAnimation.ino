@@ -24,7 +24,7 @@
 #define D A3
 
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
-void playRainDropAnimation()
+void playCombAnimation()
 {
     //VARIABLES - Raindrop properties
     //common parameters
