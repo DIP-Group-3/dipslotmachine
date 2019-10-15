@@ -15,7 +15,6 @@
 #define G2 28
 #define B2 29
 
-
 //ARRAY OF COMBOS & SELECT, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
 
@@ -31,7 +30,7 @@ int numOfFrames = 10;
 int numberOfRotations = 20;
 //float ySpeed = 10; //vertical scrollSpeed
 const float ySpeedsConstant[] = {10, 7, 8}; //original ySpeed
-float currentYSpeeds[] = {0, 0, 0}; 
+float currentYSpeeds[] = {0, 0, 0};
 
 bool isSpinning = true; //spin button to trigger status;
 int startingFrame;
@@ -66,24 +65,44 @@ void loop()
   isSpinning = false;
 }
 
-//todo: fix logic
 void displayStartingFrame(int startingFrame)
 {
-  //initialise initial conditions:
-  //lazy... hardcoded:
-  int xPos[] = {1, 24, 47};
-  int yPos[] = {6, 6, 6};
-  int currentCharacter[] = {0, 0, 0};
+  //VARIABLES
+  int xPosCurrent[] = {1, 24, 47}; //lazy... hardcoded
+  int currentCharacter[3];
+  int yPosCurrent[3];
+
+  int ySpeed = 10;
+  int yPosCenter = 6;
+
+  //INITIALISE VARIABLES
   for (int i = 0; i < 3; i++)
   {
-    //initial char to display
-    currentCharacter[i] = startingFrame;
+    currentCharacter[i] = startingFrame; //initial char to display
+    yPosCurrent[i] = -21;                //each char begin at top of matrix
   }
-  //DRAW CHARACTERS
-  for (int i = 0; i < 3; i++)
+
+  //MOVE CHARACTER one by one to the center
+  for (int i = 0; i < 3; i++) //for each character
   {
     char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
-    drawCharacter(xPos[i], yPos[i], charToDraw, matrix.Color333(255, 0, 0));
+    bool charHasReachedCenter = false;
+    while (charHasReachedCenter == false)
+    {
+      //DRAW CHARACTER
+      drawCharacter(xPosCurrent[i], yPosCurrent[i], charToDraw, matrix.Color333(255, 0, 0));
+      //MOVE CHARACTERS until center
+      yPosCurrent[i] += ySpeed;
+
+      if (yPosCurrent >= yPosCenter)
+        charHasReachedCenter = true;
+    }
+    //jitter char to come to a stop
+    int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
+    for (int i = 0; i < 6; i++)
+    {
+      drawCharacter(xPosCurrent[i], yPosCurrentPos[i], charToDraw, matrix.Color333(255, 0, 0));
+    }
   }
 }
 
@@ -115,7 +134,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     currentYPositions[i] = yPosCenter;
     //initial char to display
     currentCharacter[i] = startingFrame;
-    currentYSpeeds[i] = ySpeedsConstant[i]; 
+    currentYSpeeds[i] = ySpeedsConstant[i];
   }
 
   //begin animation...is rolling...for numberOfRotations times
