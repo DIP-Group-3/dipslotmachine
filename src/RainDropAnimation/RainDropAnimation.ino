@@ -110,10 +110,10 @@ int minimum(int array[], int size) //return index of min value in array
     }
     return index;
 }
-void drawLine(int xStart, int yStart, int yEnd)
+void drawLine(int xStart, int yStart, int length)
 {
-    for (int i = yStart; i < yEnd; i++)
-    { //todo: yEnd or yEnd+1?
+    for (int i = yStart; i < length; i++)
+    { //todo: length or length+1?
         uint16_t colour = Wheel((i + xStart) % 24);
         int currentYPos = i;
         matrix.drawPixel(xStart, currentYPos, colour);
