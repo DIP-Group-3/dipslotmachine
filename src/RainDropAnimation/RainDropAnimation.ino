@@ -26,21 +26,23 @@
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 void playRainDropAnimation()
 {
-    //VARIABLES: Raindrop properties
-    int fallingRectXStarts[32];
-    int fallingRectYStarts[32];
-    int fallingRectYEnds[32];
-
-    int risingRectXStarts[32];
-    int risingRectYStarts[32];
-    int risingRectYEnds[32];
-
-    int ySpeed = 10;
-    int lineLength;
+    //VARIABLES - Raindrop properties
+    //common parameters
     int minLineLength = 5;
     int maxLineLength = 8;
-
+    int lineLengths[32];
+    int ySpeed = 10;
     int numOfRainDrops = 32;
+
+    //falling Rectangles parameters
+    int fallingRectXStarts[numOfRainDrops];
+    int fallingRectYHeads[numOfRainDrops];
+    int fallingRectYEnds[numOfRainDrops];
+
+    //rising rectangles parameters
+    int risingRectXStarts[numOfRainDrops];
+    int risingRectYHeads[numOfRainDrops];
+    int risingRectYEnds[numOfRainDrops];
 
     //CYLINDER/PANEL PROPERTY
     int rectHeight = matrix.height(); //32-1;
@@ -53,42 +55,61 @@ void playRainDropAnimation()
         fallingRectXStarts[i] = i * 2;    //print raindrop every even interval
         risingRectXStarts[i] = i * 2 + 1; //every odd interval
 
-        lineLength = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
+        lineLengths[i] = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
 
         //YPos of rects
-        fallingRectYStarts[i] = 0 - lineLength * 2;
-        fallingRectYEnds[i] = fallingRectYStarts[i] + lineLength;
+        fallingRectYHeads[i] = 0 - lineLengths[i] * 2;
+        fallingRectYEnds[i] = fallingRectYHeads[i] + lineLengths[i];
 
-        risingRectYStarts[i] = rectHeight + 2 * lineLength;
-        risingRectYEnds[i] = risingRectYStarts[i] - lineLength;
+        risingRectYEnds[i] = rectHeight + 2 * lineLengths[i];
+        risingRectYHeads[i] = risingRectYEnds[i] - lineLengths[i];
     }
 
-    //DRAW
+    //DRAW ALL RAINDROPS/RECTANGLES
     for (int i = 0; i < numOfRainDrops; i++)
     {
         //draw falling rect
-        drawLine(fallingRectXStarts[i], fallingRectYStarts[i], fallingRectYEnds[i]);
+        drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
         //draw rising rect
-        drawLine(risingRectXStarts[i], risingRectYStarts[i], risingRectYEnds[i]);
+        drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
     }
-    //MOVE COORDINATES
-    int counter;
-    for (int i = 0; i < numOfRainDrops; i++)
-    {
-        //move falling rect
-        fallingRectYStarts[i] += ySpeed;
-        fallingRectYEnds[i] += ySpeed;
-        //move rising rect
-        risingRectYStarts[i] += ySpeed;
-        risingRectYEnds[i] += ySpeed;
+    int longestLineIndex = minimum(lineLengths, numOfRainDrops);
 
-        if (fallingRectYStarts > matrix.height())
-        { //reset line pos
-            counter++; //todo: loop logic
+    //MOVE COORDINATES
+    bool longestLineInMatrix = true;
+    do
+    {
+        for (int i = 0; i < numOfRainDrops; i++)
+        {
+            //move falling rect
+            fallingRectYHeads[i] += ySpeed;
+            fallingRectYEnds[i] += ySpeed;
+            //move rising rect
+            risingRectYHeads[i] += ySpeed;
+            risingRectYEnds[i] += ySpeed;
+
+            if (fallingRectYHeads[longestLineIndex] > matrix.height())
+            {
+                longestLineInMatrix = false;
+            }
         }
-    }
+    } while (longestLineInMatrix == true);
 }
 
+int minimum(int array[], int size) //return index of min value in array
+{
+    float min = array[0];
+    int index;
+    for (int i = 1; i < size; i++)
+    {
+        if (min > array[i])
+        {
+            min = array[i];
+            index = i;
+        }
+    }
+    return index;
+}
 void drawLine(int xStart, int yStart, int yEnd)
 {
     for (int i = yStart; i < yEnd; i++)
@@ -105,6 +126,7 @@ void setup()
 
 void loop()
 {
+    playRainDropAnimation();
 }
 
 // Input a value 0 to 24 to get a color value.
