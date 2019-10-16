@@ -101,8 +101,8 @@ void setup()
 
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
-  
-  //To Test Added 
+
+  //To Test Added
   StartUpSFX();
 }
 
@@ -110,6 +110,9 @@ void loop()
 {
   lcd.backlight();
   if(totalCoinsInside >= minCoinsRequired ){
+
+    //Compile obstable detection code into function IRupdate();
+
     isObstacle = digitalRead(isObstaclePin);
 
     //TODO: IDLE STATE ANIMATION
@@ -121,12 +124,19 @@ void loop()
       LcdMessage(1);                              // Display Message in LCD
     }
 
+    //Check if credit == 0 disable buttons for efficiency
+
+    //The if else statement below should be consolidated to a function called btnPressed()
+
+
     if(betAvail()){                               //Check if bet increment could be done
       updateBet();                                    //Call method to update bet amt
     }else if(spinAvail()){                        //Ceck if spin could be done
       SpinActivateSFX();
       activateSpin();                                 //Call Method to start LED Matrix animation
     }
+
+
   }else{
     LcdMessage(5);
     //TODO: OUT OF SERVICE ANIMATION
@@ -141,10 +151,10 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
   }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
-    
-    //ToTest Added 
+
+    //ToTest Added
     CoinInsertSFX();
-    
+
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
@@ -160,9 +170,9 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  //ToTest Added 
+  //ToTest Added
   BetIncrementSFX();
-  
+
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     Serial.println("Bet = 1");
     Serial.println(betAmt);
@@ -420,7 +430,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
-        if (slowestMovingCharIndex == i){ 
+        if (slowestMovingCharIndex == i){
           //counter value limited by slowest moving character
           counter++;
         }
@@ -524,7 +534,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
   for (int j = 0; j < 6; j++){
     matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
-    for (int i = 0; i < 3; i++){ 
+    for (int i = 0; i < 3; i++){
       //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
@@ -594,18 +604,18 @@ void machineUpdates(int endFrameIndex){
     Serial.println("JAckpot");
     LcdMessage(4);
     JackpotSFX();
-    
+
     //TODO: JACKPOT LED ANIMATION
-    
+
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
     Serial.println("Win");
     LcdMessage(3);
     WinConditionSFX();
-    
+
     //TODO: WIN LED ANIMATION
-    
+
     dispenseCoin(currentBetAmt*winRate);
     if(creditAmt <= 0){                            //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
@@ -616,9 +626,9 @@ void machineUpdates(int endFrameIndex){
     Serial.println("Others");
     LcdMessage(2);
     LoseSFX();
-    
-    //TODO: LOSE LED ANIMATION 
-    
+
+    //TODO: LOSE LED ANIMATION
+
     delay(2000);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
@@ -784,7 +794,7 @@ void JackpotSFX() {
   noTone(buzzer);
   delay(10);
   tone(buzzer, 1047);
-  delay(550);  
+  delay(550);
   noTone(buzzer);
   delay(2000);
 }
