@@ -43,8 +43,7 @@ void setup()
   matrix.begin();
   randomSeed(analogRead(reservePin));
   waterfall();
-  radiation();  // Tedious but gaurantee will work
-  radiation1(); // Simple but not sure if it will cause any problem
+  radiation();
   triangleSpinning();
   sadFace();
   comb();
@@ -71,6 +70,7 @@ void waterfall()
   // Rolling animation
   for (int i = 0; i < waterfallRotations; i++)
   {
+    matrix.fillScreen(matrix.Color333(0,0,0));
     for (int j = 0; j < 32; j++)
     {
       // Get the starting and ending pos
@@ -91,8 +91,8 @@ void waterfall()
       }
       // Changing color
       uint16_t currColor;
-      int section1 = 6 + sin(j);
-      int section2 = 12 + sin(j);
+      int section1 = 12 + sin(j);
+      int section2 = 24 + sin(j);
       if (yStart < section1)
       {
         matrix.drawLine(waterfallColumns[j], yStart, waterfallColumns[j], yEnd, waterfallColor1);
@@ -128,61 +128,61 @@ void waterfall()
 }
 
 // ANIMATION 2: RADIATION
+// void radiation1()
+// {
+//   for (int i = 0; i < radiationRotations; i++)
+//   {
+//     for (int x = 0; x < 64; x++)
+//     {
+//       for (int y = 0; y < 32; y++)
+//       {
+//         int d = (int)sqrt((x - 15) ^ 2 + (y - 31) ^ 2);
+//         if (d <= 5)
+//         {
+//           matrix.drawPixel(x, y, radiationColors[(0 + i) % 4]);
+//         }
+//         else if (d <= 10)
+//         {
+//           matrix.drawPixel(x, y, radiationColors[(1 + i) % 4]);
+//         }
+//         else if (d <= 15)
+//         {
+//           matrix.drawPixel(x, y, radiationColors[(2 + i) % 4]);
+//         }
+//         else
+//         {
+//           matrix.drawPixel(x, y, radiationColors[(3 + i) % 4]);
+//         }
+//       }
+//     }
+//     delay(0);
+//   }
+// }
+
+// ANIMATION 2: RADIATION
 void radiation()
 {
   for (int i = 0; i < radiationRotations; i++)
   {
-    for (int x = 0; x < 64; x++)
-    {
-      for (int y = 0; y < 32; y++)
-      {
-        int d = (int)sqrt((x - 15) ^ 2 + (y - 31) ^ 2);
-        if (d <= 5)
-        {
-          matrix.drawPixel(x, y, radiationColors[(0 + i) % 4]);
-        }
-        else if (d <= 10)
-        {
-          matrix.drawPixel(x, y, radiationColors[(1 + i) % 4]);
-        }
-        else if (d <= 15)
-        {
-          matrix.drawPixel(x, y, radiationColors[(2 + i) % 4]);
-        }
-        else
-        {
-          matrix.drawPixel(x, y, radiationColors[(3 + i) % 4]);
-        }
-      }
-    }
-    delay(0);
-  }
-}
-
-// ANIMATION 2 (1): RADIATION
-void radiation1()
-{
-  for (int i = 0; i < radiationRotations; i++)
-  {
     // section 1 circle
-    matrix.fillCircle(15, 31, 5, radiationColors[(0 + i) % 4]);
+    matrix.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
 
     // section 2 circle
-    for (int r = 6; r < 11; r++)
+    for (int r = 6; r < 15; r++)
     {
-      matrix.drawCircle(15, 31, r, radiationColors[(1 + i) % 4]);
+      matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
     }
 
     // section 3 circle
-    for (int r = 11; r < 16; r++)
+    for (int r = 15; r < 24; r++)
     {
-      matrix.drawCircle(15, 31, r, radiationColors[(2 + i) % 4]);
+      matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
     }
 
     // section 4 circle
-    for (int r = 16; r < 32; r++)
+    for (int r = 24; r < 32; r++)
     {
-      matrix.drawCircle(15, 31, r, radiationColors[(3 + i) % 4]);
+      matrix.drawCircle(31, , r, radiationColors[(3 + i) % 4]);
     }
   }
 }
