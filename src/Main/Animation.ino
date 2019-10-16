@@ -28,8 +28,8 @@ uint16_t waterfallColor3 = matrix.Color333(161, 0, 202);
 
 // For Radition Animation
 int radiationRotations = 20;
-uint16_t radiationColors[4] = {matrix.Color333(213, 0, 64), matrix.Color333(206, 0, 185),
-                               matrix.Color333(161, 0, 202), matrix.Color333(99, 0, 198)};
+uint16_t radiationColors[4] = {matrix.Color333(226, 1, 175), matrix.Color333(223, 2, 198), 
+                               matrix.Color333(122, 3, 220), matrix.Color333(4, 5, 217)};
 
 // For Triangle Spinning Animation
 int triangleRadius = 5;
