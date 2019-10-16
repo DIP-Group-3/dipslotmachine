@@ -68,7 +68,7 @@ void waterfall()
     waterfallStartingPos[i] = random(0, 31);
   }
   // Rolling animation
-  for (int i = 0; i < waterfallRotations; i++)
+  for (int i = 0; i < waterfallRotations; i += 5)
   {
     matrix.fillScreen(matrix.Color333(0,0,0));
     for (int j = 0; j < 32; j++)
@@ -197,11 +197,26 @@ void triangleSpinning()
       int x1 = triangleRadius * cos(angle * (pi / 180));
       int y1 = triangleRadius * sin(angle * (pi / 180));
 
+      Serial.println("x1");
+      Serial.println(x1);
+      Serial.println("y1");
+      Serial.println(y1); 
+
       int x2 = triangleRadius * cos((angle + 120) * (pi / 180));
       int y2 = triangleRadius * sin((angle + 120) * (pi / 180));
 
+      Serial.println("x2");
+      Serial.println(x2);
+      Serial.println("y2");
+      Serial.println(y2); 
+
       int x3 = triangleRadius * cos((angle + 240) * (pi / 180));
       int y3 = triangleRadius * sin((angle + 240) * (pi / 180));
+
+      Serial.println("x3");
+      Serial.println(x3);
+      Serial.println("y3");
+      Serial.println(y3); 
 
       uint16_t color;
       if (triangleNumberofRotations < 3)
