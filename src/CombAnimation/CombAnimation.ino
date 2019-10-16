@@ -25,13 +25,14 @@
 #define reservePin 15
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 void playCombAnimation()
-{
+{   
+    
     //VARIABLES - Raindrop properties
     //common parameters
     int minLineLength = 5;
     int maxLineLength = 8;
     int lineLengths[32];
-    int ySpeed = 10;
+    int ySpeed = 5;
     int numOfRainDrops = 32;
 
     //falling Rectangles parameters
@@ -56,34 +57,46 @@ void playCombAnimation()
         risingRectXStarts[i] = i * 2 + 1; //every odd interval
 
         lineLengths[i] = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
-
-        //YPos of rects
+        
+        //YPos of rects 
         fallingRectYHeads[i] = 0 - lineLengths[i] * 2;
+        
         fallingRectYEnds[i] = fallingRectYHeads[i] + lineLengths[i];
 
+//        Serial.print("yHead = ");
+//        Serial.print(fallingRectYHeads[i]);
+//        Serial.print("\n");
+//        Serial.print("yENd = ");
+//        Serial.print(fallingRectYEnds[i]);
+//        Serial.print("\n");
         risingRectYEnds[i] = rectHeight + 2 * lineLengths[i];
         risingRectYHeads[i] = risingRectYEnds[i] - lineLengths[i];
     }
-
-    //DRAW ALL RAINDROPS/RECTANGLES
-    for (int i = 0; i < numOfRainDrops; i++)
-    {
-        //draw falling rect
-        drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
-        //draw rising rect
-        drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
-    }
-    int longestLineIndex = minimum(lineLengths, numOfRainDrops);
 
     //MOVE COORDINATES
     bool longestLineInMatrix = true;
     do
     {
+        matrix.fillScreen(matrix.Color333(0, 0, 0)); //fill black
+        //DRAW ALL RAINDROPS/RECTANGLES
+        for (int i = 0; i < numOfRainDrops; i++)
+        {   
+            
+            //draw falling rect
+            drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
+            //draw rising rect
+            drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
+        }
+        int longestLineIndex = minimum(lineLengths, numOfRainDrops);
+
         for (int i = 0; i < numOfRainDrops; i++)
         {
             //move falling rect
             fallingRectYHeads[i] += ySpeed;
             fallingRectYEnds[i] += ySpeed;
+            Serial.print("yHead = ");
+            Serial.print(fallingRectYHeads[i]);
+            Serial.print("\n");
             //move rising rect
             risingRectYHeads[i] -= ySpeed;
             risingRectYEnds[i] -= ySpeed;
@@ -110,13 +123,29 @@ int minimum(int array[], int size) //return index of min value in array
     }
     return index;
 }
+
+
 void drawLine(int xStart, int yStart, int length)
-{
+{   
+    Serial.print("drawLine called\n");
     for (int i = yStart; i < length; i++)
     { //todo: length or length+1?
         uint16_t colour = Wheel((i + xStart) % 24);
-        int currentYPos = i;
-        matrix.drawPixel(xStart, currentYPos, colour);
+        //int currentYPos = i;
+//        Serial.print("XStart =  ");
+//        Serial.print(xStart);
+//        Serial.print("\n");
+//        Serial.print("YStart = ");
+//        Serial.print(yStart);
+//        Serial.print("\n");
+          Serial.print("i = ");
+          Serial.print(i);
+          Serial.print("\n");
+        
+        matrix.drawPixel(xStart, i, colour);
+        //matrix.fillScreen(matrix.Color333(0, 0, 255));
+        //matrix.drawPixel(xStart,i, matrix.Color333(255,255,0));
+        
     }
 }
 
@@ -124,11 +153,17 @@ void setup()
 {
     matrix.begin();
     randomSeed(analogRead(reservePin));
+    Serial.begin(9600);
 }
 
+bool start = true;
 void loop()
-{
-    playRainDropAnimation();
+{   
+    if (start){
+      playCombAnimation();
+      start=false;
+    }
+    
 }
 
 // Input a value 0 to 24 to get a color value.
