@@ -226,8 +226,11 @@ void triangleSpinning()
 // ANIMATION 4: FAIL SAD FACE 
 void sadFace(){
    drawFace(0 + 10, 0 + 10); 
+   delay(100);
    drawFace(31 - 10, 31 - 10);
+   delay(100);
    drawFace(31 + 10, 0 + 10);
+   delay(100);
    drawFace(63 - 10, 31 - 10);
 }
 

@@ -1,8 +1,7 @@
 #include <Wire.h> 
 #include <Servo.h>
-#include <LiquidCrystal_I2C.h>
 #include <RGBmatrixPanel.h>
-#include <Buzzer.ino>
+#include <Buzzer.h>
 
 //Arduino Mega Pin Definition
 #define A A0              // ROW SELECT: WHICH TWO ROWS CURRENTLY LIT
