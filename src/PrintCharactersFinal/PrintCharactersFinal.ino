@@ -29,7 +29,7 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
 int numOfFrames = 10;
 int numberOfRotations = 20;
 //float ySpeed = 10; //vertical scrollSpeed
-const float ySpeedsConstant[] = {10, 7, 8}; //original ySpeed
+const float ySpeedsConstant[] = {3, 4, 10}; //{10, 7, 8}; //original ySpeed
 float currentYSpeeds[] = {0, 0, 0};
 
 bool isSpinning = true; //spin button to trigger status;
@@ -60,48 +60,59 @@ void loop()
   {
     displayStartingFrame(startingFrame);
     delay(2000);
-    playAnimation(startingFrame, endingFrame, numberOfRotations);
+    //playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
-  isSpinning = false;
+  //isSpinning = false;
 }
-
 void displayStartingFrame(int startingFrame)
 {
-  //VARIABLES
-  int xPosCurrent[] = {1, 24, 47}; //lazy... hardcoded
-  int currentCharacter[3];
+  int xPosCurrent[] = {1, 24, 47};
   int yPosCurrent[3];
+  int currentCharacter[3];
 
-  int ySpeed = 10;
+  int ySpeed = 7;
   int yPosCenter = 6;
 
-  //INITIALISE VARIABLES
+  uint16_t colour = matrix.Color333(255, 0, 0); //red
+
+  //INITIALISE
   for (int i = 0; i < 3; i++)
   {
     currentCharacter[i] = startingFrame; //initial char to display
     yPosCurrent[i] = -21;                //each char begin at top of matrix
   }
 
-  //MOVE CHARACTER one by one to the center
-  for (int i = 0; i < 3; i++) //for each character
+  //for each Character
+  //bring it down to the center
+  bool charArrivedAtCenter[] = {false, false, false};
+  for (int i = 0; i < 3; i++)
   {
-    char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
-    bool charHasReachedCenter = false;
-    while (charHasReachedCenter == false)
-    {
-      //DRAW CHARACTER
-      drawCharacter(xPosCurrent[i], yPosCurrent[i], charToDraw, matrix.Color333(255, 0, 0));
-      //MOVE CHARACTERS until center
-      yPosCurrent[i] += ySpeed;
+    //extract character from character pointer
+    char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
+    drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
-      if (yPosCurrent >= yPosCenter)
-        charHasReachedCenter = true;
-    }
-    //jitter char to come to a stop
-    int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
-    for (int i = 0; i < 6; i++)
+    while (true)
     {
-      drawCharacter(xPosCurrent[i], yPosCurrentPos[i], charToDraw, matrix.Color333(255, 0, 0));
+      matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+      drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
+
+      yPosCurrent[i] += ySpeed;
+      //draw all char that reached center again
+      for (int j = 0; j < 3; j++)
+      {
+        if (charArrivedAtCenter[j] == true)
+        {
+          //draw character
+          char charToPrint = extractCharFromFrameList(currentCharacter[i], i);
+          drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
+        }
+      }
+      if (yPosCurrent[i] >= yPosCenter)
+      {
+        charArrivedAtCenter[i] = true;
+        yPosCurrent[3] = 6;
+        break;
+      }
     }
   }
 }
@@ -182,6 +193,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     currentCharacter[i] = endingFrame; //set each char pointer to point at endingFrame
   }
 
+  /*
   //ending animation: draw ending frame
   //the following code aims to pull character to the center of the matrix
   //idea: frameArrivedAtCenter[] keeps track of whether the characters that has reached middle of matrix
@@ -228,7 +240,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
       break;                                                                           //exit
-  }
+  } */
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
@@ -286,7 +298,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
       //buzz SFX
-      tone(piezoPin, 5000, 50);
+      //tone(piezoPin, 5000, 50);
     }
   }
 }
