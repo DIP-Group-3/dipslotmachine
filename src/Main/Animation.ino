@@ -58,12 +58,12 @@ void loop()
 void waterfall()
 {
   // Generate waterfall columns             This gives the X0, X1
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < 16; i++)
   {
-    waterfallColumns[i] = (2 * i + 1);
+    waterfallColumns[i] = (4 * i + 1);
   }
   // Generate waterfall starting positions  This gives the Y0
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < 16; i++)
   {
     waterfallStartingPos[i] = random(0, 31);
   }
@@ -74,12 +74,9 @@ void waterfall()
     for (int j = 0; j < 16; j++)
     {
       // Get the starting and ending pos
-      int yStart1 = waterfallStartingPos[15 + j] + i;
-      int yStart2 = waterfallStartingPos[15 - j] + i;
-      int yEnd1 = yStart1 - 32; // 32 is the length of each waterfall
-      int yEnd2 = yStart2 - 32; // 32 is the length of each waterfall
-      drawWaterfall(yStart1, yEnd1, 15+j);
-      drawWaterfall(yStart1, yEnd2, 15-j);
+      int yStart = waterfallStartingPos[j] + i;
+      int yEnd = yStart - 32;
+      drawWaterfall(yStart, yEnd, j);
     }
     Serial.print('\n');
     delay(0);
@@ -132,37 +129,6 @@ void drawWaterfall(int yStart, int yEnd, int index)
     }
   }
 }
-// ANIMATION 2: RADIATION
-// void radiation1()
-// {
-//   for (int i = 0; i < radiationRotations; i++)
-//   {
-//     for (int x = 0; x < 64; x++)
-//     {
-//       for (int y = 0; y < 32; y++)
-//       {
-//         int d = (int)sqrt((x - 15) ^ 2 + (y - 31) ^ 2);
-//         if (d <= 5)
-//         {
-//           matrix.drawPixel(x, y, radiationColors[(0 + i) % 4]);
-//         }
-//         else if (d <= 10)
-//         {
-//           matrix.drawPixel(x, y, radiationColors[(1 + i) % 4]);
-//         }
-//         else if (d <= 15)
-//         {
-//           matrix.drawPixel(x, y, radiationColors[(2 + i) % 4]);
-//         }
-//         else
-//         {
-//           matrix.drawPixel(x, y, radiationColors[(3 + i) % 4]);
-//         }
-//       }
-//     }
-//     delay(0);
-//   }
-// }
 
 // ANIMATION 2: RADIATION
 void radiation()
@@ -197,6 +163,7 @@ void triangleSpinning()
 {
   for (int i = 0; i < triangleNumberofRotations; i++)
   {
+    matrix.fillScreen(matrix.Color333(0,0,0));
     for (int angle = 0; angle < 360; angle += 5)
     {
       int x1 = triangleRadius * cos(angle * (pi / 180));
@@ -239,6 +206,7 @@ void triangleSpinning()
       matrix.drawLine(x1, y1, x2, y2, color);
       matrix.drawLine(x2, y2, x3, y3, color);
       matrix.drawLine(x3, y3, x1, y1, color);
+      delay(5);
     }
   }
 }
@@ -257,7 +225,7 @@ void sadFace()
 
 void drawFace(int x, int y)
 {
-  uint16_t faceColor = matrix.Color333(256, 256, 256);
+  uint16_t faceColor = matrix.Color333(123, 123, 123);
   matrix.drawCircle(x, y, 10, faceColor);        // Face outline
   matrix.fillCircle(x - 3, y - 3, 2, faceColor); // Left eye
   matrix.fillCircle(x + 3, y + 3, 2, faceColor); // Right eye
