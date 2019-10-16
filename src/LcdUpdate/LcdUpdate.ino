@@ -3,7 +3,7 @@
 #include <Servo.h>
 
 //LCD Display Variable
-int isObstaclePin = 7;
+int isObstaclePin = 14;
 int isObstacle = HIGH;
 LiquidCrystal_I2C lcd(0x27,20,4);                // Set the LCD address to 0x27 for a 20 chars and 4 line display
 
@@ -36,6 +36,7 @@ void setup()
   pinMode(betBtn, INPUT);
   pinMode(spinBtn, INPUT);
   LcdMessage(0);
+  //lcd.print("TEST");
 }
 
 void loop()
@@ -43,8 +44,10 @@ void loop()
   lcd.backlight();
   isObstacle = digitalRead(isObstaclePin);
   if(isObstacle == LOW) {                       // Obstacle detected 
+    Serial.println("Obstacle");
     coinInsert = true;
   } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
+    Serial.println("Insert Coin");
     updateCredit(1);                            // Incremeent Credit Amt
     LcdMessage(1);                              // Display Message in LCD
   }
@@ -128,6 +131,7 @@ bool spinAvail(){
 }
 
 void LcdMessage(int scenario){
+  Serial.println("Print MEssage");
   lcd.clear();                                                    //Clear current displayed frame
   switch(scenario){
     
@@ -139,7 +143,9 @@ void LcdMessage(int scenario){
               break;
 
     //Credit!=0 && 0<Bet<=3 Message Frame
-    case 1:   lcd.setCursor(1,1);
+    case 1:   
+              Serial.println("MEssage 1");
+              lcd.setCursor(1,1);
               lcd.print("Credit : ");
               lcd.print(creditAmt);
               lcd.setCursor(1,2);   

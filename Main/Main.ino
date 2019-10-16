@@ -10,7 +10,7 @@
 #define D A3
 
 #define MotorPin 5
-#define speakerPin 7
+#define buzzer 7
 #define OE 9              // OUTPUT ENABLE
 #define LAT 10            // LATCH SIGNAL MARKS THE END OF A ROW OF DATA
 #define CLK 11            // USE THIS ON ARDUINO MEGA
@@ -79,6 +79,7 @@ const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
 int intermediateSpinPos = 90;
 int winRate = 2;
+int adminCoin =0;
 
 void setup()
 {
@@ -100,12 +101,15 @@ void setup()
 
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
+  
+  //To Test Added 
+  StartUpSFX();
 }
 
 void loop()
 {
   lcd.backlight();
-  if(totalCoinsInside >= winRate ){
+  if(totalCoinsInside >= minCoinsRequired ){
     isObstacle = digitalRead(isObstaclePin);
 
     //TODO: IDLE STATE ANIMATION
@@ -120,13 +124,10 @@ void loop()
     if(betAvail()){                               //Check if bet increment could be done
       updateBet();                                    //Call method to update bet amt
     }else if(spinAvail()){                        //Ceck if spin could be done
+      SpinActivateSFX();
       activateSpin();                                 //Call Method to start LED Matrix animation
     }
   }else{
-    LcdMessage(6);
-    delay(1500);
-    dispenseCoin(totalCoinsInside);
-    delay(1500);
     LcdMessage(5);
     //TODO: OUT OF SERVICE ANIMATION
   }
@@ -140,6 +141,10 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
   }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
+    
+    //ToTest Added 
+    CoinInsertSFX();
+    
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
@@ -155,7 +160,10 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  if(betAmt>= maxBet || betAmt >= creditAmt || (betAmt*winRate >= totalCoinsInside)){             //Scenario 1: Current bet amount equal to/greater than 3
+  //ToTest Added 
+  BetIncrementSFX();
+  
+  if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     Serial.println("Bet = 1");
     Serial.println(betAmt);
     betAmt = 1;
@@ -207,6 +215,15 @@ bool spinAvail(){
   if(spinState == HIGH){
     spinPressed = true;
   }else if (spinState == LOW && creditAmt > 0 && spinPressed){
+    if(totalCoinsInside < (winRate * betAmt)){
+      LcdMessage(6);
+      bool admin = true;
+      while(admin){
+        admin = AdminCoinInsert();
+      }
+      adminCoin =0;
+      return false;
+    }
     Serial.println("Spin");
     return true;
   }else{
@@ -264,10 +281,11 @@ void LcdMessage(int scenario){
               lcd.print("OUT OF SERVICE");
               break;
 
-    case 6:   lcd.setCursor(6,1);
-              lcd.print("REFUND OF");
-              lcd.setCursor(3,2);
-              lcd.print("BALANCE CREDIT");
+    case 6:   lcd.setCursor(2,1);
+              lcd.print("APPROACH COUNTER");
+              lcd.setCursor(4,2);
+              lcd.print("CREDIT : ");
+              lcd.print(creditAmt);
               break;
 
     //Default Message Frame
@@ -428,6 +446,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
+  Serial.println("End Animation");
   machineUpdates(endingFrame);
 }
 
@@ -451,13 +470,10 @@ uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame){
 
   if (frameToPrint.equalsIgnoreCase(Jackpot)){                            //JACKPOT
     return blueColor;
-
   }else if (frameToPrint.equalsIgnoreCase(Win)){                      //EEE
     return greenColor;
-
   }else{                                                                //OTHERS
     return greenColor;
-
   }
 }
 
@@ -476,9 +492,6 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, finalColour);
-
-      //buzz SFX
-      tone(speakerPin, 5000, 50);
     }
   }
 }
@@ -508,25 +521,54 @@ void dispenseCoin(int amount){
   totalCoinsInside -= amount;
 }
 
+bool AdminCoinInsert(){
+  if(adminCoin <3){
+    if(isObstacle == LOW) {                       // Obstacle detected
+      coinInsert = true;
+    } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
+      adminCoin += 1;
+      totalCoinsInside += adminCoin;
+    }
+    return false;
+  }else{
+    return true;
+  }
+  
+}
+
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
-void machineUpdates(String endingFrame){
+void machineUpdates(int endFrameIndex){
+  String endingFrame = combo[endFrameIndex];
+  Serial.println("Message Update");
   if(endingFrame.equalsIgnoreCase(Jackpot)){
+    Serial.println("JAckpot");
     LcdMessage(4);
-    //TODO: JACKPOT ANIMATION
+    JackpotSFX();
+    
+    //TODO: JACKPOT LED ANIMATION
+    
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
+    Serial.println("Win");
     LcdMessage(3);
-    //TODO: WIN ANIMATION
+    WinConditionSFX();
+    
+    //TODO: WIN LED ANIMATION
+    
     dispenseCoin(currentBetAmt*winRate);
-    if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
+    if(creditAmt <= 0){                            //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
       LcdMessage(1);
     }
   }else{
+    Serial.println("Others");
     LcdMessage(2);
-    //TODO: LOSE ANIMATION
+    LoseSFX();
+    
+    //TODO: LOSE LED ANIMATION 
+    
     delay(2000);
     if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
@@ -535,3 +577,178 @@ void machineUpdates(String endingFrame){
     }
   }
 }
+
+void StartUpSFX() {
+  tone(buzzer, 260);
+  delay(250);
+  tone(buzzer, 330);
+  delay(120);
+  tone(buzzer, 349);
+  delay(120);
+  tone(buzzer, 392);
+  delay(250);
+  tone(buzzer, 490);
+  delay(250);
+  tone(buzzer, 523);
+  delay(200);
+  noTone(buzzer);
+  delay(2000);
+}
+
+void CoinInsertSFX() {
+  tone(buzzer, 1000);
+  delay(70);
+  tone(buzzer, 1500);
+  delay(70);
+  noTone(buzzer);
+  delay(2000);
+}
+
+void BetIncrementSFX() {
+  tone(buzzer, 1319);
+  delay(90);
+  tone(buzzer, 1047);
+  delay(90);
+  tone(buzzer, 1319);
+  delay(90);
+  tone(buzzer, 1047);
+  delay(200);
+  noTone(buzzer);
+  delay(2000);
+}
+
+void SpinActivateSFX() {
+  for (int count = 0; count < 8; count++) {
+    tone(buzzer, 400);
+    delay(70);
+    tone(buzzer, 600);
+    delay(70);
+  }
+  noTone(buzzer);
+  delay(2000);
+}
+
+void LoseSFX() {
+  tone(buzzer, 1500);
+  delay(200);
+  tone(buzzer, 1250);
+  delay(200);
+  tone(buzzer, 1000);
+  delay(200);
+  tone(buzzer, 1100);
+  delay(250);
+  noTone(buzzer);
+  delay(2000);
+}
+
+void WinConditionSFX() {
+  tone(buzzer, 900);
+  delay(80);
+  noTone(buzzer);
+  delay(50);
+  tone(buzzer, 900);
+  delay(250);
+  noTone(buzzer);
+  delay(50);
+  tone(buzzer, 900);
+  delay(100);
+  tone(buzzer, 1150);
+  delay(100);
+  tone(buzzer, 1350);
+  delay(250);
+  tone(buzzer, 1150);
+  delay(100);
+  tone(buzzer, 1350);
+  delay(300);
+  noTone(buzzer);
+  delay(2000);
+}
+
+void JackpotSFX() {
+  tone(buzzer, 196);
+  delay(150);
+  tone(buzzer, 262);
+  delay(150);
+  tone(buzzer, 330);
+  delay(150);
+  tone(buzzer, 392);
+  delay(150);
+  tone(buzzer, 523);
+  delay(150);
+  tone(buzzer, 659);
+  delay(150);
+  tone(buzzer, 784);
+  delay(450);
+  tone(buzzer, 659);
+  delay(450);
+
+  noTone(buzzer);
+  delay(50);
+
+  tone(buzzer, 116);
+  delay(150);
+  tone(buzzer, 294);
+  delay(150);
+  tone(buzzer, 311);
+  delay(150);
+  tone(buzzer, 415);
+  delay(150);
+  tone(buzzer, 523);
+  delay(150);
+  tone(buzzer, 621);
+  delay(150);
+  tone(buzzer, 830);
+  delay(450);
+  tone(buzzer, 621);
+  delay(450);
+
+  noTone(buzzer);
+  delay(50);
+
+  tone(buzzer, 207);
+  delay(150);
+  tone(buzzer, 262);
+  delay(150);
+  tone(buzzer, 349);
+  delay(150);
+  tone(buzzer, 233);
+  delay(150);
+  tone(buzzer, 587);
+  delay(150);
+  tone(buzzer, 698);
+  delay(150);
+  tone(buzzer, 932);
+  delay(400);
+  noTone(buzzer);
+  delay(100);
+  tone(buzzer, 932);
+  delay(150);
+  noTone(buzzer);
+  delay(10);
+  tone(buzzer, 932);
+  delay(150);
+  noTone(buzzer);
+  delay(10);
+  tone(buzzer, 932);
+  delay(150);
+  noTone(buzzer);
+  delay(10);
+  tone(buzzer, 1047);
+  delay(550);  
+  noTone(buzzer);
+  delay(2000);
+}
+/*
+void DispenseCoinsSFX() {
+  for (int count = 0; count < 7; count++) {     //set limit of count to number of coins dispensing?
+    tone(buzzer, 800);
+    delay(90);
+    tone(buzzer, 1000);
+    delay(90);
+  }
+
+  tone(buzzer, 1600);
+  delay(100);
+  noTone(buzzer);
+  delay(2000);
+}*/
