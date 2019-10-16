@@ -120,7 +120,7 @@ void displayStartingFrame(int startingFrame)
   for (int j = 0; j < 3; j++)
   {
     //draw character
-    char charToPrint = extractCharFromFrameList(currentCharacter[i], i);
+    char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
     drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
   }
 }
