@@ -46,6 +46,7 @@ void setup()
   radiation();  // Tedious but gaurantee will work
   radiation1(); // Simple but not sure if it will cause any problem
   triangleSpinning();
+  sadFace();
   comb();
 }
 
@@ -131,9 +132,9 @@ void radiation()
 {
   for (int i = 0; i < radiationRotations; i++)
   {
-    for (int x = 0; x < 63; x++)
+    for (int x = 0; x < 64; x++)
     {
-      for (int y = 0; y < 31; y++)
+      for (int y = 0; y < 32; y++)
       {
         int d = (int)sqrt((x - 15) ^ 2 + (y - 31) ^ 2);
         if (d <= 5)
@@ -219,6 +220,26 @@ void triangleSpinning()
       matrix.drawLine(x2, y2, x3, y3, color);
       matrix.drawLine(x3, y3, x1, y1, color);
     }
+  }
+}
+
+// ANIMATION 4: FAIL SAD FACE 
+void sadFace(){
+   drawFace(0 + 10, 0 + 10); 
+   drawFace(31 - 10, 31 - 10);
+   drawFace(31 + 10, 0 + 10);
+   drawFace(63 - 10, 31 - 10);
+}
+
+void drawFace(int x, int y){
+  uint16_t faceColor = matrix.Color333(256,256,256);
+  matrix.drawCircle(x, y, 10, faceColor);      // Face outline
+  matrix.fillCircle(x-3, y-3, 2, faceColor);   // Left eye 
+  matrix.fillCircle(x+3, y+3, 2, faceColor);   // Right eye 
+  for(int angle = 0; angle < 180; angle += 5){ // Mouth
+    int i = x + 4 * cos(angle * (pi / 180));
+    int j = (y + 7) + 4 * sin(angle * (pi / 180));
+    matrix.drawPixel(i, j, faceColor);
   }
 }
 
