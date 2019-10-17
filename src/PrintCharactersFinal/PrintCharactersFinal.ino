@@ -103,7 +103,7 @@ void displayStartingFrame(int startingFrame)
         if (charArrivedAtCenter[j] == true)
         {
           //draw character
-          char charToPrint = extractCharFromFrameList(currentCharacter[i], i);
+          char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
           drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
         }
       }
