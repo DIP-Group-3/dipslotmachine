@@ -81,11 +81,11 @@ int intermediateSpinPos = 90;
 int winRate = 2;
 int adminCoin =0;
 
-void setup()
-{
+void setup(){
   Serial.begin(9600);
   myservo.attach(MotorPin);
   lcd.init();                                    // Initialize the LCD
+  lcd.backlight();
   pinMode(isObstaclePin, INPUT);
   pinMode(betBtn, INPUT);
   pinMode(spinBtn, INPUT);
@@ -106,40 +106,39 @@ void setup()
   StartUpSFX();
 }
 
-void loop()
-{
-  lcd.backlight();
-  if(totalCoinsInside >= minCoinsRequired ){
-
-    //Compile obstable detection code into function IRupdate();
-
-    isObstacle = digitalRead(isObstaclePin);
-
+void loop(){
+  if(totalCoinsInside > winRate){
+    irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
-
-    if(isObstacle == LOW) {                       // Obstacle detected
-      coinInsert = true;
-    } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
-      updateCredit(1);                            // Incremeent Credit Amt
-      LcdMessage(1);                              // Display Message in LCD
+    if (creditAmt > 0) {
+      buttonPress();
     }
-
-    //Check if credit == 0 disable buttons for efficiency
-
-    //The if else statement below should be consolidated to a function called btnPressed()
-
-
-    if(betAvail()){                               //Check if bet increment could be done
-      updateBet();                                    //Call method to update bet amt
-    }else if(spinAvail()){                        //Ceck if spin could be done
-      SpinActivateSFX();
-      activateSpin();                                 //Call Method to start LED Matrix animation
-    }
-
-
   }else{
     LcdMessage(5);
     //TODO: OUT OF SERVICE ANIMATION
+  }
+}
+
+//IR SENSOR METHOD: CHECK FOR COIN DETECTION
+void irSensorUpdate(){
+  isObstacle = digitalRead(isObstaclePin);
+
+  //TODO: IDLE STATE ANIMATION
+  if(isObstacle == LOW) {                       // Obstacle detected
+    coinInsert = true;
+  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
+    updateCredit(1);                            // Incremeent Credit Amt
+    LcdMessage(1);                              // Display Message in LCD
+  }
+}
+
+//BUTTON METHOD: DETERMINE WHICH BUTTON IS PRESSED
+void buttonPress(){
+  if(betAvail()){                               //Check if bet increment could be done
+    updateBet();                                    //Call method to update bet amt
+  }else if(spinAvail()){                        //Ceck if spin could be done
+    SpinActivateSFX();
+    activateSpin();                                 //Call Method to start LED Matrix animation
   }
 }
 
