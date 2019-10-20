@@ -23,7 +23,7 @@ String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE",
 float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5};
 
 //construct 64x32 LED MATRIX panel
-RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
+RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 
 //Global Variables
 int numOfFrames = 10;
@@ -89,14 +89,14 @@ void displayStartingFrame(int startingFrame)
   {
     //extract character from character pointer
     char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
-    drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
+    //drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
     while (true)
     {
+      //DRAW FRAME
       matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
       drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
-      yPosCurrent[i] += ySpeed;
       //draw all char that reached center again
       for (int j = 0; j < 3; j++)
       {
@@ -107,12 +107,17 @@ void displayStartingFrame(int startingFrame)
           drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
         }
       }
+      
+      //MOVE CHARACTERS
+      yPosCurrent[i] += ySpeed;
       if (yPosCurrent[i] >= yPosCenter)
       {
         charArrivedAtCenter[i] = true;
         yPosCurrent[i] = 6;
         break;
       }
+      
+      matrix.swapBuffers(false);
     }
   }
   //draw all characters again
@@ -123,6 +128,8 @@ void displayStartingFrame(int startingFrame)
     char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
     drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
   }
+
+  matrix.swapBuffers(false);
 }
 
 void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
@@ -160,10 +167,11 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   int slowestMovingCharIndex;
   for (int counter = 0; counter < numberOfRotations;)
   {
-    matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+    
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS
+    matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
     //for cylinder/character 1, 2, 3 respectively, draw character
     for (int i = 0; i < 3; i++)
     {
@@ -171,7 +179,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, matrix.Color333(255, 0, 0));
     }
-    delay(0);
+    matrix.swapBuffers(false);
 
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
@@ -201,7 +209,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     currentCharacter[i] = endingFrame; //set each char pointer to point at endingFrame
   }
 
-  /*
+  
   //ending animation: draw ending frame
   //the following code aims to pull character to the center of the matrix
   //idea: frameArrivedAtCenter[] keeps track of whether the characters that has reached middle of matrix
@@ -245,10 +253,11 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
         colour = matrix.Color333(255, 0, 0);
       }
     }
+    matrix.swapBuffers(false);
 
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
       break;                                                                           //exit
-  } */
+  } 
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
@@ -308,6 +317,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       //buzz SFX
       //tone(piezoPin, 5000, 50);
     }
+    matrix.swapBuffers(false);
   }
 }
 
