@@ -127,15 +127,9 @@ void irSensorUpdate(){
   //TODO: IDLE STATE ANIMATION
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
-  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
-
-    updateCredit(1);                            // Incremeent Credit Amt'
-    Serial.print("LCD message is executed");
-    unsigned long time = millis();
+  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True  
     LcdMessage(1);                              // Display Message in LCD
-    Serial.print("Time spent: ");
-    Serial.print(millis() - time);
-    Serial.println();
+    updateCredit(1);                            // Incremeent Credit Amt'
   }
 }
 
@@ -152,15 +146,13 @@ void buttonPress(){
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
 void updateCredit(int addAmt){                  //Method: Update Credit Amount
   if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
+    CoinInsertSFX();
     betAmt = 1;
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
   }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
-
-    //ToTest Added
     CoinInsertSFX();
-
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
@@ -176,14 +168,12 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  //ToTest Added
-  BetIncrementSFX();
-
   Serial.print("Update Bet is executed");
   unsigned long time = millis();
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     Serial.println("Bet = 1");
     Serial.println(betAmt);
+    betAmt = 1;
   }else{                                                  //Scenario 2: Current bet amount less than 3
     Serial.println("Increase Bet");
     Serial.println(betAmt);
@@ -194,6 +184,7 @@ void updateBet(){                               //Method: Update Bet Amount when
   Serial.print("Time spent: ");
   Serial.print(millis() - time);
   Serial.println();
+  BetIncrementSFX();
 }
 
 //BET BTN METHOD: CHECK IF INCREMENT COULD BE ALLOWED
@@ -588,7 +579,6 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
-      //buzz SFX
       tone(buzzer, 5000, 50);
     }
     matrix.swapBuffers(false);
