@@ -84,7 +84,7 @@ int adminCoin =0;
 
 void setup(){
   Serial.begin(9600);
-  myservo.attach(MotorPin);
+  //myservo.attach(MotorPin);
   lcd.init();                                    // Initialize the LCD
   lcd.backlight();
   pinMode(isObstaclePin, INPUT);
@@ -108,15 +108,12 @@ void setup(){
 }
 
 void loop(){
-  if(totalCoinsInside > winRate){
+  if(totalCoinsInside >= winRate){
     irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
     if (creditAmt > 0) {
       buttonPress();
     }
-  }else{
-    LcdMessage(5);
-    //TODO: OUT OF SERVICE ANIMATION
   }
 }
 
@@ -128,8 +125,9 @@ void irSensorUpdate(){
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
   } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True  
-    LcdMessage(1);                              // Display Message in LCD
     updateCredit(1);                            // Incremeent Credit Amt'
+    LcdMessage(1);                              // Display Message in LCD
+    CoinInsertSFX();
   }
 }
 
@@ -138,6 +136,7 @@ void buttonPress(){
   if(betAvail()){                               //Check if bet increment could be done
     updateBet();                                    //Call method to update bet amt
   }else if(spinAvail()){                        //Ceck if spin could be done
+    LcdMessage(7);
     SpinActivateSFX();
     activateSpin();                                 //Call Method to start LED Matrix animation
   }
@@ -146,13 +145,11 @@ void buttonPress(){
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
 void updateCredit(int addAmt){                  //Method: Update Credit Amount
   if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
-    CoinInsertSFX();
     betAmt = 1;
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
   }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
-    CoinInsertSFX();
     creditAmt += addAmt;
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
@@ -168,22 +165,13 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  Serial.print("Update Bet is executed");
-  unsigned long time = millis();
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
-    Serial.println("Bet = 1");
-    Serial.println(betAmt);
     betAmt = 1;
   }else{                                                  //Scenario 2: Current bet amount less than 3
-    Serial.println("Increase Bet");
-    Serial.println(betAmt);
     betAmt++;
   }
   betPressed = false;
   LcdMessage(1);
-  Serial.print("Time spent: ");
-  Serial.print(millis() - time);
-  Serial.println();
   BetIncrementSFX();
 }
 
@@ -194,7 +182,6 @@ bool betAvail(){
     betPressed = true;
     return false;
   }else if(betState == LOW && creditAmt > 0 && betPressed){        //Bet Btn Pressed && credit Amt greater than 0
-    Serial.println("Bet to increase");
     return true;
   }else{
     betPressed = false;
@@ -207,15 +194,6 @@ void activateSpin(){                                            //Method: Activa
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   creditAmt -= betAmt;                                              //Deducted credit based on bet amount
-  if(creditAmt <=0){
-    creditAmt = 0;                                                  //Credit amount set back to 0
-    betAmt = 0;                                                     //Bet amount set back to 0
-    LcdMessage(0);                                                  //Display "Insert Coin" Message when credit less than 0
-  }else{
-    betAmt = 1;                                                     //Bet amount set to 1
-    LcdMessage(1);                                                  //Display remaining credit and bet amounts in LCD
-  }
-
   //TODO: STARTING ANIMATION
   activateLED();
 }
@@ -235,7 +213,6 @@ bool spinAvail(){
       adminCoin =0;
       return false;
     }
-    Serial.println("Spin");
     return true;
   }else{
     spinPressed = false;
@@ -275,7 +252,7 @@ void LcdMessage(int scenario){
               lcd.print("YOU WON!");
               lcd.setCursor(9,2);
               lcd.print("$");
-              lcd.print(betAmt*2);
+              lcd.print(currentBetAmt*2);
               break;
 
     //Jackpot Condition Message Frame - "IEM"
@@ -296,6 +273,12 @@ void LcdMessage(int scenario){
               lcd.setCursor(4,2);
               lcd.print("CREDIT : ");
               lcd.print(creditAmt);
+              break;
+    
+    case 7:   lcd.setCursor(6,1);
+              lcd.print("SPINNING");
+              lcd.setCursor(8,2);
+              lcd.print("...");
               break;
 
     //Default Message Frame
@@ -603,6 +586,7 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
+  myservo.attach(MotorPin);
   Serial.println("Dispensing Coin");
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
@@ -611,6 +595,7 @@ void dispenseCoin(int amount){
     delay(230);
   }
   totalCoinsInside -= amount;
+  myservo.detach();
 }
 
 bool AdminCoinInsert(){
@@ -630,14 +615,12 @@ bool AdminCoinInsert(){
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
   String endingFrame = combo[0];
-  Serial.println("Message Update");
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("JAckpot");
     LcdMessage(4);
     JackpotSFX();
 
     //TODO: JACKPOT LED ANIMATION
-
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
@@ -646,27 +629,28 @@ void machineUpdates(int endFrameIndex){
     WinConditionSFX();
 
     //TODO: WIN LED ANIMATION
-    Serial.print("LCD message is executed");
     unsigned long time = millis();
-      dispenseCoin(currentBetAmt*winRate);                 
+    dispenseCoin(currentBetAmt*winRate);                 
     Serial.print("Time spent: ");
     Serial.print(millis() - time);
 
-    
-    if(creditAmt <= 0){                            //Message Type 1: Credit less than or equal to 0
+    if(totalCoinsInside < winRate){
+      LcdMessage(5);
+    }else if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
       LcdMessage(1);
     }
   }else{
-    Serial.println("Others");
     LcdMessage(2);
     LoseSFX();
 
     //TODO: LOSE LED ANIMATION
 
     delay(2000);
-    if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
+    if(totalCoinsInside < winRate){
+      LcdMessage(5);
+    }else if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
       LcdMessage(1);
