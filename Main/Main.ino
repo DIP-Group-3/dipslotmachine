@@ -34,7 +34,7 @@ String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE",
 float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5};
 
 //CONSTRUCTOR FOR 64x32 LED MATRIX PANEL
-RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false, 64);
+RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 
 //LED Global Variables
 int numOfFrames = 10;
@@ -320,7 +320,8 @@ void activateLED(){
 }
 
 //LED MATRIX METHOD: DISPLAY INITIAL/START FRAME
-void displayStartingFrame(int startingFrame){
+void displayStartingFrame(int startingFrame)
+{
   int xPosCurrent[] = {1, 24, 47};
   int yPosCurrent[3];
   int currentCharacter[3];
@@ -331,7 +332,8 @@ void displayStartingFrame(int startingFrame){
   uint16_t colour = matrix.Color333(255, 0, 0); //red
 
   //INITIALISE
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     currentCharacter[i] = startingFrame; //initial char to display
     yPosCurrent[i] = -21;                //each char begin at top of matrix
   }
@@ -339,42 +341,56 @@ void displayStartingFrame(int startingFrame){
   //for each Character
   //bring it down to the center
   bool charArrivedAtCenter[] = {false, false, false};
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     //extract character from character pointer
     char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
-    drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
+    //drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
-    while (true){
+    while (true)
+    {
+      //DRAW FRAME
       matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
       drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
-      yPosCurrent[i] += ySpeed;
       //draw all char that reached center again
-      for (int j = 0; j < 3; j++){
-        if (charArrivedAtCenter[j] == true){
+      for (int j = 0; j < 3; j++)
+      {
+        if (charArrivedAtCenter[j] == true)
+        {
           //draw character
-          char charToPrint = extractCharFromFrameList(currentCharacter[i], i);
+          char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
           drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
         }
       }
-      if (yPosCurrent[i] >= yPosCenter){
+
+      //MOVE CHARACTERS
+      yPosCurrent[i] += ySpeed;
+      if (yPosCurrent[i] >= yPosCenter)
+      {
         charArrivedAtCenter[i] = true;
         yPosCurrent[i] = 6;
         break;
       }
+
+      matrix.swapBuffers(false);
     }
   }
   //draw all characters again
   matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
-  for (int j = 0; j < 3; j++){
+  for (int j = 0; j < 3; j++)
+  {
     //draw character
     char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
     drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
   }
+
+  matrix.swapBuffers(false);
 }
 
 //LED MATRIX METHOD: INITIALISE ANIMATION
-void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
+void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
+{
   // currentCharacter[] rationale explained:
   // This array stores 3 pointers that points to each character in a frame.
   // This pointers keep track of what character to display according to the following data structure:
@@ -395,7 +411,8 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int yPosTop = -21; //yPos where character is outside of matrix
 
   // initialise initial conditions
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     // initial yPos of each character of each cylinder = center of matrix
     currentYPositions[i] = yPosCenter;
     //initial char to display
@@ -405,33 +422,38 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
 
   //begin animation...is rolling...for numberOfRotations times
   int slowestMovingCharIndex;
-  for (int counter = 0; counter < numberOfRotations;){
-    matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+  for (int counter = 0; counter < numberOfRotations;)
+  {
+
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS
+    matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
     //for cylinder/character 1, 2, 3 respectively, draw character
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++)
+    {
       //extract character from character pointer
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, matrix.Color333(255, 0, 0));
     }
-    delay(0);
+    matrix.swapBuffers(false);
 
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++)
+    {
       //move character down by scrollSpeed scaled by weights
       currentYPositions[i] += round(currentYSpeeds[i] * spdWeights[counter]);
       //check if current character has exited matrix
-      if (currentYPositions[i] >= matrix.height() + 21){ //text ht = 21
+      if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
+      {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
 
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
-        if (slowestMovingCharIndex == i){
-          //counter value limited by slowest moving character
+        if (slowestMovingCharIndex == i)
+        { //counter value limited by slowest moving character
           counter++;
         }
       }
@@ -439,11 +461,12 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   }
 
   //PRINT ENDING FRAME
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     currentCharacter[i] = endingFrame; //set each char pointer to point at endingFrame
   }
 
-  /*
+
   //ending animation: draw ending frame
   //the following code aims to pull character to the center of the matrix
   //idea: frameArrivedAtCenter[] keeps track of whether the characters that has reached middle of matrix
@@ -487,22 +510,25 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
         colour = matrix.Color333(255, 0, 0);
       }
     }
+    matrix.swapBuffers(false);
 
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
       break;                                                                           //exit
-  } */
+  }
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
-  machineUpdates(endingFrame);
 }
 
 //LED MATRIX METHOD: TO GET INDEX OF MIN VALUE IN ARRAY METHOD
-int minimum(float array[], int size){ //return index of min value in array
+int minimum(float array[], int size) //return index of min value in array
+{
   float min = array[0];
   int index;
-  for (int i = 1; i < size; i++){
-    if (min > array[i]){
+  for (int i = 1; i < size; i++)
+  {
+    if (min > array[i])
+    {
       min = array[i];
       index = i;
     }
@@ -511,60 +537,81 @@ int minimum(float array[], int size){ //return index of min value in array
 }
 
 //LED MATRIX METHOD: SET COLOR BASED ON COMBINATIONS
-uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame){
+uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame)
+{
   uint16_t colour;
   String frameToPrint = combo[endingFrame];
   //set character colour
-  if (frameToPrint.equalsIgnoreCase("IEM")){ //JACKPOT
+  if (frameToPrint.equalsIgnoreCase("IEM"))
+  { //JACKPOT
     colour = matrix.Color333(0, 255, 245);
-  }else if (frameToPrint.equalsIgnoreCase("EEE")){ //EEE
-    colour = matrix.Color333(76, 255, 56);
-  }else{ //OTHERS
+  }
+  else if (frameToPrint.equalsIgnoreCase("EEE"))
+  { //EEE
     colour = matrix.Color333(76, 255, 56);
   }
+  else
+  { //OTHERS
+    colour = matrix.Color333(76, 255, 56);
+  }
+
   return colour;
 }
 
 //LED MATRIX METHOD: OSCILLATION ANIMATION ALGORITHMN
-void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int currentYPositions[], int currentCharacter[], int endingFrame) //(int endingFrame, int currentXPos, int[] currentYPositions){
+void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int currentYPositions[], int currentCharacter[], int endingFrame) //(int endingFrame, int currentXPos, int[] currentYPositions)
+{
+
   //String frameToPrint = combo[endingFrame];
   uint16_t colour = getColourToPrintBasedOnEndingFrame(endingFrame);
 
   //oscillateAnimation
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
-  for (int j = 0; j < 6; j++){
+  for (int j = 0; j < 6; j++)
+  {
     matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
-    for (int i = 0; i < 3; i++){
-      //for each character in cylinder 1, 2, 3 respectively
+    for (int i = 0; i < 3; i++)
+    { //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
       //buzz SFX
       //tone(piezoPin, 5000, 50);
     }
+    matrix.swapBuffers(false);
   }
 }
 
-//LED MATRIX METHOD: EXTRACT CHAR BY INDEX
-char extractCharFromFrameList(int rowNumber, int colNumber){
+// LED MATRIX METHOD: EXTRACT CHAT FROM COMBO
+char extractCharFromFrameList(int rowNumber, int colNumber)
+{
   return combo[rowNumber].charAt(colNumber); //eg. combo[1] returns "NBS". combo[1].at(2) returns "B".
 }
 
 //LED MATRIX METHOD: DRAW CHARACTER, SET COLOR & POSITION
-void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
+void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
+{
+  // DRAW Text
+  uint8_t w = 0;
   matrix.setTextColor(color);
   matrix.setCursor(xPos, yPos);
   matrix.print(characterToPrint);
 }
 
 // GENERIC METHOD: CHANGING COLOR
-uint16_t Wheel(byte WheelPos){
-  if (WheelPos < 8){
+uint16_t Wheel(byte WheelPos)
+{
+  if (WheelPos < 8)
+  {
     return matrix.Color333(7 - WheelPos, WheelPos, 0);
-  }else if (WheelPos < 16){
+  }
+  else if (WheelPos < 16)
+  {
     WheelPos -= 8;
     return matrix.Color333(0, 7 - WheelPos, WheelPos);
-  }else{
+  }
+  else
+  {
     WheelPos -= 16;
     return matrix.Color333(0, WheelPos, 7 - WheelPos);
   }
