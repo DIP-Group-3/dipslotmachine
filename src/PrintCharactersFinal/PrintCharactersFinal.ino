@@ -29,7 +29,7 @@ RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 int numOfFrames = 10;
 int numberOfRotations = 20;
 //float ySpeed = 10; //vertical scrollSpeed
-const float ySpeedsConstant[] = {3, 4, 10}; //{10, 7, 8}; //original ySpeed
+const float ySpeedsConstant[] = {5, 6, 10}; //{10, 7, 8}; //original ySpeed
 float currentYSpeeds[] = {0, 0, 0};
 
 bool isSpinning = true; //spin button to trigger status;
@@ -60,9 +60,9 @@ void loop()
   {
     displayStartingFrame(startingFrame);
     delay(2000);
-    //playAnimation(startingFrame, endingFrame, numberOfRotations);
+    playAnimation(startingFrame, endingFrame, numberOfRotations);
   }
-  //isSpinning = false;
+  isSpinning = false;
 }
 void displayStartingFrame(int startingFrame)
 {
