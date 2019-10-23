@@ -128,8 +128,14 @@ void irSensorUpdate(){
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
   } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
-    updateCredit(1);                            // Incremeent Credit Amt
+
+    updateCredit(1);                            // Incremeent Credit Amt'
+    Serial.print("LCD message is executed");
+    unsigned long time = millis();
     LcdMessage(1);                              // Display Message in LCD
+    Serial.print("Time spent: ");
+    Serial.print(millis() - time);
+    Serial.println();
   }
 }
 
@@ -173,10 +179,11 @@ void updateBet(){                               //Method: Update Bet Amount when
   //ToTest Added
   BetIncrementSFX();
 
+  Serial.print("Update Bet is executed");
+  unsigned long time = millis();
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     Serial.println("Bet = 1");
     Serial.println(betAmt);
-    betAmt = 1;
   }else{                                                  //Scenario 2: Current bet amount less than 3
     Serial.println("Increase Bet");
     Serial.println(betAmt);
@@ -184,6 +191,9 @@ void updateBet(){                               //Method: Update Bet Amount when
   }
   betPressed = false;
   LcdMessage(1);
+  Serial.print("Time spent: ");
+  Serial.print(millis() - time);
+  Serial.println();
 }
 
 //BET BTN METHOD: CHECK IF INCREMENT COULD BE ALLOWED
@@ -246,7 +256,6 @@ bool spinAvail(){
 void LcdMessage(int scenario){
   lcd.clear();                                                    //Clear current displayed frame
   switch(scenario){
-
     //Idle State || Credit 0 Message Frame
     case 0 :  lcd.setCursor(7,1);
               lcd.print("INSERT");
@@ -329,7 +338,7 @@ void displayStartingFrame(int startingFrame)
   int ySpeed = 7;
   int yPosCenter = 6;
 
-  uint16_t colour = matrix.Color333(255, 0, 0); //red
+  uint16_t colour = redColor; //red
 
   //INITIALISE
   for (int i = 0; i < 3; i++)
@@ -350,7 +359,7 @@ void displayStartingFrame(int startingFrame)
     while (true)
     {
       //DRAW FRAME
-      matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+      matrix.fillScreen(blackColor); //FILL SCREEN 'black'
       drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
       //draw all char that reached center again
@@ -368,6 +377,7 @@ void displayStartingFrame(int startingFrame)
       yPosCurrent[i] += ySpeed;
       if (yPosCurrent[i] >= yPosCenter)
       {
+        tone(buzzer, 5000, 50);
         charArrivedAtCenter[i] = true;
         yPosCurrent[i] = 6;
         break;
@@ -377,7 +387,7 @@ void displayStartingFrame(int startingFrame)
     }
   }
   //draw all characters again
-  matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+  matrix.fillScreen(blackColor); //FILL SCREEN 'black'
   for (int j = 0; j < 3; j++)
   {
     //draw character
@@ -428,13 +438,13 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS
-    matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
     //for cylinder/character 1, 2, 3 respectively, draw character
     for (int i = 0; i < 3; i++)
     {
       //extract character from character pointer
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
-      drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, matrix.Color333(255, 0, 0));
+      drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, redColor);
     }
     matrix.swapBuffers(false);
 
@@ -448,7 +458,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
       {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
-
+        tone(buzzer, 5000, 50);
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
@@ -476,7 +486,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   uint16_t colour;
   while (true)
   {
-    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    matrix.fillScreen(blackColor);
     for (int i = 0; i < 3; i++) //for each character of each cylinder,
     {
       //DRAW CHARACTERS
@@ -490,10 +500,12 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       }
       else //this character has arrived/passed at/the center. Proceed to oscillate about center
       {
+        tone(buzzer, 5000, 50);
         //update character status: char has reached or passed the center
         frameArrivedAtCenter[i] = true;
         if (frameArrivedAtCenter[i] == true)
         {
+
           currentYPositions[i] = 4; //force to (matrix center - 2) position. Position hardcoded, need to draw to visualise.
           currentYSpeeds[i] = 2;    //for oscillating logic. Char will osscilate about center of matrix w amplitude = 2 (+/- 2 about center)
         }
@@ -507,7 +519,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       }
       else //else, use original colour
       {
-        colour = matrix.Color333(255, 0, 0);
+        colour = redColor;
       }
     }
     matrix.swapBuffers(false);
@@ -518,6 +530,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
+  machineUpdates(endingFrame);
 }
 
 //LED MATRIX METHOD: TO GET INDEX OF MIN VALUE IN ARRAY METHOD
@@ -544,15 +557,15 @@ uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame)
   //set character colour
   if (frameToPrint.equalsIgnoreCase("IEM"))
   { //JACKPOT
-    colour = matrix.Color333(0, 255, 245);
+    colour = blueColor;
   }
   else if (frameToPrint.equalsIgnoreCase("EEE"))
   { //EEE
-    colour = matrix.Color333(76, 255, 56);
+    colour = greenColor;
   }
   else
   { //OTHERS
-    colour = matrix.Color333(76, 255, 56);
+    colour = greenColor;
   }
 
   return colour;
@@ -569,14 +582,14 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
   for (int j = 0; j < 6; j++)
   {
-    matrix.fillScreen(matrix.Color333(0, 0, 0)); //FILL SCREEN 'black'
+    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
     for (int i = 0; i < 3; i++)
     { //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
       //buzz SFX
-      //tone(piezoPin, 5000, 50);
+      tone(buzzer, 5000, 50);
     }
     matrix.swapBuffers(false);
   }
@@ -598,27 +611,9 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
   matrix.print(characterToPrint);
 }
 
-// GENERIC METHOD: CHANGING COLOR
-uint16_t Wheel(byte WheelPos)
-{
-  if (WheelPos < 8)
-  {
-    return matrix.Color333(7 - WheelPos, WheelPos, 0);
-  }
-  else if (WheelPos < 16)
-  {
-    WheelPos -= 8;
-    return matrix.Color333(0, 7 - WheelPos, WheelPos);
-  }
-  else
-  {
-    WheelPos -= 16;
-    return matrix.Color333(0, WheelPos, 7 - WheelPos);
-  }
-}
-
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
+  Serial.println("Dispensing Coin");
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
     delay(230);
@@ -644,7 +639,7 @@ bool AdminCoinInsert(){
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
-  String endingFrame = combo[endFrameIndex];
+  String endingFrame = combo[0];
   Serial.println("Message Update");
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("JAckpot");
@@ -661,8 +656,13 @@ void machineUpdates(int endFrameIndex){
     WinConditionSFX();
 
     //TODO: WIN LED ANIMATION
+    Serial.print("LCD message is executed");
+    unsigned long time = millis();
+      dispenseCoin(currentBetAmt*winRate);                 
+    Serial.print("Time spent: ");
+    Serial.print(millis() - time);
 
-    dispenseCoin(currentBetAmt*winRate);
+    
     if(creditAmt <= 0){                            //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
@@ -844,17 +844,3 @@ void JackpotSFX() {
   noTone(buzzer);
   delay(2000);
 }
-/*
-void DispenseCoinsSFX() {
-  for (int count = 0; count < 7; count++) {     //set limit of count to number of coins dispensing?
-    tone(buzzer, 800);
-    delay(90);
-    tone(buzzer, 1000);
-    delay(90);
-  }
-
-  tone(buzzer, 1600);
-  delay(100);
-  noTone(buzzer);
-  delay(2000);
-}*/
