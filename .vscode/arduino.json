@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:mega",
+    "sketch": "src\\PrintCharactersFinal.ino",
+    "configuration": "cpu=atmega2560"
+}
