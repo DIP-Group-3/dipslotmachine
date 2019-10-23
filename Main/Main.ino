@@ -77,7 +77,8 @@ bool coinInsert = false;
 Servo myservo;
 const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
-int intermediateSpinPos = 90;
+int servoStartAngle = 60;
+int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
 
@@ -572,11 +573,10 @@ uint16_t Wheel(byte WheelPos){
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
   for(int i = 0; i < amount; i++){
-    myservo.write(0);
-    delay(180);
-    myservo.write(intermediateSpinPos);
-    delay(180);
-    myservo.write(0);
+    myservo.write(servoStartAngle);
+    delay(230);
+    myservo.write(servoEndAngle);
+    delay(230);
   }
   totalCoinsInside -= amount;
 }
