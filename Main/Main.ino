@@ -37,8 +37,9 @@ String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE",
 float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5};
 
 //CONSTRUCTOR FOR 64x32 LED MATRIX PANEL
-RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64); 
-RGBmatrixPanel matrix_with_db(A, B, C, D, CLK, LAT, OE, true, 64);
+// RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64); 
+// RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
+RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 
 //LED Global Variables
 int numOfFrames = 10;
@@ -50,10 +51,10 @@ int startingFrame;
 int endingFrame;
 
 //LED DESIGN GLOBAL VARIABLE;
-uint16_t blackColor = matrix_with_db.Color333(0, 0, 0);
-uint16_t redColor = matrix_with_db.Color333(255, 0, 0);
-uint16_t blueColor = matrix_with_db.Color333(0, 255, 245);
-uint16_t greenColor = matrix_with_db.Color333(76, 255, 56);
+uint16_t blackColor = matrix.Color333(0, 0, 0);
+uint16_t redColor = matrix.Color333(255, 0, 0);
+uint16_t blueColor = matrix.Color333(0, 255, 245);
+uint16_t greenColor = matrix.Color333(76, 255, 56);
 
 //LED WINING CONDITION
 const String Jackpot = "IEM";
@@ -122,11 +123,14 @@ void setup(){
   pinMode(spinBtn, INPUT);
 
   //Set-up code for matrix
-  matrix_with_db.begin();
-  matrix_without_db.begin();
+  // matrix.begin();
+  // matrix_without_db.begin();
+  matrix.begin();
   //set text properties
-  matrix_with_db.setTextSize(3);            // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
-  matrix_with_db.setTextWrap(false);        // Don't wrap at end of line - will do ourselves
+  // matrix.setTextSize(3);            // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
+  // matrix.setTextWrap(false);        // Don't wrap at end of line - will do ourselves
+  matrix.setTextSize(3);
+  matrix.setTextWrap(false);
 
   // *MUST SEED using Analog input from UNUSED_PIN. analogRead(reservePin).
   randomSeed(analogRead(reservePin));
@@ -366,7 +370,7 @@ void displayStartingFrame(int startingFrame)
     while (true)
     {
       //DRAW FRAME
-      matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
+      matrix.fillScreen(blackColor); //FILL SCREEN 'black'
       drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
       //draw all char that reached center again
@@ -390,11 +394,11 @@ void displayStartingFrame(int startingFrame)
         break;
       }
 
-      matrix_with_db.swapBuffers(false);
+      matrix.swapBuffers(false);
     }
   }
   //draw all characters again
-  matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
+  matrix.fillScreen(blackColor); //FILL SCREEN 'black'
   for (int j = 0; j < 3; j++)
   {
     //draw character
@@ -402,7 +406,7 @@ void displayStartingFrame(int startingFrame)
     drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
   }
 
-  matrix_with_db.swapBuffers(false);
+  matrix.swapBuffers(false);
 }
 
 //LED MATRIX METHOD: INITIALISE ANIMATION
@@ -445,7 +449,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS
-    matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
+    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
     //for cylinder/character 1, 2, 3 respectively, draw character
     for (int i = 0; i < 3; i++)
     {
@@ -453,7 +457,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, redColor);
     }
-    matrix_with_db.swapBuffers(false);
+    matrix.swapBuffers(false);
 
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
@@ -462,7 +466,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       //move character down by scrollSpeed scaled by weights
       currentYPositions[i] += round(currentYSpeeds[i] * spdWeights[counter]);
       //check if current character has exited matrix
-      if (currentYPositions[i] >= matrix_with_db.height() + 21) //text ht = 21
+      if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
       {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
         tone(buzzer, 5000, 50);
@@ -493,7 +497,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   uint16_t colour;
   while (true)
   {
-    matrix_with_db.fillScreen(blackColor);
+    matrix.fillScreen(blackColor);
     for (int i = 0; i < 3; i++) //for each character of each cylinder,
     {
       //DRAW CHARACTERS
@@ -529,7 +533,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
         colour = redColor;
       }
     }
-    matrix_with_db.swapBuffers(false);
+    matrix.swapBuffers(false);
 
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
       break;                                                                           //exit
@@ -589,7 +593,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
   for (int j = 0; j < 6; j++)
   {
-    matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
+    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
     for (int i = 0; i < 3; i++)
     { //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
@@ -597,7 +601,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
       tone(buzzer, 5000, 50);
     }
-    matrix_with_db.swapBuffers(false);
+    matrix.swapBuffers(false);
   }
 }
 
@@ -612,9 +616,9 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 {
   // DRAW Text
   uint8_t w = 0;
-  matrix_with_db.setTextColor(color);
-  matrix_with_db.setCursor(xPos, yPos);
-  matrix_with_db.print(characterToPrint);
+  matrix.setTextColor(color);
+  matrix.setCursor(xPos, yPos);
+  matrix.print(characterToPrint);
 }
 
 //SERVER MOTOR METHOD: TO DISPENSE COIN
