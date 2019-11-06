@@ -14,9 +14,9 @@
 #define OE 9              // OUTPUT ENABLE
 #define LAT 10            // LATCH SIGNAL MARKS THE END OF A ROW OF DATA
 #define CLK 11            // USE THIS ON ARDUINO MEGA
-#define betBtn 12
-#define spinBtn 13
-#define isObstaclePin 14
+#define betBtn 18
+#define spinBtn 19
+#define isObstaclePin 20
 #define reservePin 15
 
 #define R1 24             // UPPER RGB DATA - TOP HALF OF DISPLAY
@@ -34,7 +34,8 @@ String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE",
 float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5};
 
 //CONSTRUCTOR FOR 64x32 LED MATRIX PANEL
-RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
+RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64); 
+RGBmatrixPanel matrix_with_db(A, B, C, D, CLK, LAT, OE, true, 64);
 
 //LED Global Variables
 int numOfFrames = 10;
