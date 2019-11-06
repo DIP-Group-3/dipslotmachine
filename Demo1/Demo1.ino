@@ -86,7 +86,7 @@ int adminCoin =0;
 
 // For demo purpose
 int globalDemoSequence[] = {1,0,2};
-globalDemoVariable = 0;
+int globalDemoVariable = 0;
 
 //For Waterfall Animation
 int waterfallColumns[32];

@@ -86,7 +86,7 @@ int adminCoin =0;
 
 // For demo purpose
 int globalDemoSequence[] = {0,2};
-globalDemoVariable = 0;
+int globalDemoVariable = 0;
 
 //For Waterfall Animation
 int waterfallColumns[32];
@@ -655,7 +655,7 @@ void machineUpdates(int endFrameIndex){
     JackpotSFX();
 
     //TODO: JACKPOT LED ANIMATION
-    waterfall();
+    firework();
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
