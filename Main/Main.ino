@@ -25,6 +25,7 @@
 #define R1 27             // LOWER RGB DATA - BOTTOM HALF OF DISPLAY
 #define G2 28
 #define B2 29
+#define pi 3.1415926535897932384626433832795
 
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
@@ -47,10 +48,10 @@ int startingFrame;
 int endingFrame;
 
 //LED DESIGN GLOBAL VARIABLE;
-uint16_t blackColor = matrix.Color333(0, 0, 0);
-uint16_t redColor = matrix.Color333(255, 0, 0);
-uint16_t blueColor = matrix.Color333(0, 255, 245);
-uint16_t greenColor = matrix.Color333(76, 255, 56);
+uint16_t blackColor = matrix_with_db.Color333(0, 0, 0);
+uint16_t redColor = matrix_with_db.Color333(255, 0, 0);
+uint16_t blueColor = matrix_with_db.Color333(0, 255, 245);
+uint16_t greenColor = matrix_with_db.Color333(76, 255, 56);
 
 //LED WINING CONDITION
 const String Jackpot = "IEM";
@@ -84,6 +85,36 @@ int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
 
+// For Waterfall Animation
+int waterfallColumns[32];
+int waterfallStartingPos[32];
+int waterfallRotations = 40;
+uint16_t waterfallColor1 = matrix_with_db.Color333(0, 210, 84);
+uint16_t waterfallColor2 = matrix_with_db.Color333(0, 202, 202);
+uint16_t waterfallColor3 = matrix_with_db.Color333(161, 0, 202);
+
+// For Radition Animation
+int radiationRotations = 20;
+uint16_t radiationColors[4] = {matrix_with_db.Color333(226, 1, 175), matrix_with_db.Color333(223, 2, 198),
+                               matrix_with_db.Color333(122, 3, 220), matrix_with_db.Color333(4, 5, 217)};
+
+// For Triangle Spinning Animation
+int triangleRadius = 5;
+int triangleNumberofRotations = 10;
+uint16_t triangleColors[3] = {matrix_with_db.Color333(236, 91, 212), matrix_with_db.Color333(232, 81, 132),
+                              matrix_with_db.Color333(228, 98, 72)};
+
+// For Fireworks Animation
+uint16_t blackColor = matrix_with_db.Color333(0, 0, 0);
+uint16_t redColor = matrix_with_db.Color333(255, 0, 0);
+uint16_t blueColor = matrix_with_db.Color333(0, 255, 245);
+uint16_t greenColor = matrix_with_db.Color333(76, 255, 56);
+const int set1XStart = 4, set1XEnd = 17;
+const int set2XStart = 25, set2XEnd = 38;
+const int set3XStart = 46, set3XEnd = 59;
+const int yMax = 20, yMin =2;
+bool roll = true;
+
 void setup(){
   Serial.begin(9600);
   //myservo.attach(MotorPin);
@@ -94,10 +125,11 @@ void setup(){
   pinMode(spinBtn, INPUT);
 
   //Set-up code for matrix
-  matrix.begin();
+  matrix_with_db.begin();
+  matrix_without_db.begin();
   //set text properties
-  matrix.setTextSize(3);            // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
-  matrix.setTextWrap(false);        // Don't wrap at end of line - will do ourselves
+  matrix_with_db.setTextSize(3);            // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
+  matrix_with_db.setTextWrap(false);        // Don't wrap at end of line - will do ourselves
 
   // *MUST SEED using Analog input from UNUSED_PIN. analogRead(reservePin).
   randomSeed(analogRead(reservePin));
@@ -346,7 +378,7 @@ void displayStartingFrame(int startingFrame)
     while (true)
     {
       //DRAW FRAME
-      matrix.fillScreen(blackColor); //FILL SCREEN 'black'
+      matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
       drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
       //draw all char that reached center again
@@ -370,11 +402,11 @@ void displayStartingFrame(int startingFrame)
         break;
       }
 
-      matrix.swapBuffers(false);
+      matrix_with_db.swapBuffers(false);
     }
   }
   //draw all characters again
-  matrix.fillScreen(blackColor); //FILL SCREEN 'black'
+  matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
   for (int j = 0; j < 3; j++)
   {
     //draw character
@@ -382,7 +414,7 @@ void displayStartingFrame(int startingFrame)
     drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
   }
 
-  matrix.swapBuffers(false);
+  matrix_with_db.swapBuffers(false);
 }
 
 //LED MATRIX METHOD: INITIALISE ANIMATION
@@ -425,7 +457,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS
-    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
+    matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
     //for cylinder/character 1, 2, 3 respectively, draw character
     for (int i = 0; i < 3; i++)
     {
@@ -433,7 +465,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, redColor);
     }
-    matrix.swapBuffers(false);
+    matrix_with_db.swapBuffers(false);
 
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
@@ -442,7 +474,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       //move character down by scrollSpeed scaled by weights
       currentYPositions[i] += round(currentYSpeeds[i] * spdWeights[counter]);
       //check if current character has exited matrix
-      if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
+      if (currentYPositions[i] >= matrix_with_db.height() + 21) //text ht = 21
       {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
         tone(buzzer, 5000, 50);
@@ -473,7 +505,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
   uint16_t colour;
   while (true)
   {
-    matrix.fillScreen(blackColor);
+    matrix_with_db.fillScreen(blackColor);
     for (int i = 0; i < 3; i++) //for each character of each cylinder,
     {
       //DRAW CHARACTERS
@@ -509,7 +541,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
         colour = redColor;
       }
     }
-    matrix.swapBuffers(false);
+    matrix_with_db.swapBuffers(false);
 
     if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
       break;                                                                           //exit
@@ -569,7 +601,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
   for (int j = 0; j < 6; j++)
   {
-    matrix.fillScreen(blackColor); //FILL SCREEN 'black'
+    matrix_with_db.fillScreen(blackColor); //FILL SCREEN 'black'
     for (int i = 0; i < 3; i++)
     { //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
@@ -577,7 +609,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
       tone(buzzer, 5000, 50);
     }
-    matrix.swapBuffers(false);
+    matrix_with_db.swapBuffers(false);
   }
 }
 
@@ -592,9 +624,9 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 {
   // DRAW Text
   uint8_t w = 0;
-  matrix.setTextColor(color);
-  matrix.setCursor(xPos, yPos);
-  matrix.print(characterToPrint);
+  matrix_with_db.setTextColor(color);
+  matrix_with_db.setCursor(xPos, yPos);
+  matrix_with_db.print(characterToPrint);
 }
 
 //SERVER MOTOR METHOD: TO DISPENSE COIN
@@ -812,4 +844,275 @@ void JackpotSFX() {
   delay(550);
   noTone(buzzer);
   delay(2000);
+}
+
+// ANIMATION 1: WATERFALL
+void waterfall()
+{
+  // Generate waterfall columns             This gives the X0, X1
+  for (int i = 0; i < 16; i++)
+  {
+    waterfallColumns[i] = (4 * i + 1);
+  }
+  // Generate waterfall starting positions  This gives the Y0
+  for (int i = 0; i < 16; i++)
+  {
+    waterfallStartingPos[i] = random(0, 31);
+  }
+  // Rolling animation
+  for (int i = 0; i < waterfallRotations; i += 3)
+  {
+    matrix_with_db.fillScreen(matrix_with_db.Color333(0, 0, 0));
+    for (int j = 0; j < 8; j++)
+    {
+      // Get the starting and ending pos
+      int yStart1 = waterfallStartingPos[15 + j + 1] + i;
+      int yStart2 = waterfallStartingPos[15 - j] + i;
+      int yStart3 = waterfallStartingPos[j] + i;
+      int yStart4 = waterfallStartingPos[23 + j + 1];
+      int yEnd1 = yStart1 - 32;
+      int yEnd2 = yStart2 - 32;
+      int yEnd3 = yStart3 - 32;
+      int yEnd4 = yStart4 - 32;
+      drawWaterfall(yStart1, yEnd1, 15+j+1);
+      drawWaterfall(yStart2, yEnd2, 15-j);
+      drawWaterfall(yStart3, yEnd3, j);
+      drawWaterfall(yStart4, yEnd4, 23+j+1);
+    }
+    matrix_with_db.swapBuffers(false);
+    delay(120);
+  }
+}
+void drawWaterfall(int yStart, int yEnd, int index)
+{
+  if (yEnd < 0 and yStart < 31)
+  {
+    yEnd = 0;
+  }
+  else if (yStart > 31)
+  {
+    yStart = 31;
+  }
+  else if (yEnd > 31)
+  {
+    yStart = yStart - 64;
+    yEnd = 0;
+  }
+  // Changing color
+  uint16_t currColor;
+  int section1 = 12 + sin(index);
+  int section2 = 24 + sin(index);
+  if (yStart < section1)
+  {
+    matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor1);
+  }
+  else if (yStart < section2)
+  {
+    matrix_with_db.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
+    matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section1, waterfallColor2);
+  }
+  else
+  {
+    if (yEnd < section1)
+    {
+      matrix_with_db.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
+      matrix_with_db.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], section1, waterfallColor2);
+      matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
+    }
+    else if (yEnd < section2)
+    {
+      matrix_with_db.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], yEnd, waterfallColor2);
+      matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
+    }
+    else
+    {
+      matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor3);
+    }
+  }
+}
+
+// ANIMATION 2: RADIATION
+void radiation()
+{
+  for (int i = 0; i < radiationRotations; i++)
+  {
+    // section 1 circle
+    matrix_without_db.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
+
+    // section 2 circle
+    for (int r = 6; r < 15; r++)
+    {
+      matrix_without_db.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
+    }
+
+    // section 3 circle
+    for (int r = 15; r < 24; r++)
+    {
+      matrix_without_db.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
+    }
+
+    // section 4 circle
+    for (int r = 24; r < 32; r++)
+    {
+      matrix_without_db.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
+    }
+  }
+}
+
+// ANIMATION 3: TRIANGLE SPINNING
+void triangleSpinning()
+{
+  int centerX = 31;
+  int centerY = 15;
+  for (int i = 0; i < triangleNumberofRotations; i++)
+  {
+    for (int angle = 0; angle < 360; angle += 5)
+    {
+      matrix_without_db.fillScreen(matrix_without_db.Color333(0,0,0));
+      int x1 = centerX + triangleRadius * cos(angle * (pi / 180));
+      int y1 = centerY + triangleRadius * sin(angle * (pi / 180));
+
+      Serial.println("x1");
+      Serial.println(x1);
+      Serial.println("y1");
+      Serial.println(y1);
+
+      int x2 = centerX + triangleRadius * cos((angle + 120) * (pi / 180));
+      int y2 = centerY + triangleRadius * sin((angle + 120) * (pi / 180));
+
+      Serial.println("x2");
+      Serial.println(x2);
+      Serial.println("y2");
+      Serial.println(y2);
+
+      int x3 = centerX + triangleRadius * cos((angle + 240) * (pi / 180));
+      int y3 = centerY + triangleRadius * sin((angle + 240) * (pi / 180));
+
+      Serial.println("x3");
+      Serial.println(x3);
+      Serial.println("y3");
+      Serial.println(y3);
+
+      uint16_t color;
+      if (triangleNumberofRotations < 3)
+      {
+        color = triangleColors[0];
+      }
+      else if (triangleNumberofRotations < 6)
+      {
+        color = triangleColors[1];
+      }
+      else
+      {
+        color = triangleColors[2];
+      }
+      matrix_without_db.drawLine(x1, y1, x2, y2, color);
+      matrix_without_db.drawLine(x2, y2, x3, y3, color);
+      matrix_without_db.drawLine(x3, y3, x1, y1, color);
+      delay(5);
+    }
+  }
+}
+
+// ANIMATION 4: FAIL SAD FACE
+void sadFace()
+{
+  drawFace(0 + 10, 0 + 10);
+  delay(100);
+  matrix_with_db.fillScreen(matrix_with_db.Color333(0,0,0));
+  matrix_with_db.swapBuffers(false);
+
+  drawFace(31 - 10, 31 - 10);
+  delay(100);
+  matrix_with_db.fillScreen(matrix_with_db.Color333(0,0,0));
+  matrix_with_db.swapBuffers(false);
+
+  drawFace(31 + 10, 0 + 10);
+  delay(100);
+  matrix_with_db.fillScreen(matrix_with_db.Color333(0,0,0));
+  matrix_with_db.swapBuffers(false);
+
+  drawFace(63 - 10, 31 - 10);
+}
+
+void drawFace(int x, int y)
+{
+  uint16_t faceColor = matrix_with_db.Color333(123, 123, 123);
+  matrix_with_db.drawCircle(x, y, 10, faceColor);        // Face outline
+  matrix_with_db.fillCircle(x - 3, y - 3, 2, faceColor); // Left eye
+  matrix_with_db.fillCircle(x + 3, y - 3, 2, faceColor); // Right eye
+  int centerX = x;
+  int centerY = y+7;
+  int mouthRadius = 4;
+  for (int angle = 0; angle > -180; angle -= 5)
+  { // Mouth
+    int i = centerX + mouthRadius * cos(angle * (pi / 180));
+    int j = centerY + mouthRadius * sin(angle * (pi / 180));
+    matrix_with_db.drawPixel(i, j, faceColor);
+  }
+}
+
+// ANIMATION 5: FIREWORKS
+void firework(){
+    if(roll){
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 0, 0), matrix_without_db.Color333(3, 0, 0), 10);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix_without_db.Color333(0, 7, 0), matrix_without_db.Color333(0, 3, 0), 20);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix_without_db.Color333(0, 0, 7), matrix_without_db.Color333(0, 0, 3), 15);
+
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 3, 1), matrix_without_db.Color333(3, 1, 0), 20);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 7, 7), matrix_without_db.Color333(3, 1, 0), 16);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix_without_db.Color333(3, 0, 7), matrix_without_db.Color333(1, 0, 3), 18);
+
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix_without_db.Color333(5, 3, 0), matrix_without_db.Color333(7, 1, 1), 20);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 0, 0), matrix_without_db.Color333(7, 3, 0), 16);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix_without_db.Color333(3, 7, 7), matrix_without_db.Color333(7, 3, 3), 18);
+        roll =false;
+    }
+}
+
+void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t delayTime) {
+
+  for( byte i=32; i>y; i--) {
+    matrix_without_db.drawLine(x, i, x, (i+1), lineColor);
+    delay(delayTime);
+    matrix_without_db.drawLine(x, i, x, (i+1), blackColor);
+  }
+  delay(delayTime);
+  matrix_without_db.drawCircle(x, y, 1, lineColor); delay(delayTime*3);
+  matrix_without_db.drawCircle(x, y, 1, blackColor);
+
+  for ( byte j=1;j<4; j++) {
+    matrix_without_db.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
+    matrix_without_db.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
+    matrix_without_db.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
+    matrix_without_db.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
+
+    matrix_without_db.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, radColor);
+    matrix_without_db.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, radColor);
+    matrix_without_db.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
+    matrix_without_db.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
+
+    delay(delayTime*2);
+
+    matrix_without_db.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
+    matrix_without_db.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
+    matrix_without_db.drawLine((x-5)-(j-1), y, (x-4)-(j-1), y, blackColor);
+    matrix_without_db.drawLine((x+2)+(j-1), y, (x+3)+(j-1), y, blackColor);
+
+    matrix_without_db.drawLine((x+1)+(j-1), (y+1)+(j-1), (x+3)+(j-1), (y+3)+(j-1), blackColor);
+    matrix_without_db.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
+    matrix_without_db.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
+    matrix_without_db.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
+    delay(delayTime*2);
+
+    matrix_without_db.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
+    matrix_without_db.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
+    matrix_without_db.drawLine((x-5)-j, y, (x-4)-j, y, blackColor);
+    matrix_without_db.drawLine((x+2)+j, y, (x+3)+j, y, blackColor);
+
+    matrix_without_db.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, blackColor);
+    matrix_without_db.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, blackColor);
+    matrix_without_db.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, blackColor);
+    matrix_without_db.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
+  }
 }
