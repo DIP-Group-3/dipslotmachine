@@ -146,7 +146,7 @@ void loop(){
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
-    triangleSpinning();
+    //triangleSpinning();
     if (creditAmt > 0) {
       buttonPress();
     }
@@ -155,6 +155,7 @@ void loop(){
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
 void irSensorUpdate(){
+  Serial.println("IR Snsr");
   isObstacle = digitalRead(isObstaclePin);
 
   //TODO: IDLE STATE ANIMATION
@@ -624,7 +625,7 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
   myservo.attach(MotorPin);
-  DispenseCoinsSFX();
+  //DispenseCoinsSFX();
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
     delay(230);
@@ -905,6 +906,7 @@ void waterfall()
       drawWaterfall(yStart3, yEnd3, j);
       drawWaterfall(yStart4, yEnd4, 23+j+1);
     }
+    matrix.swapBuffers(false);
     Serial.print('\n');
     delay(120);
   }
@@ -964,23 +966,27 @@ void radiation()
   {
     // section 1 circle
     matrix.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
+    matrix.swapBuffers(false);
 
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
       matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
+      matrix.swapBuffers(false);
     }
 
     // section 3 circle
     for (int r = 15; r < 24; r++)
     {
       matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
+      matrix.swapBuffers(false);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++)
     {
       matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
+      matrix.swapBuffers(false);
     }
   }
 }
@@ -998,26 +1004,16 @@ void triangleSpinning()
       int x1 = centerX + triangleRadius * cos(angle * (pi / 180));
       int y1 = centerY + triangleRadius * sin(angle * (pi / 180));
 
-      Serial.println("x1");
-      Serial.println(x1);
-      Serial.println("y1");
-      Serial.println(y1);
 
       int x2 = centerX + triangleRadius * cos((angle + 120) * (pi / 180));
       int y2 = centerY + triangleRadius * sin((angle + 120) * (pi / 180));
 
-      Serial.println("x2");
-      Serial.println(x2);
-      Serial.println("y2");
-      Serial.println(y2);
+  
 
       int x3 = centerX + triangleRadius * cos((angle + 240) * (pi / 180));
       int y3 = centerY + triangleRadius * sin((angle + 240) * (pi / 180));
 
-      Serial.println("x3");
-      Serial.println(x3);
-      Serial.println("y3");
-      Serial.println(y3);
+ 
 
       uint16_t color;
       if (triangleNumberofRotations < 3)
