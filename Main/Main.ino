@@ -242,6 +242,7 @@ void activateSpin(){                                            //Method: Activa
   creditAmt -= betAmt;                                              //Deducted credit based on bet amount
   betAmt = 1;
   //TODO: STARTING ANIMATION
+  waterfall();
   activateLED();
 }
 
@@ -652,14 +653,14 @@ void machineUpdates(int endFrameIndex){
     LcdMessage(4);
     JackpotSFX();
 
-    //TODO: JACKPOT LED ANIMATION
+    firework();
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
     LcdMessage(3);
     WinConditionSFX();
 
-    //TODO: WIN LED ANIMATION
+    radiation();
     dispenseCoin(currentBetAmt*winRate);                 
 
     if(totalCoinsInside < winRate){
@@ -673,8 +674,7 @@ void machineUpdates(int endFrameIndex){
     LcdMessage(2);
     LoseSFX();
 
-    //TODO: LOSE LED ANIMATION
-
+    sadFace();
     delay(2000);
     if(totalCoinsInside < winRate){
       LcdMessage(5);
