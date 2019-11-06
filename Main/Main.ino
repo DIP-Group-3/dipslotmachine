@@ -858,6 +858,20 @@ void JackpotSFX() {
   delay(2000);
 }
 
+void DispenseCoinsSFX() {
+  for (int count = 0; count < 7; count++) {     //set limit of count to number of coins dispensing?
+    tone(buzzer, 800);
+    delay(90);
+    tone(buzzer, 1000);
+    delay(90);
+  }
+
+  tone(buzzer, 1600);
+  delay(100);
+  noTone(buzzer);
+  delay(2000);
+}
+
 // ANIMATION 1: WATERFALL
 void waterfall()
 {
