@@ -27,6 +27,8 @@
 #define B2 29
 #define pi 3.1415926535897932384626433832795
 
+#define pi 3.1415926535897932384626433832795
+
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
 
@@ -71,7 +73,6 @@ bool spinPressed = false;
 
 //Credit, Bet variable
 int creditAmt =0, betAmt=0, currentBetAmt=0, maxBet=3;
-bool admin = false;
 
 //IR sensor variable
 bool coinInsert = false;
@@ -85,30 +86,26 @@ int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
 
-// For Waterfall Animation
+//For Waterfall Animation
 int waterfallColumns[32];
 int waterfallStartingPos[32];
 int waterfallRotations = 40;
-uint16_t waterfallColor1 = matrix_with_db.Color333(0, 210, 84);
-uint16_t waterfallColor2 = matrix_with_db.Color333(0, 202, 202);
-uint16_t waterfallColor3 = matrix_with_db.Color333(161, 0, 202);
+uint16_t waterfallColor1 = matrix.Color333(0, 210, 84);
+uint16_t waterfallColor2 = matrix.Color333(0, 202, 202);
+uint16_t waterfallColor3 = matrix.Color333(161, 0, 202);
 
-// For Radition Animation
+//For Radition Animation
 int radiationRotations = 20;
-uint16_t radiationColors[4] = {matrix_with_db.Color333(226, 1, 175), matrix_with_db.Color333(223, 2, 198),
-                               matrix_with_db.Color333(122, 3, 220), matrix_with_db.Color333(4, 5, 217)};
+uint16_t radiationColors[4] = {matrix.Color333(226, 1, 175), matrix.Color333(223, 2, 198),
+                               matrix.Color333(122, 3, 220), matrix.Color333(4, 5, 217)};
 
-// For Triangle Spinning Animation
+//For Triangle Spinning Animation
 int triangleRadius = 5;
 int triangleNumberofRotations = 10;
-uint16_t triangleColors[3] = {matrix_with_db.Color333(236, 91, 212), matrix_with_db.Color333(232, 81, 132),
-                              matrix_with_db.Color333(228, 98, 72)};
+uint16_t triangleColors[3] = {matrix.Color333(236, 91, 212), matrix.Color333(232, 81, 132),
+                              matrix.Color333(228, 98, 72)};
 
-// For Fireworks Animation
-uint16_t blackColor = matrix_with_db.Color333(0, 0, 0);
-uint16_t redColor = matrix_with_db.Color333(255, 0, 0);
-uint16_t blueColor = matrix_with_db.Color333(0, 255, 245);
-uint16_t greenColor = matrix_with_db.Color333(76, 255, 56);
+//For Fireworks Animation
 const int set1XStart = 4, set1XEnd = 17;
 const int set2XStart = 25, set2XEnd = 38;
 const int set3XStart = 46, set3XEnd = 59;
@@ -143,8 +140,9 @@ void setup(){
 
 void loop(){
   if(totalCoinsInside >= winRate){
-      irSensorUpdate();
+    irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
+    triangleSpinning();
     if (creditAmt > 0) {
       buttonPress();
     }
@@ -158,7 +156,7 @@ void irSensorUpdate(){
   //TODO: IDLE STATE ANIMATION
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
-  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True 
+  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True  
     updateCredit(1);                            // Incremeent Credit Amt'
     LcdMessage(1);                              // Display Message in LCD
     CoinInsertSFX();
@@ -178,33 +176,21 @@ void buttonPress(){
 
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
 void updateCredit(int addAmt){                  //Method: Update Credit Amount
-  if(admin){
-    if(adminCoin <3){
-      totalCoinsInside++;
-      adminCoin += addAmt;
-      coinInsert = !coinInsert;
-    }else{
-      totalCoinsInside++;
-      admin = false;
-      adminCoin = 0;
-    }
-  }else{
-    if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
-      betAmt = 1;
-      creditAmt += addAmt;
-      totalCoinsInside += addAmt;
-      coinInsert = !coinInsert;
-    }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
-      creditAmt += addAmt;
-      totalCoinsInside += addAmt;
-      coinInsert = !coinInsert;
-    }else{                                        //Scenario 3: Credit deducted when played
-      creditAmt += addAmt;
-      if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
-        LcdMessage(0);
-      }else{                                          //Message Type 2: When credit greater than 0
-        LcdMessage(1);
-      }
+  if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
+    betAmt = 1;
+    creditAmt += addAmt;
+    totalCoinsInside += addAmt;
+    coinInsert = !coinInsert;
+  }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
+    creditAmt += addAmt;
+    totalCoinsInside += addAmt;
+    coinInsert = !coinInsert;
+  }else{                                        //Scenario 3: Credit deducted when played
+    creditAmt += addAmt;
+    if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
+      LcdMessage(0);
+    }else{                                          //Message Type 2: When credit greater than 0
+      LcdMessage(1);
     }
   }
 }
@@ -240,7 +226,6 @@ void activateSpin(){                                            //Method: Activa
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   creditAmt -= betAmt;                                              //Deducted credit based on bet amount
-  betAmt = 1;
   //TODO: STARTING ANIMATION
   waterfall();
   activateLED();
@@ -254,12 +239,14 @@ bool spinAvail(){
   }else if (spinState == LOW && creditAmt > 0 && spinPressed){
     if(totalCoinsInside < (winRate * betAmt)){
       LcdMessage(6);
-      spinPressed = false;
-      admin = true;
+      bool admin = true;
+      while(admin){
+        admin = AdminCoinInsert();
+      }
+      adminCoin =0;
       return false;
-    }else{
-     return true;
     }
+    return true;
   }else{
     spinPressed = false;
     return false;
@@ -644,28 +631,47 @@ void dispenseCoin(int amount){
   myservo.detach();
 }
 
-
+bool AdminCoinInsert(){
+  if(adminCoin <3){
+    if(isObstacle == LOW) {                       // Obstacle detected
+      coinInsert = true;
+    } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
+      adminCoin += 1;
+      totalCoinsInside += adminCoin;
+    }
+    return false;
+  }else{
+    return true;
+  }
+}
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
-  String endingFrame = combo[endFrameIndex];
+  String endingFrame = combo[0];
   if(endingFrame.equalsIgnoreCase(Jackpot)){
+    Serial.println("JAckpot");
     LcdMessage(4);
     JackpotSFX();
 
+    //TODO: JACKPOT LED ANIMATION
     firework();
     dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
+    Serial.println("Win");
     LcdMessage(3);
     WinConditionSFX();
 
+    //TODO: WIN LED ANIMATION
     radiation();
+    unsigned long time = millis();
     dispenseCoin(currentBetAmt*winRate);                 
+    Serial.print("Time spent: ");
+    Serial.print(millis() - time);
 
     if(totalCoinsInside < winRate){
       LcdMessage(5);
-    }else if(creditAmt <= 0){                      //Message Type 1: Credit less than or equal to 0
+    }else if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
       LcdMessage(0);
     }else{                                          //Message Type 2: When credit greater than 0
       LcdMessage(1);
@@ -674,6 +680,7 @@ void machineUpdates(int endFrameIndex){
     LcdMessage(2);
     LoseSFX();
 
+    //TODO: LOSE LED ANIMATION
     sadFace();
     delay(2000);
     if(totalCoinsInside < winRate){
@@ -847,20 +854,6 @@ void JackpotSFX() {
   delay(2000);
 }
 
-void DispenseCoinsSFX() {
-  for (int count = 0; count < 7; count++) {     //set limit of count to number of coins dispensing?
-    tone(buzzer, 800);
-    delay(90);
-    tone(buzzer, 1000);
-    delay(90);
-  }
-
-  tone(buzzer, 1600);
-  delay(100);
-  noTone(buzzer);
-  delay(2000);
-}
-
 // ANIMATION 1: WATERFALL
 void waterfall()
 {
@@ -877,7 +870,7 @@ void waterfall()
   // Rolling animation
   for (int i = 0; i < waterfallRotations; i += 3)
   {
-    matrix_with_db.fillScreen(matrix_with_db.Color333(0, 0, 0));
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
     for (int j = 0; j < 8; j++)
     {
       // Get the starting and ending pos
@@ -894,7 +887,7 @@ void waterfall()
       drawWaterfall(yStart3, yEnd3, j);
       drawWaterfall(yStart4, yEnd4, 23+j+1);
     }
-    matrix_with_db.swapBuffers(false);
+    Serial.print('\n');
     delay(120);
   }
 }
@@ -919,29 +912,29 @@ void drawWaterfall(int yStart, int yEnd, int index)
   int section2 = 24 + sin(index);
   if (yStart < section1)
   {
-    matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor1);
+    matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor1);
   }
   else if (yStart < section2)
   {
-    matrix_with_db.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
-    matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section1, waterfallColor2);
+    matrix.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
+    matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section1, waterfallColor2);
   }
   else
   {
     if (yEnd < section1)
     {
-      matrix_with_db.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
-      matrix_with_db.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], section1, waterfallColor2);
-      matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
+      matrix.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
+      matrix.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], section1, waterfallColor2);
+      matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
     }
     else if (yEnd < section2)
     {
-      matrix_with_db.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], yEnd, waterfallColor2);
-      matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
+      matrix.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], yEnd, waterfallColor2);
+      matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
     }
     else
     {
-      matrix_with_db.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor3);
+      matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor3);
     }
   }
 }
@@ -952,24 +945,24 @@ void radiation()
   for (int i = 0; i < radiationRotations; i++)
   {
     // section 1 circle
-    matrix_without_db.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
+    matrix.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
 
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
-      matrix_without_db.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
+      matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
     }
 
     // section 3 circle
     for (int r = 15; r < 24; r++)
     {
-      matrix_without_db.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
+      matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++)
     {
-      matrix_without_db.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
+      matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
     }
   }
 }
@@ -983,7 +976,7 @@ void triangleSpinning()
   {
     for (int angle = 0; angle < 360; angle += 5)
     {
-      matrix_without_db.fillScreen(matrix_without_db.Color333(0,0,0));
+      matrix.fillScreen(matrix.Color333(0,0,0));
       int x1 = centerX + triangleRadius * cos(angle * (pi / 180));
       int y1 = centerY + triangleRadius * sin(angle * (pi / 180));
 
@@ -1021,9 +1014,9 @@ void triangleSpinning()
       {
         color = triangleColors[2];
       }
-      matrix_without_db.drawLine(x1, y1, x2, y2, color);
-      matrix_without_db.drawLine(x2, y2, x3, y3, color);
-      matrix_without_db.drawLine(x3, y3, x1, y1, color);
+      matrix.drawLine(x1, y1, x2, y2, color);
+      matrix.drawLine(x2, y2, x3, y3, color);
+      matrix.drawLine(x3, y3, x1, y1, color);
       delay(5);
     }
   }
@@ -1034,28 +1027,25 @@ void sadFace()
 {
   drawFace(0 + 10, 0 + 10);
   delay(100);
-  matrix_with_db.fillScreen(matrix_with_db.Color333(0,0,0));
-  matrix_with_db.swapBuffers(false);
+  matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 - 10, 31 - 10);
   delay(100);
-  matrix_with_db.fillScreen(matrix_with_db.Color333(0,0,0));
-  matrix_with_db.swapBuffers(false);
+  matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 + 10, 0 + 10);
   delay(100);
-  matrix_with_db.fillScreen(matrix_with_db.Color333(0,0,0));
-  matrix_with_db.swapBuffers(false);
+  matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(63 - 10, 31 - 10);
 }
 
 void drawFace(int x, int y)
 {
-  uint16_t faceColor = matrix_with_db.Color333(123, 123, 123);
-  matrix_with_db.drawCircle(x, y, 10, faceColor);        // Face outline
-  matrix_with_db.fillCircle(x - 3, y - 3, 2, faceColor); // Left eye
-  matrix_with_db.fillCircle(x + 3, y - 3, 2, faceColor); // Right eye
+  uint16_t faceColor = matrix.Color333(123, 123, 123);
+  matrix.drawCircle(x, y, 10, faceColor);        // Face outline
+  matrix.fillCircle(x - 3, y - 3, 2, faceColor); // Left eye
+  matrix.fillCircle(x + 3, y - 3, 2, faceColor); // Right eye
   int centerX = x;
   int centerY = y+7;
   int mouthRadius = 4;
@@ -1063,24 +1053,24 @@ void drawFace(int x, int y)
   { // Mouth
     int i = centerX + mouthRadius * cos(angle * (pi / 180));
     int j = centerY + mouthRadius * sin(angle * (pi / 180));
-    matrix_with_db.drawPixel(i, j, faceColor);
+    matrix.drawPixel(i, j, faceColor);
   }
 }
 
 // ANIMATION 5: FIREWORKS
 void firework(){
     if(roll){
-        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 0, 0), matrix_without_db.Color333(3, 0, 0), 10);
-        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix_without_db.Color333(0, 7, 0), matrix_without_db.Color333(0, 3, 0), 20);
-        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix_without_db.Color333(0, 0, 7), matrix_without_db.Color333(0, 0, 3), 15);
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 10);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(0, 7, 0), matrix.Color333(0, 3, 0), 20);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(0, 0, 7), matrix.Color333(0, 0, 3), 15);
 
-        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 3, 1), matrix_without_db.Color333(3, 1, 0), 20);
-        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 7, 7), matrix_without_db.Color333(3, 1, 0), 16);
-        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix_without_db.Color333(3, 0, 7), matrix_without_db.Color333(1, 0, 3), 18);
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 3, 1), matrix.Color333(3, 1, 0), 20);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 7, 7), matrix.Color333(3, 1, 0), 16);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 0, 7), matrix.Color333(1, 0, 3), 18);
 
-        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix_without_db.Color333(5, 3, 0), matrix_without_db.Color333(7, 1, 1), 20);
-        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix_without_db.Color333(7, 0, 0), matrix_without_db.Color333(7, 3, 0), 16);
-        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix_without_db.Color333(3, 7, 7), matrix_without_db.Color333(7, 3, 3), 18);
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(5, 3, 0), matrix.Color333(7, 1, 1), 20);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(7, 3, 0), 16);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 18);
         roll =false;
     }
 }
@@ -1088,46 +1078,161 @@ void firework(){
 void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t delayTime) {
 
   for( byte i=32; i>y; i--) {
-    matrix_without_db.drawLine(x, i, x, (i+1), lineColor);
+    matrix.drawLine(x, i, x, (i+1), lineColor);
     delay(delayTime);
-    matrix_without_db.drawLine(x, i, x, (i+1), blackColor);
+    matrix.drawLine(x, i, x, (i+1), blackColor);
   }
   delay(delayTime);
-  matrix_without_db.drawCircle(x, y, 1, lineColor); delay(delayTime*3);
-  matrix_without_db.drawCircle(x, y, 1, blackColor);
+  matrix.drawCircle(x, y, 1, lineColor); delay(delayTime*3);
+  matrix.drawCircle(x, y, 1, blackColor);
 
   for ( byte j=1;j<4; j++) {
-    matrix_without_db.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
-    matrix_without_db.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
-    matrix_without_db.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
-    matrix_without_db.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
+    matrix.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
+    matrix.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
+    matrix.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
+    matrix.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
 
-    matrix_without_db.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, radColor);
-    matrix_without_db.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, radColor);
-    matrix_without_db.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
-    matrix_without_db.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
+    matrix.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, radColor);
+    matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, radColor);
+    matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
+    matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
 
     delay(delayTime*2);
 
-    matrix_without_db.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
-    matrix_without_db.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
-    matrix_without_db.drawLine((x-5)-(j-1), y, (x-4)-(j-1), y, blackColor);
-    matrix_without_db.drawLine((x+2)+(j-1), y, (x+3)+(j-1), y, blackColor);
+    matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
+    matrix.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
+    matrix.drawLine((x-5)-(j-1), y, (x-4)-(j-1), y, blackColor);
+    matrix.drawLine((x+2)+(j-1), y, (x+3)+(j-1), y, blackColor);
 
-    matrix_without_db.drawLine((x+1)+(j-1), (y+1)+(j-1), (x+3)+(j-1), (y+3)+(j-1), blackColor);
-    matrix_without_db.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
-    matrix_without_db.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
-    matrix_without_db.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
+    matrix.drawLine((x+1)+(j-1), (y+1)+(j-1), (x+3)+(j-1), (y+3)+(j-1), blackColor);
+    matrix.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
+    matrix.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
+    matrix.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
     delay(delayTime*2);
 
-    matrix_without_db.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
-    matrix_without_db.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
-    matrix_without_db.drawLine((x-5)-j, y, (x-4)-j, y, blackColor);
-    matrix_without_db.drawLine((x+2)+j, y, (x+3)+j, y, blackColor);
+    matrix.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
+    matrix.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
+    matrix.drawLine((x-5)-j, y, (x-4)-j, y, blackColor);
+    matrix.drawLine((x+2)+j, y, (x+3)+j, y, blackColor);
 
-    matrix_without_db.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, blackColor);
-    matrix_without_db.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, blackColor);
-    matrix_without_db.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, blackColor);
-    matrix_without_db.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
+    matrix.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, blackColor);
+    matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, blackColor);
+    matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, blackColor);
+    matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
+  }
+}
+
+// ANIMATION 6: COMB
+void comb()
+{
+  //VARIABLES - Raindrop properties
+  //common parameters
+  int minLineLength = 5;
+  int maxLineLength = 8;
+  int lineLengths[32];
+  int ySpeed = 10;
+  int numOfRainDrops = 32;
+
+  //falling Rectangles parameters
+  int fallingRectXStarts[numOfRainDrops];
+  int fallingRectYHeads[numOfRainDrops];
+  int fallingRectYEnds[numOfRainDrops];
+
+  //rising rectangles parameters
+  int risingRectXStarts[numOfRainDrops];
+  int risingRectYHeads[numOfRainDrops];
+  int risingRectYEnds[numOfRainDrops];
+
+  //CYLINDER/PANEL PROPERTY
+  int rectHeight = matrix.height(); //32-1;
+  int rectWidth = 64 - 1;
+
+  //initialise VARIABLES, create 32 rain drops
+  for (int i = 0; i < numOfRainDrops; i++)
+  {
+    //XPOS of rects
+    fallingRectXStarts[i] = i * 2;    //print raindrop every even interval
+    risingRectXStarts[i] = i * 2 + 1; //every odd interval
+
+    lineLengths[i] = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
+
+    //YPos of rects
+    fallingRectYHeads[i] = 0 - lineLengths[i] * 2;
+    fallingRectYEnds[i] = fallingRectYHeads[i] + lineLengths[i];
+
+    risingRectYEnds[i] = rectHeight + 2 * lineLengths[i];
+    risingRectYHeads[i] = risingRectYEnds[i] - lineLengths[i];
+  }
+
+  //DRAW ALL RAINDROPS/RECTANGLES
+  for (int i = 0; i < numOfRainDrops; i++)
+  {
+    //draw falling rect
+    drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
+    //draw rising rect
+    drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
+  }
+  int longestLineIndex = minimum(lineLengths, numOfRainDrops);
+
+  //MOVE COORDINATES
+  bool longestLineInMatrix = true;
+  do
+  {
+    for (int i = 0; i < numOfRainDrops; i++)
+    {
+      //move falling rect
+      fallingRectYHeads[i] += ySpeed;
+      fallingRectYEnds[i] += ySpeed;
+      //move rising rect
+      risingRectYHeads[i] -= ySpeed;
+      risingRectYEnds[i] -= ySpeed;
+
+      if (fallingRectYHeads[longestLineIndex] > matrix.height())
+      {
+        longestLineInMatrix = false;
+      }
+    }
+  } while (longestLineInMatrix == true);
+}
+int minimum(int array[], int size) //return index of min value in array
+{
+  float min = array[0];
+  int index;
+  for (int i = 1; i < size; i++)
+  {
+    if (min > array[i])
+    {
+      min = array[i];
+      index = i;
+    }
+  }
+  return index;
+}
+void drawLine(int xStart, int yStart, int length)
+{
+  for (int i = yStart; i < length; i++)
+  { //todo: length or length+1?
+    uint16_t colour = Wheel((i + xStart) % 24);
+    int currentYPos = i;
+    matrix.drawPixel(xStart, currentYPos, colour);
+  }
+}
+// Input a value 0 to 24 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint16_t Wheel(byte WheelPos)
+{
+  if (WheelPos < 8)
+  {
+    return matrix.Color333(7 - WheelPos, WheelPos, 0);
+  }
+  else if (WheelPos < 16)
+  {
+    WheelPos -= 8;
+    return matrix.Color333(0, 7 - WheelPos, WheelPos);
+  }
+  else
+  {
+    WheelPos -= 16;
+    return matrix.Color333(WheelPos, 0, 7 - WheelPos);
   }
 }
