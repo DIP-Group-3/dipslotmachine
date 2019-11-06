@@ -16,7 +16,7 @@
 #define CLK 11            // USE THIS ON ARDUINO MEGA
 #define betBtn 18
 #define spinBtn 19
-#define isObstaclePin 20
+#define isObstaclePin 2
 #define reservePin 15
 
 #define R1 24             // UPPER RGB DATA - TOP HALF OF DISPLAY
@@ -632,6 +632,7 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
   myservo.attach(MotorPin);
+  DispenseCoinsSFX();
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
     delay(230);
@@ -841,7 +842,21 @@ void JackpotSFX() {
   noTone(buzzer);
   delay(10);
   tone(buzzer, 1047);
-  delay(550);
+  delay(550);  
+  noTone(buzzer);
+  delay(2000);
+}
+
+void DispenseCoinsSFX() {
+  for (int count = 0; count < 7; count++) {     //set limit of count to number of coins dispensing?
+    tone(buzzer, 800);
+    delay(90);
+    tone(buzzer, 1000);
+    delay(90);
+  }
+
+  tone(buzzer, 1600);
+  delay(100);
   noTone(buzzer);
   delay(2000);
 }
