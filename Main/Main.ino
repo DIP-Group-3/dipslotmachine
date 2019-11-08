@@ -37,7 +37,7 @@ String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE",
 float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5};
 
 //CONSTRUCTOR FOR 64x32 LED MATRIX PANEL
-// RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64); 
+// RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64);
 // RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 
@@ -161,7 +161,7 @@ void irSensorUpdate(){
   //TODO: IDLE STATE ANIMATION
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
-  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True  
+  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
     updateCredit(1);                            // Incremeent Credit Amt'
     LcdMessage(1);                              // Display Message in LCD
     CoinInsertSFX();
@@ -191,12 +191,8 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
   }else{                                        //Scenario 3: Credit deducted when played
+    betAmt = 1;
     creditAmt += addAmt;
-    if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
-      LcdMessage(0);
-    }else{                                          //Message Type 2: When credit greater than 0
-      LcdMessage(1);
-    }
   }
 }
 
@@ -230,7 +226,7 @@ bool betAvail(){
 void activateSpin(){                                            //Method: Activate LED Matrix
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
-  creditAmt -= betAmt;                                              //Deducted credit based on bet amount
+  updateCredit(betAmt*-1);                                              //Deducted credit based on bet amount
   //TODO: STARTING ANIMATION
   waterfall();
   activateLED();
@@ -312,7 +308,7 @@ void LcdMessage(int scenario){
               lcd.print("CREDIT : ");
               lcd.print(creditAmt);
               break;
-    
+
     case 7:   lcd.setCursor(6,1);
               lcd.print("SPINNING");
               lcd.setCursor(8,2);
@@ -652,7 +648,7 @@ bool AdminCoinInsert(){
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
-  String endingFrame = combo[0];
+  String endingFrame = combo[endFrameIndex];
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("JAckpot");
     LcdMessage(4);
@@ -670,7 +666,7 @@ void machineUpdates(int endFrameIndex){
     //TODO: WIN LED ANIMATION
     radiation();
     unsigned long time = millis();
-    dispenseCoin(currentBetAmt*winRate);                 
+    dispenseCoin(currentBetAmt*winRate);
     Serial.print("Time spent: ");
     Serial.print(millis() - time);
 
@@ -854,7 +850,7 @@ void JackpotSFX() {
   noTone(buzzer);
   delay(10);
   tone(buzzer, 1047);
-  delay(550);  
+  delay(550);
   noTone(buzzer);
   delay(2000);
 }
@@ -1008,12 +1004,12 @@ void triangleSpinning()
       int x2 = centerX + triangleRadius * cos((angle + 120) * (pi / 180));
       int y2 = centerY + triangleRadius * sin((angle + 120) * (pi / 180));
 
-  
+
 
       int x3 = centerX + triangleRadius * cos((angle + 240) * (pi / 180));
       int y3 = centerY + triangleRadius * sin((angle + 240) * (pi / 180));
 
- 
+
 
       uint16_t color;
       if (triangleNumberofRotations < 3)
