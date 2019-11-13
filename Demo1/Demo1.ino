@@ -876,14 +876,6 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
-void delayInMillis(int delay){
-  unsigned long time_1 = millis();
-  while(millis() < time_1 + delay){
-      time_1 = millis();
-      print_time(time_1);
-  }
-}
-
 void drawWinningMessage(){
   drawCharacter(2, 7, 'Y', redColor); // Y 
   drawCharacter(12, 7, 'O', redColor); // O 
@@ -927,7 +919,7 @@ void waterfall()
       drawWaterfall(yStart4, yEnd4, 23+j+1);
     }
     matrix.swapBuffers(false);
-    delayInMillis(120);
+    delayMicroseconds(120000);
   }
 }
 void drawWaterfall(int yStart, int yEnd, int index)
@@ -1062,7 +1054,7 @@ void triangleSpinning()
       matrix.drawLine(x3, y3, x1, y1, color);
       matrix.swapBuffers(false);
 
-      delayInMillis(5);
+      delayMicroseconds(5000);
     }
   }
 }
@@ -1070,16 +1062,17 @@ void triangleSpinning()
 // ANIMATION 4: FAIL SAD FACE
 void sadFace()
 {
+  matrix.fillScreen(matrix.Color333(0,0,0));
   drawFace(0 + 10, 0 + 10);
-  delayInMillis(100);
+  delayMicroseconds(100000);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 - 10, 31 - 10);
-  delayInMillis(100);
+  delayMicroseconds(100000);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 + 10, 0 + 10);
-  delayInMillis(100);
+  delayMicroseconds(100000);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(63 - 10, 31 - 10);
@@ -1126,11 +1119,11 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
 
   for( byte i=32; i>y; i--) {
     matrix.drawLine(x, i, x, (i+1), lineColor);
-    delayInMillis(delayTime);
+    delayMicroseconds(delayTime*1000);
     matrix.drawLine(x, i, x, (i+1), blackColor);
   }
-  delayInMillis(delayTime);
-  matrix.drawCircle(x, y, 1, lineColor); delayInMillis(delayTime*3);
+  delayMicroseconds(delayTime*1000);
+  matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);
   matrix.drawCircle(x, y, 1, blackColor);
 
   for ( byte j=1;j<4; j++) {
@@ -1144,7 +1137,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
 
-    delayInMillis(delayTime*2);
+    delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
     matrix.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
@@ -1155,7 +1148,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
     matrix.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
     matrix.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
-    delayInMillis(delayTime*2);
+    delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
