@@ -80,7 +80,7 @@ bool coinInsert = false;
 Servo myservo;
 const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
-int servoStartAngle = 30;
+int servoStartAngle = 60;
 int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
