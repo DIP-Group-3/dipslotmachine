@@ -147,6 +147,9 @@ void setup(){
 }
 
 void loop(){
+//  displayStartingFrame(0);
+//  firework();
+  
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
@@ -154,7 +157,7 @@ void loop(){
     if (creditAmt > 0) {
       buttonPress();
     }
-  }
+  } 
 }
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
@@ -629,12 +632,13 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
   matrix.setTextColor(color);
   matrix.setCursor(xPos, yPos);
   matrix.print(characterToPrint);
+  
 }
 
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
-  myservo.attach(MotorPin);
   DispenseCoinsSFX();
+  myservo.attach(MotorPin);
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
     delay(230);
@@ -669,8 +673,9 @@ void machineUpdates(int endFrameIndex){
 
     //TODO: JACKPOT LED ANIMATION
     firework();
-    dispenseCoin(totalCoinsInside);
+    dispenseCoin(5);//(totalCoinsInside);
     LcdMessage(5);
+    
   }else if(endingFrame.equalsIgnoreCase(Win)){
     Serial.println("Win");
     LcdMessage(3);
@@ -884,6 +889,7 @@ void DispenseCoinsSFX() {
 
 void drawWinningMessage(){
   Serial.println("Winning message is displayed");
+  matrix.fillScreen(matrix.Color333(0, 0, 0));
   drawCharacter(2, 7, 'Y', redColor); // Y 
   drawCharacter(12, 7, 'O', redColor); // O 
   drawCharacter(22, 7, 'O', redColor); // U 
@@ -989,27 +995,27 @@ void radiation()
     // section 1 circle
     for (int r = 1; r < 6; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
     }
 
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
     }
 
     // section 3 circle
     for (int r = 15; r < 24; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
     }
     matrix.swapBuffers(false);
@@ -1116,7 +1122,7 @@ void firework(){
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(5, 3, 0), matrix.Color333(7, 1, 1), 20);
         drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(7, 3, 0), 16);
         drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 18);
-        roll =false;
+        roll = false;
     }
     drawWinningMessage();
 }
@@ -1125,8 +1131,10 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
 
   for( byte i=32; i>y; i--) {
     matrix.drawLine(x, i, x, (i+1), lineColor);
+    matrix.swapBuffers(true);
     delayMicroseconds(delayTime*1000);
     matrix.drawLine(x, i, x, (i+1), blackColor);
+    matrix.swapBuffers(true);
   }
   delayMicroseconds(delayTime*1000);
   matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);
@@ -1134,39 +1142,63 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
 
   for ( byte j=1;j<4; j++) {
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
+    matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
+    matrix.swapBuffers(true);
 
     matrix.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, radColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, radColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
+    matrix.swapBuffers(true);
 
     delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-5)-(j-1), y, (x-4)-(j-1), y, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+2)+(j-1), y, (x+3)+(j-1), y, blackColor);
+    matrix.swapBuffers(true);
 
     matrix.drawLine((x+1)+(j-1), (y+1)+(j-1), (x+3)+(j-1), (y+3)+(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
+    matrix.swapBuffers(true);
     delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-5)-j, y, (x-4)-j, y, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+2)+j, y, (x+3)+j, y, blackColor);
+    matrix.swapBuffers(true);
 
     matrix.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
+    matrix.swapBuffers(true);
 
-    matrix.swapBuffers(false);
+    
   }
 }
 
