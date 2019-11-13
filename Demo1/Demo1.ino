@@ -27,7 +27,7 @@
 #define B2 29
 #define pi 3.1415926535897932384626433832795
 
-#define pi 3.1415926535897932384626433832795
+int rollingMusic[] = {523, 587,  659, 698, 740, 783, 880, 988};
 
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
@@ -96,7 +96,7 @@ uint16_t waterfallColor2 = matrix.Color333(0, 202, 202);
 uint16_t waterfallColor3 = matrix.Color333(161, 0, 202);
 
 //For Radition Animation
-int radiationRotations = 3;
+int radiationRotations = 5;
 uint16_t radiationColors[4] = {matrix.Color333(226, 1, 175), matrix.Color333(223, 2, 198),
                                matrix.Color333(122, 3, 220), matrix.Color333(4, 5, 217)};
 
@@ -338,7 +338,6 @@ void LcdMessage(int scenario){
 
 //LED MATRIX METHOD: ACTIVATE LED MATRIX
 void activateLED(){
-  matrix.setTextSize(3);
   startingFrame = random(300) % numOfFrames; //choose random start frame
   endingFrame = globalDemoSequence[globalDemoVariable%3]; 
 
@@ -469,6 +468,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
+    int musicCounter = 0;
     for (int i = 0; i < 3; i++)
     {
       //move character down by scrollSpeed scaled by weights
@@ -477,13 +477,14 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
       if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
       {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
-        tone(buzzer, 5000, 50);
+        rollingMusic[musicCounter%8];//tone(buzzer, 5000, 50);
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
         if (slowestMovingCharIndex == i)
         { //counter value limited by slowest moving character
           counter++;
+          musicCounter++;
         }
       }
     }
@@ -885,13 +886,24 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
+void drawAnimationCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
+  // DRAW Text
+  uint8_t w = 0;
+  matrix.setTextSize(1);            
+  matrix.setTextColor(color);
+  matrix.setCursor(xPos, yPos);
+  matrix.print(characterToPrint);
+}
+
 void drawWinningMessage(){
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
-  matrix.setCursor(12,12);
-  matrix.setTextSize(1);
-  matrix.print("YOU WIN");
-  matrix.swapBuffers(false);
+  drawAnimationCharacter(2, 14, 'Y', redColor); // Y 
+  drawAnimationCharacter(12, 14, 'O', redColor); // O 
+  drawAnimationCharacter(22, 14, 'O', redColor); // U 
+  drawAnimationCharacter(34, 14, 'O', redColor); // W 
+  drawAnimationCharacter(44, 14, 'O', redColor); // I 
+  drawAnimationCharacter(54, 14, 'O', redColor); // N
 }
 
 // ANIMATION 1: WATERFALL
@@ -991,27 +1003,27 @@ void radiation()
     // section 1 circle
     for (int r = 1; r < 6; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      matrix.drawCircle(31, 15, r, Wheel(i%24));
     }
 
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+3)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
     }
 
     // section 3 circle
     for (int r = 15; r < 24; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+6)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++)
     {
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+9)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
     }
     matrix.swapBuffers(false);
