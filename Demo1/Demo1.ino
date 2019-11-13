@@ -235,6 +235,8 @@ void activateSpin(){                                            //Method: Activa
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   creditAmt -= betAmt;                                              //Deducted credit based on bet amount
+  //updateCredit(betAmt*-1);
+  betAmt=1;
   //TODO: STARTING ANIMATION
   waterfall();
   activateLED();
@@ -1066,15 +1068,15 @@ void sadFace()
 {
   matrix.fillScreen(matrix.Color333(0,0,0));
   drawFace(0 + 10, 0 + 10);
-  delayMicroseconds(100000);
+  delayMicroseconds(500000);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 - 10, 31 - 10);
-  delayMicroseconds(100000);
+  delayMicroseconds(500000);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 + 10, 0 + 10);
-  delayMicroseconds(100000);
+  delayMicroseconds(500000);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(63 - 10, 31 - 10);
