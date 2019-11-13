@@ -548,7 +548,9 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
+  Serial.println("Before globalDemoVariable is updated");
   globalDemoVariable++;
+  Serial.println("After globalDemoVariable is updated");
   machineUpdates(endingFrame);
 }
 
