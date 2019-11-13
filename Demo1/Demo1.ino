@@ -148,6 +148,7 @@ void setup(){
 
 void loop(){
 //  displayStartingFrame(0);
+//  delay(100);
 //  firework();
   
   if(totalCoinsInside >= winRate){
