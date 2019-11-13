@@ -132,13 +132,13 @@ void setup(){
 
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
-  
+
   rocketAnimation();
-  
+
   //To Test Added
   StartUpSFX();
 
-  
+
 }
 
 void loop(){
@@ -823,12 +823,11 @@ void DispenseCoinsSFX() {
 
 void drawWinningMessage(){
   Serial.println("Winning message is displayed");
-  drawCharacter(2, 7, 'Y', redColor); // Y
-  drawCharacter(12, 7, 'O', redColor); // O
-  drawCharacter(22, 7, 'U', redColor); // U
-  drawCharacter(34, 7, 'W', redColor); // W
-  drawCharacter(44, 7, 'I', redColor); // I
-  drawCharacter(54, 7, 'N', redColor); // N
+  matrix.fillScreen(matrix.Color333(0, 0, 0));
+  matrix.setCursor(12,12);
+  matrix.setTextSize(1);
+  matrix.print("YOU WIN");
+  matrix.swapBuffers(false);
 }
 
 // ANIMATION 1: WATERFALL
