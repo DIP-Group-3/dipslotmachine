@@ -37,22 +37,24 @@ uint16_t greenColor = matrix.Color333(76, 255, 56);
 uint16_t x0=3, x1=4, x2=6, x3=7, x4=10, x5=15, x6= 19;
 
 void setup(){
-  
+  matrix.begin();
 }
 
 void loop(){
-  /*
+  
     matrix.fillTriangle(x5, 8, x6, 13, x5, 18, blueColor);
     matrix.fillTriangle(x4, 18, x3, 22, x3, 18, blueColor); 
     matrix.fillTriangle(x4, 8, x3, 4, x3, 8, blueColor);
-    matrix.fillRect(x3,8,8, 9, greenColor);
+    matrix.fillRect(x3,8,8,10, greenColor);
+    
     matrix.drawLine(x0,9, x2,9 ,redColor);
     matrix.drawLine(x1,11, x2,11 ,redColor);
     matrix.drawLine(x0,13, x2,13 ,redColor);
     matrix.drawLine(x1,15, x2,15 ,redColor);
     matrix.drawLine(x0,17, x2,17 ,redColor);
-    */
+  /*  
   for(int x0=3; x0 <63; x0+=3){
+    matrix.fillScreen(blackColor);
     //drawTriangle(15, uint16_t 8, uint16_t 19, uint16_t 13, uint16_t 15, uint16_t 18, uint16_t redColor);
     matrix.fillTriangle(x5+x0, 8, x6+x0, 13, x5+x0, 18, blueColor);
     matrix.fillTriangle(x4+x0, 18, x3+x0, 22, x3+x0, 18, blueColor); 
@@ -63,5 +65,5 @@ void loop(){
     matrix.drawLine(x0,13, x2+x0,13 ,redColor);
     matrix.drawLine(x1+x0,15, x2+x0,15 ,redColor);
     matrix.drawLine(x0,17, x2+x0,17 ,redColor);
-  }
+  }*/
 }
