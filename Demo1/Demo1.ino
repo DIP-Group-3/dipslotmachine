@@ -881,6 +881,7 @@ void DispenseCoinsSFX() {
 }
 
 void drawWinningMessage(){
+  Serial.println("Winning message is displayed");
   drawCharacter(2, 7, 'Y', redColor); // Y 
   drawCharacter(12, 7, 'O', redColor); // O 
   drawCharacter(22, 7, 'O', redColor); // U 
@@ -987,7 +988,6 @@ void radiation()
     for (int r = 1; r < 6; r++)
     {
       matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
-      matrix.swapBuffers(false);
     }
 
     // section 2 circle
@@ -995,7 +995,6 @@ void radiation()
     {
       matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
-      matrix.swapBuffers(false);
     }
 
     // section 3 circle
@@ -1003,16 +1002,15 @@ void radiation()
     {
       matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
-      matrix.swapBuffers(false);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++)
     {
-      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
-      matrix.swapBuffers(false);
     }
+    matrix.swapBuffers(false);
   }
   drawWinningMessage();
 }
