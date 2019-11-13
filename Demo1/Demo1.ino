@@ -96,7 +96,7 @@ uint16_t waterfallColor2 = matrix.Color333(0, 202, 202);
 uint16_t waterfallColor3 = matrix.Color333(161, 0, 202);
 
 //For Radition Animation
-int radiationRotations = 20;
+int radiationRotations = 3;
 uint16_t radiationColors[4] = {matrix.Color333(226, 1, 175), matrix.Color333(223, 2, 198),
                                matrix.Color333(122, 3, 220), matrix.Color333(4, 5, 217)};
 
@@ -980,19 +980,20 @@ void drawWaterfall(int yStart, int yEnd, int index)
 // ANIMATION 2: RADIATION
 void radiation()
 {
+  matrix.fillScreen(matrix.Color333(0,0,0));
   for (int i = 0; i < radiationRotations; i++)
   {
     // section 1 circle
     for (int r = 1; r < 6; r++)
     {
-      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
       matrix.swapBuffers(false);
     }
 
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
-      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
       matrix.swapBuffers(false);
     }
@@ -1000,7 +1001,7 @@ void radiation()
     // section 3 circle
     for (int r = 15; r < 24; r++)
     {
-      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.drawCircle(31, 15, r, Wheel((i+r)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
       matrix.swapBuffers(false);
     }
@@ -1102,6 +1103,7 @@ void drawFace(int x, int y)
 
 // ANIMATION 5: FIREWORKS
 void firework(){
+  matrix.fillScreen(matrix.Color333(0,0,0));
     if(roll){
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 10);
         drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(0, 7, 0), matrix.Color333(0, 3, 0), 20);
