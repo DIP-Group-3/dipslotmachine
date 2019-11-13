@@ -27,7 +27,6 @@
 #define B2 29
 #define pi 3.1415926535897932384626433832795
 
-
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
 
@@ -81,7 +80,7 @@ bool coinInsert = false;
 Servo myservo;
 const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
-int servoStartAngle = 60;
+int servoStartAngle = 30;
 int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
@@ -220,7 +219,6 @@ void activateSpin(){                                            //Method: Activa
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   updateCredit(betAmt*-1);                                              //Deducted credit based on bet amount
-  betAmt = 1;
   //TODO: STARTING ANIMATION
   waterfall();
   activateLED();
@@ -523,18 +521,15 @@ int minimum(float array[], int size){ //return index of min value in array
 
 //LED MATRIX METHOD: SET COLOR BASED ON COMBINATIONS
 uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame){
-  uint16_t colour;
   String frameToPrint = combo[endingFrame];
-  //set character colour
-  if (frameToPrint.equalsIgnoreCase("IEM")){ //JACKPOT
-    colour = blueColor;
-  }else if (frameToPrint.equalsIgnoreCase("EEE")){ //EEE
-    colour = greenColor;
-  }else{ //OTHERS
-    colour = greenColor;
-  }
 
-  return colour;
+  if (frameToPrint.equalsIgnoreCase("IEM")){ //JACKPOT
+    return blueColor;
+  }else if (frameToPrint.equalsIgnoreCase("EEE")){ //EEE
+    return greenColor;
+  }else{ //OTHERS
+    return greenColor;
+  }
 }
 
 //LED MATRIX METHOD: OSCILLATION ANIMATION ALGORITHMN
@@ -573,7 +568,7 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
   myservo.attach(MotorPin);
-  //DispenseCoinsSFX();
+  DispenseCoinsSFX();
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
     delay(230);
@@ -819,25 +814,31 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
+void drawWinningMessage(){
+  Serial.println("Winning message is displayed");
+  drawCharacter(2, 7, 'Y', redColor); // Y
+  drawCharacter(12, 7, 'O', redColor); // O
+  drawCharacter(22, 7, 'U', redColor); // U
+  drawCharacter(34, 7, 'W', redColor); // W
+  drawCharacter(44, 7, 'I', redColor); // I
+  drawCharacter(54, 7, 'N', redColor); // N
+}
+
 // ANIMATION 1: WATERFALL
-void waterfall()
-{
+void waterfall(){
+
   // Generate waterfall columns             This gives the X0, X1
-  for (int i = 0; i < 16; i++)
-  {
+  for (int i = 0; i < 16; i++)  {
     waterfallColumns[i] = (4 * i + 1);
   }
   // Generate waterfall starting positions  This gives the Y0
-  for (int i = 0; i < 16; i++)
-  {
+  for (int i = 0; i < 16; i++)  {
     waterfallStartingPos[i] = random(0, 31);
   }
   // Rolling animation
-  for (int i = 0; i < waterfallRotations; i += 3)
-  {
-    matrix.fillScreen(matrix.Color333(0, 0, 0));
-    for (int j = 0; j < 8; j++)
-    {
+  for (int i = 0; i < waterfallRotations; i += 3)  {
+    matrix.fillScreen(blackColor);
+    for (int j = 0; j < 8; j++)    {
       // Get the starting and ending pos
       int yStart1 = waterfallStartingPos[15 + j + 1] + i;
       int yStart2 = waterfallStartingPos[15 - j] + i;
@@ -853,8 +854,7 @@ void waterfall()
       drawWaterfall(yStart4, yEnd4, 23+j+1);
     }
     matrix.swapBuffers(false);
-    Serial.print('\n');
-    delay(120);
+    delayMicroseconds(120000);
   }
 }
 void drawWaterfall(int yStart, int yEnd, int index){
@@ -863,11 +863,10 @@ void drawWaterfall(int yStart, int yEnd, int index){
   }else if (yStart > 31){
     yStart = 31;
   }else if (yEnd > 31){
-    yStart = yStart - 64;
-    yEnd = 0;
+    yStart = 0;
+    yEnd =0;
   }
   // Changing color
-  uint16_t currColor;
   int section1 = 12 + sin(index);
   int section2 = 24 + sin(index);
   if (yStart < section1){
@@ -891,29 +890,33 @@ void drawWaterfall(int yStart, int yEnd, int index){
 
 // ANIMATION 2: RADIATION
 void radiation(){
+  matrix.fillScreen(matrix.Color333(0,0,0));
   for (int i = 0; i < radiationRotations; i++){
     // section 1 circle
-    matrix.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
-    matrix.swapBuffers(false);
+    for (int r = 1; r < 6; r++){
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+    }
 
     // section 2 circle
     for (int r = 6; r < 15; r++){
-      matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
-      matrix.swapBuffers(false);
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
     }
 
     // section 3 circle
     for (int r = 15; r < 24; r++){
-      matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
-      matrix.swapBuffers(false);
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++){
-      matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
-      matrix.swapBuffers(false);
+      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+      // matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
     }
+    matrix.swapBuffers(false);
   }
+  drawWinningMessage();
 }
 
 // ANIMATION 3: TRIANGLE SPINNING
@@ -922,7 +925,7 @@ void triangleSpinning(){
   int centerY = 15;
   for (int i = 0; i < triangleNumberofRotations; i++){
     for (int angle = 0; angle < 360; angle += 5){
-      matrix.fillScreen(matrix.Color333(0,0,0));
+      matrix.fillScreen(blackColor);
       int x1 = centerX + triangleRadius * cos(angle * (pi / 180));
       int y1 = centerY + triangleRadius * sin(angle * (pi / 180));
 
@@ -943,24 +946,26 @@ void triangleSpinning(){
       matrix.drawLine(x1, y1, x2, y2, color);
       matrix.drawLine(x2, y2, x3, y3, color);
       matrix.drawLine(x3, y3, x1, y1, color);
-      delay(5);
+      matrix.swapBuffers(false);
+      delayMicroseconds(5000);
     }
   }
 }
 
 // ANIMATION 4: FAIL SAD FACE
 void sadFace(){
+  matrix.fillScreen(blackColor);
   drawFace(0 + 10, 0 + 10);
-  delay(100);
-  matrix.fillScreen(matrix.Color333(0,0,0));
+  delayMicroseconds(500000);
+  matrix.fillScreen(blackColor);
 
   drawFace(31 - 10, 31 - 10);
-  delay(100);
-  matrix.fillScreen(matrix.Color333(0,0,0));
+  delayMicroseconds(500000);
+  matrix.fillScreen(blackColor);
 
   drawFace(31 + 10, 0 + 10);
-  delay(100);
-  matrix.fillScreen(matrix.Color333(0,0,0));
+  delayMicroseconds(500000);
+  matrix.fillScreen(blackColor);
 
   drawFace(63 - 10, 31 - 10);
 }
@@ -978,10 +983,12 @@ void drawFace(int x, int y){
     int j = centerY + mouthRadius * sin(angle * (pi / 180));
     matrix.drawPixel(i, j, faceColor);
   }
+  matrix.swapBuffers(false);
 }
 
 // ANIMATION 5: FIREWORKS
 void firework(){
+  matrix.fillScreen(blackColor);
     if(roll){
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 10);
         drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(0, 7, 0), matrix.Color333(0, 3, 0), 20);
@@ -996,52 +1003,80 @@ void firework(){
         drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 18);
         roll =false;
     }
+    drawWinningMessage();
 }
 
 void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t delayTime) {
 
   for( byte i=32; i>y; i--) {
     matrix.drawLine(x, i, x, (i+1), lineColor);
-    delay(delayTime);
+    matrix.swapBuffers(true);
+    delayMicroseconds(delayTime*1000);
     matrix.drawLine(x, i, x, (i+1), blackColor);
+    matrix.swapBuffers(true);
   }
-  delay(delayTime);
-  matrix.drawCircle(x, y, 1, lineColor); delay(delayTime*3);
+  delayMicroseconds(delayTime*1000);
+  matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);;
   matrix.drawCircle(x, y, 1, blackColor);
 
   for ( byte j=1;j<4; j++) {
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
+    matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
+    matrix.swapBuffers(true);
 
     matrix.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, radColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, radColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
+    matrix.swapBuffers(true);
 
-    delay(delayTime*2);
+    delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-5)-(j-1), y, (x-4)-(j-1), y, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+2)+(j-1), y, (x+3)+(j-1), y, blackColor);
+    matrix.swapBuffers(true);
 
     matrix.drawLine((x+1)+(j-1), (y+1)+(j-1), (x+3)+(j-1), (y+3)+(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
-    delay(delayTime*2);
+    matrix.swapBuffers(true);
+
+    delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-5)-j, y, (x-4)-j, y, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+2)+j, y, (x+3)+j, y, blackColor);
+    matrix.swapBuffers(true);
 
     matrix.drawLine((x+1)+j, (y+1)+j, (x+3)+j, (y+3)+j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, blackColor);
+    matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
+    matrix.swapBuffers(true);
   }
 }
 
