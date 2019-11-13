@@ -147,10 +147,6 @@ void setup(){
 }
 
 void loop(){
-//  displayStartingFrame(0);
-//  delay(100);
-//  firework();
-  
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
@@ -888,15 +884,24 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
+void drawAnimationCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
+  // DRAW Text
+  uint8_t w = 0;
+  matrix.setTextSize(1);            
+  matrix.setTextColor(color);
+  matrix.setCursor(xPos, yPos);
+  matrix.print(characterToPrint);
+}
+
 void drawWinningMessage(){
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
-  drawCharacter(2, 7, 'Y', redColor); // Y 
-  drawCharacter(12, 7, 'O', redColor); // O 
-  drawCharacter(22, 7, 'O', redColor); // U 
-  drawCharacter(34, 7, 'O', redColor); // W 
-  drawCharacter(44, 7, 'O', redColor); // I 
-  drawCharacter(54, 7, 'O', redColor); // N
+  drawAnimationCharacter(2, 14, 'Y', redColor); // Y 
+  drawAnimationCharacter(12, 14, 'O', redColor); // O 
+  drawAnimationCharacter(22, 14, 'O', redColor); // U 
+  drawAnimationCharacter(34, 14, 'O', redColor); // W 
+  drawAnimationCharacter(44, 14, 'O', redColor); // I 
+  drawAnimationCharacter(54, 14, 'O', redColor); // N
 }
 
 // ANIMATION 1: WATERFALL
