@@ -22,7 +22,7 @@
 #define R1 24             // UPPER RGB DATA - TOP HALF OF DISPLAY
 #define G1 25
 #define B1 26
-#define R1 27             // LOWER RGB DATA - BOTTOM HALF OF DISPLAY
+#define R2 27             // LOWER RGB DATA - BOTTOM HALF OF DISPLAY
 #define G2 28
 #define B2 29
 
