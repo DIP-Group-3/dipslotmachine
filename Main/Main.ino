@@ -574,8 +574,8 @@ void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
 
 //SERVER MOTOR METHOD: TO DISPENSE COIN
 void dispenseCoin(int amount){
-  myservo.attach(MotorPin);
   DispenseCoinsSFX();
+  myservo.attach(MotorPin);
   for(int i = 0; i < amount; i++){
     myservo.write(servoStartAngle);
     delay(230);
@@ -607,10 +607,10 @@ void machineUpdates(int endFrameIndex){
     Serial.println("Jackpot");
     LcdMessage(4);
     JackpotSFX();
-
+    
+    dispenseCoin(totalCoinsInside);
     //TODO: JACKPOT LED ANIMATION
     firework();
-    dispenseCoin(totalCoinsInside);
     LcdMessage(5);
   }else if(endingFrame.equalsIgnoreCase(Win)){
     Serial.println("Win");
@@ -1099,7 +1099,7 @@ void rocketAnimation(){
    matrix.drawLine(x0,13, x2+x0,13 ,redColor);
    matrix.drawLine(x1+x0,15, x2+x0,15 ,redColor);
    matrix.drawLine(x0,17, x2+x0,17 ,redColor);
-   delayMicroseconds(2500);
+   delayMicroseconds(4000);
    matrix.swapBuffers(false);
  }
 }
