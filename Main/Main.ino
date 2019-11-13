@@ -111,6 +111,9 @@ const int set3XStart = 46, set3XEnd = 59;
 const int yMax = 20, yMin =2;
 bool roll = true;
 
+//For Rocket ANIMATION
+uint16_t x0=3, x1=4, x2=6, x3=7, x4=10, x5=15, x6= 19;
+
 void setup(){
   Serial.begin(9600);
 
@@ -129,9 +132,13 @@ void setup(){
 
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
-
+  
+  rocketAnimation();
+  
   //To Test Added
   StartUpSFX();
+
+  
 }
 
 void loop(){
@@ -1078,6 +1085,24 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
     matrix.swapBuffers(true);
   }
+}
+
+void rocketAnimation(){
+  for(int x0=3; x0 <68; x0+=3){
+   matrix.fillScreen(blackColor);
+   //drawTriangle(15, uint16_t 8, uint16_t 19, uint16_t 13, uint16_t 15, uint16_t 18, uint16_t redColor);
+   matrix.fillTriangle(x5+x0, 9, x6+x0, 13, x5+x0, 17, blueColor);
+   matrix.fillTriangle(x4+x0, 18, x3+x0, 21, x3+x0, 18, blueColor);
+   matrix.fillTriangle(x4+x0, 8, x3+x0, 5, x3+x0, 8, blueColor);
+   matrix.fillRect(x3+x0,9,8, 9, greenColor);
+   matrix.drawLine(x0,9, x2+x0,9 ,redColor);
+   matrix.drawLine(x1+x0,11, x2+x0,11 ,redColor);
+   matrix.drawLine(x0,13, x2+x0,13 ,redColor);
+   matrix.drawLine(x1+x0,15, x2+x0,15 ,redColor);
+   matrix.drawLine(x0,17, x2+x0,17 ,redColor);
+   delayMicroseconds(2500);
+   matrix.swapBuffers(false);
+ }
 }
 
 // ANIMATION 6: COMB
