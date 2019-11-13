@@ -337,7 +337,7 @@ void LcdMessage(int scenario){
 //LED MATRIX METHOD: ACTIVATE LED MATRIX
 void activateLED(){
   startingFrame = random(300) % numOfFrames; //choose random start frame
-  endingFrame = globalDemoSequence[globalDemoVariable]; 
+  endingFrame = globalDemoSequence[globalDemoVariable%3]; 
 
   displayStartingFrame(startingFrame);
   delay(2000);
@@ -546,6 +546,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
+  globalDemoVariable++;
   machineUpdates(endingFrame);
 }
 
