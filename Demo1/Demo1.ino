@@ -82,7 +82,7 @@ bool coinInsert = false;
 Servo myservo;
 const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
-int servoStartAngle = 60;
+int servoStartAngle = 30;
 int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
@@ -338,6 +338,7 @@ void LcdMessage(int scenario){
 
 //LED MATRIX METHOD: ACTIVATE LED MATRIX
 void activateLED(){
+  matrix.setTextSize(3);
   startingFrame = random(300) % numOfFrames; //choose random start frame
   endingFrame = globalDemoSequence[globalDemoVariable%3]; 
 
@@ -884,24 +885,13 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
-void drawAnimationCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
-  // DRAW Text
-  uint8_t w = 0;
-  matrix.setTextSize(1);            
-  matrix.setTextColor(color);
-  matrix.setCursor(xPos, yPos);
-  matrix.print(characterToPrint);
-}
-
 void drawWinningMessage(){
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
-  drawAnimationCharacter(2, 14, 'Y', redColor); // Y 
-  drawAnimationCharacter(12, 14, 'O', redColor); // O 
-  drawAnimationCharacter(22, 14, 'O', redColor); // U 
-  drawAnimationCharacter(34, 14, 'O', redColor); // W 
-  drawAnimationCharacter(44, 14, 'O', redColor); // I 
-  drawAnimationCharacter(54, 14, 'O', redColor); // N
+  matrix.setCursor(12,12);
+  matrix.setTextSize(1);
+  matrix.print("YOU WIN");
+  matrix.swapBuffers(false);
 }
 
 // ANIMATION 1: WATERFALL
