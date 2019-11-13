@@ -876,6 +876,23 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
+void delayInMillis(int delay){
+  unsigned long time_1 = millis();
+  while(millis() < time_1 + delay){
+      time_1 = millis();
+      print_time(time_1);
+  }
+}
+
+void drawWinningMessage(){
+  drawCharacter(2, 7, 'Y', redColor); // Y 
+  drawCharacter(12, 7, 'O', redColor); // O 
+  drawCharacter(22, 7, 'O', redColor); // U 
+  drawCharacter(34, 7, 'O', redColor); // W 
+  drawCharacter(44, 7, 'O', redColor); // I 
+  drawCharacter(54, 7, 'O', redColor); // N
+}
+
 // ANIMATION 1: WATERFALL
 void waterfall()
 {
@@ -890,7 +907,7 @@ void waterfall()
     waterfallStartingPos[i] = random(0, 31);
   }
   // Rolling animation
-  for (int i = 0; i < waterfallRotations; i += 3)
+  for (int i = 0; i < waterfallRotations; i += 4)
   {
     matrix.fillScreen(matrix.Color333(0, 0, 0));
     for (int j = 0; j < 8; j++)
@@ -910,8 +927,7 @@ void waterfall()
       drawWaterfall(yStart4, yEnd4, 23+j+1);
     }
     matrix.swapBuffers(false);
-    Serial.print('\n');
-    delay(120);
+    delayInMillis(120);
   }
 }
 void drawWaterfall(int yStart, int yEnd, int index)
@@ -926,8 +942,11 @@ void drawWaterfall(int yStart, int yEnd, int index)
   }
   else if (yEnd > 31)
   {
-    yStart = yStart - 64;
+    // don't draw anything in the scenario
+    yStart = 0;
     yEnd = 0;
+    // yStart = yStart - 64;
+    // yEnd = 0;
   }
   // Changing color
   uint16_t currColor;
@@ -968,30 +987,37 @@ void radiation()
   for (int i = 0; i < radiationRotations; i++)
   {
     // section 1 circle
-    matrix.fillCircle(31, 15, 5, radiationColors[(0 + i) % 4]);
-    matrix.swapBuffers(false);
+    for (int r = 1; r < 6; r++)
+    {
+      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      matrix.swapBuffers(false);
+    }
 
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
-      matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
+      matrix.fillCircle(31, 15, r, Wheel((i+r)%24);
+      // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
       matrix.swapBuffers(false);
     }
 
     // section 3 circle
     for (int r = 15; r < 24; r++)
     {
-      matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
+      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
       matrix.swapBuffers(false);
     }
 
     // section 4 circle
     for (int r = 24; r < 32; r++)
     {
-      matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
+      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
+      // matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
       matrix.swapBuffers(false);
     }
   }
+  drawWinningMessage();
 }
 
 // ANIMATION 3: TRIANGLE SPINNING
@@ -1011,12 +1037,12 @@ void triangleSpinning()
       int x2 = centerX + triangleRadius * cos((angle + 120) * (pi / 180));
       int y2 = centerY + triangleRadius * sin((angle + 120) * (pi / 180));
 
-  
+
 
       int x3 = centerX + triangleRadius * cos((angle + 240) * (pi / 180));
       int y3 = centerY + triangleRadius * sin((angle + 240) * (pi / 180));
 
- 
+
 
       uint16_t color;
       if (triangleNumberofRotations < 3)
@@ -1034,7 +1060,9 @@ void triangleSpinning()
       matrix.drawLine(x1, y1, x2, y2, color);
       matrix.drawLine(x2, y2, x3, y3, color);
       matrix.drawLine(x3, y3, x1, y1, color);
-      delay(5);
+      matrix.swapBuffers(false);
+
+      delayInMillis(5);
     }
   }
 }
@@ -1043,15 +1071,15 @@ void triangleSpinning()
 void sadFace()
 {
   drawFace(0 + 10, 0 + 10);
-  delay(100);
+  delayInMillis(100);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 - 10, 31 - 10);
-  delay(100);
+  delayInMillis(100);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 + 10, 0 + 10);
-  delay(100);
+  delayInMillis(100);
   matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(63 - 10, 31 - 10);
@@ -1072,6 +1100,7 @@ void drawFace(int x, int y)
     int j = centerY + mouthRadius * sin(angle * (pi / 180));
     matrix.drawPixel(i, j, faceColor);
   }
+  matrix.swapBuffers(false);
 }
 
 // ANIMATION 5: FIREWORKS
@@ -1090,17 +1119,18 @@ void firework(){
         drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 18);
         roll =false;
     }
+    drawWinningMessage();
 }
 
 void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t delayTime) {
 
   for( byte i=32; i>y; i--) {
     matrix.drawLine(x, i, x, (i+1), lineColor);
-    delay(delayTime);
+    delayInMillis(delayTime);
     matrix.drawLine(x, i, x, (i+1), blackColor);
   }
-  delay(delayTime);
-  matrix.drawCircle(x, y, 1, lineColor); delay(delayTime*3);
+  delayInMillis(delayTime);
+  matrix.drawCircle(x, y, 1, lineColor); delayInMillis(delayTime*3);
   matrix.drawCircle(x, y, 1, blackColor);
 
   for ( byte j=1;j<4; j++) {
@@ -1114,7 +1144,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, radColor);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, radColor);
 
-    delay(delayTime*2);
+    delayInMillis(delayTime*2);
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
     matrix.drawLine(x, (y+2)+(j-1), x, (y+3)+(j-1), blackColor);
@@ -1125,7 +1155,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.drawLine((x-1)-(j-1), (y+1)+(j-1), (x-3)-(j-1), (y+3)+(j-1), blackColor);
     matrix.drawLine((x+1)+(j-1), (y-1)-(j-1), (x+3)+(j-1), (y-3)-(j-1), blackColor);
     matrix.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
-    delay(delayTime*2);
+    delayInMillis(delayTime*2);
 
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, blackColor);
@@ -1136,95 +1166,11 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.drawLine((x-1)-j, (y+1)+j, (x-3)-j, (y+3)+j, blackColor);
     matrix.drawLine((x+1)+j, (y-1)-j, (x+3)+j, (y-3)-j, blackColor);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
+
+    matrix.swapBuffers(false);
   }
 }
 
-// ANIMATION 6: COMB
-void comb()
-{
-  //VARIABLES - Raindrop properties
-  //common parameters
-  int minLineLength = 5;
-  int maxLineLength = 8;
-  int lineLengths[32];
-  int ySpeed = 10;
-  int numOfRainDrops = 32;
-
-  //falling Rectangles parameters
-  int fallingRectXStarts[numOfRainDrops];
-  int fallingRectYHeads[numOfRainDrops];
-  int fallingRectYEnds[numOfRainDrops];
-
-  //rising rectangles parameters
-  int risingRectXStarts[numOfRainDrops];
-  int risingRectYHeads[numOfRainDrops];
-  int risingRectYEnds[numOfRainDrops];
-
-  //CYLINDER/PANEL PROPERTY
-  int rectHeight = matrix.height(); //32-1;
-  int rectWidth = 64 - 1;
-
-  //initialise VARIABLES, create 32 rain drops
-  for (int i = 0; i < numOfRainDrops; i++)
-  {
-    //XPOS of rects
-    fallingRectXStarts[i] = i * 2;    //print raindrop every even interval
-    risingRectXStarts[i] = i * 2 + 1; //every odd interval
-
-    lineLengths[i] = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
-
-    //YPos of rects
-    fallingRectYHeads[i] = 0 - lineLengths[i] * 2;
-    fallingRectYEnds[i] = fallingRectYHeads[i] + lineLengths[i];
-
-    risingRectYEnds[i] = rectHeight + 2 * lineLengths[i];
-    risingRectYHeads[i] = risingRectYEnds[i] - lineLengths[i];
-  }
-
-  //DRAW ALL RAINDROPS/RECTANGLES
-  for (int i = 0; i < numOfRainDrops; i++)
-  {
-    //draw falling rect
-    drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
-    //draw rising rect
-    drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
-  }
-  int longestLineIndex = minimum(lineLengths, numOfRainDrops);
-
-  //MOVE COORDINATES
-  bool longestLineInMatrix = true;
-  do
-  {
-    for (int i = 0; i < numOfRainDrops; i++)
-    {
-      //move falling rect
-      fallingRectYHeads[i] += ySpeed;
-      fallingRectYEnds[i] += ySpeed;
-      //move rising rect
-      risingRectYHeads[i] -= ySpeed;
-      risingRectYEnds[i] -= ySpeed;
-
-      if (fallingRectYHeads[longestLineIndex] > matrix.height())
-      {
-        longestLineInMatrix = false;
-      }
-    }
-  } while (longestLineInMatrix == true);
-}
-int minimum(int array[], int size) //return index of min value in array
-{
-  float min = array[0];
-  int index;
-  for (int i = 1; i < size; i++)
-  {
-    if (min > array[i])
-    {
-      min = array[i];
-      index = i;
-    }
-  }
-  return index;
-}
 void drawLine(int xStart, int yStart, int length)
 {
   for (int i = yStart; i < length; i++)
