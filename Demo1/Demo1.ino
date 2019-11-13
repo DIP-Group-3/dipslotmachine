@@ -656,6 +656,7 @@ bool AdminCoinInsert(){
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
+  String endingFrame = combo[endFrameIndex];
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("JAckpot");
     LcdMessage(4);
@@ -988,7 +989,7 @@ void radiation()
     // section 2 circle
     for (int r = 6; r < 15; r++)
     {
-      matrix.fillCircle(31, 15, r, Wheel((i+r)%24);
+      matrix.fillCircle(31, 15, r, Wheel((i+r)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
       matrix.swapBuffers(false);
     }
