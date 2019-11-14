@@ -22,10 +22,12 @@
 #define R1 24             // UPPER RGB DATA - TOP HALF OF DISPLAY
 #define G1 25
 #define B1 26
-#define R2 27             // LOWER RGB DATA - BOTTOM HALF OF DISPLAY
+#define R1 27             // LOWER RGB DATA - BOTTOM HALF OF DISPLAY
 #define G2 28
 #define B2 29
 #define pi 3.1415926535897932384626433832795
+
+int rollingMusic[] = {523, 587,  659, 698, 740, 783, 880, 988};
 
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
@@ -35,7 +37,7 @@ String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE",
 float spdWeights[] = {0.6, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5};
 
 //CONSTRUCTOR FOR 64x32 LED MATRIX PANEL
-// RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64);
+// RGBmatrixPanel matrix_without_db(A, B, C, D, CLK, LAT, OE, false, 64); 
 // RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true, 64);
 
@@ -94,7 +96,7 @@ uint16_t waterfallColor2 = matrix.Color333(0, 202, 202);
 uint16_t waterfallColor3 = matrix.Color333(161, 0, 202);
 
 //For Radition Animation
-int radiationRotations = 20;
+int radiationRotations = 5;
 uint16_t radiationColors[4] = {matrix.Color333(226, 1, 175), matrix.Color333(223, 2, 198),
                                matrix.Color333(122, 3, 220), matrix.Color333(4, 5, 217)};
 
@@ -111,19 +113,26 @@ const int set3XStart = 46, set3XEnd = 59;
 const int yMax = 20, yMin =2;
 bool roll = true;
 
-//For Rocket ANIMATION
-uint16_t x0=3, x1=4, x2=6, x3=7, x4=10, x5=15, x6= 19;
+// For demo purpose
+int globalDemoSequence[] = {0,2};
+int globalDemoVariable = 0;
 
 void setup(){
   Serial.begin(9600);
-
+  //myservo.attach(MotorPin);
   lcd.init();                                    // Initialize the LCD
   lcd.backlight();
   pinMode(isObstaclePin, INPUT);
   pinMode(betBtn, INPUT);
   pinMode(spinBtn, INPUT);
 
+  //Set-up code for matrix
+  // matrix.begin();
+  // matrix_without_db.begin();
   matrix.begin();
+  //set text properties
+  // matrix.setTextSize(3);            // size 1 -> hxw = 7x4. size = 3 -> hxw = (7*3)x(4*3) = 21x12
+  // matrix.setTextWrap(false);        // Don't wrap at end of line - will do ourselves
   matrix.setTextSize(3);
   matrix.setTextWrap(false);
 
@@ -133,12 +142,8 @@ void setup(){
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
 
-  rocketAnimation();
-
   //To Test Added
   StartUpSFX();
-
-
 }
 
 void loop(){
@@ -149,7 +154,7 @@ void loop(){
     if (creditAmt > 0) {
       buttonPress();
     }
-  }
+  } 
 }
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
@@ -160,7 +165,7 @@ void irSensorUpdate(){
   //TODO: IDLE STATE ANIMATION
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
-  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
+  } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True  
     updateCredit(1);                            // Incremeent Credit Amt'
     LcdMessage(1);                              // Display Message in LCD
     CoinInsertSFX();
@@ -190,8 +195,12 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     totalCoinsInside += addAmt;
     coinInsert = !coinInsert;
   }else{                                        //Scenario 3: Credit deducted when played
-    betAmt = 1;
     creditAmt += addAmt;
+    if(creditAmt <= 0){                             //Message Type 1: Credit less than or equal to 0
+      LcdMessage(0);
+    }else{                                          //Message Type 2: When credit greater than 0
+      LcdMessage(1);
+    }
   }
 }
 
@@ -225,7 +234,9 @@ bool betAvail(){
 void activateSpin(){                                            //Method: Activate LED Matrix
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
-  updateCredit(betAmt*-1);                                              //Deducted credit based on bet amount
+  creditAmt -= betAmt;                                              //Deducted credit based on bet amount
+  //updateCredit(betAmt*-1);
+  betAmt=1;
   //TODO: STARTING ANIMATION
   waterfall();
   activateLED();
@@ -307,7 +318,7 @@ void LcdMessage(int scenario){
               lcd.print("CREDIT : ");
               lcd.print(creditAmt);
               break;
-
+    
     case 7:   lcd.setCursor(6,1);
               lcd.print("SPINNING");
               lcd.setCursor(8,2);
@@ -328,7 +339,7 @@ void LcdMessage(int scenario){
 //LED MATRIX METHOD: ACTIVATE LED MATRIX
 void activateLED(){
   startingFrame = random(300) % numOfFrames; //choose random start frame
-  endingFrame = random(300) % numOfFrames;   //choose random end frame
+  endingFrame = globalDemoSequence[globalDemoVariable%2]; 
 
   displayStartingFrame(startingFrame);
   delay(2000);
@@ -336,7 +347,8 @@ void activateLED(){
 }
 
 //LED MATRIX METHOD: DISPLAY INITIAL/START FRAME
-void displayStartingFrame(int startingFrame){
+void displayStartingFrame(int startingFrame)
+{
   int xPosCurrent[] = {1, 24, 47};
   int yPosCurrent[3];
   int currentCharacter[3];
@@ -347,7 +359,8 @@ void displayStartingFrame(int startingFrame){
   uint16_t colour = redColor; //red
 
   //INITIALISE
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     currentCharacter[i] = startingFrame; //initial char to display
     yPosCurrent[i] = -21;                //each char begin at top of matrix
   }
@@ -355,19 +368,23 @@ void displayStartingFrame(int startingFrame){
   //for each Character
   //bring it down to the center
   bool charArrivedAtCenter[] = {false, false, false};
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     //extract character from character pointer
     char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
     //drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
-    while (true){
+    while (true)
+    {
       //DRAW FRAME
       matrix.fillScreen(blackColor); //FILL SCREEN 'black'
       drawCharacter(xPosCurrent[i], yPosCurrent[i], characterToPrint, colour);
 
       //draw all char that reached center again
-      for (int j = 0; j < 3; j++){
-        if (charArrivedAtCenter[j] == true){
+      for (int j = 0; j < 3; j++)
+      {
+        if (charArrivedAtCenter[j] == true)
+        {
           //draw character
           char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
           drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
@@ -376,18 +393,21 @@ void displayStartingFrame(int startingFrame){
 
       //MOVE CHARACTERS
       yPosCurrent[i] += ySpeed;
-      if (yPosCurrent[i] >= yPosCenter){
+      if (yPosCurrent[i] >= yPosCenter)
+      {
         tone(buzzer, 5000, 50);
         charArrivedAtCenter[i] = true;
         yPosCurrent[i] = 6;
         break;
       }
+
       matrix.swapBuffers(false);
     }
   }
   //draw all characters again
   matrix.fillScreen(blackColor); //FILL SCREEN 'black'
-  for (int j = 0; j < 3; j++){
+  for (int j = 0; j < 3; j++)
+  {
     //draw character
     char charToPrint = extractCharFromFrameList(currentCharacter[j], j);
     drawCharacter(xPosCurrent[j], yPosCurrent[j], charToPrint, colour);
@@ -397,7 +417,8 @@ void displayStartingFrame(int startingFrame){
 }
 
 //LED MATRIX METHOD: INITIALISE ANIMATION
-void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
+void playAnimation(int startingFrame, int endingFrame, int numberOfRotations)
+{
   // currentCharacter[] rationale explained:
   // This array stores 3 pointers that points to each character in a frame.
   // This pointers keep track of what character to display according to the following data structure:
@@ -418,7 +439,8 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int yPosTop = -21; //yPos where character is outside of matrix
 
   // initialise initial conditions
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     // initial yPos of each character of each cylinder = center of matrix
     currentYPositions[i] = yPosCenter;
     //initial char to display
@@ -428,14 +450,16 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
 
   //begin animation...is rolling...for numberOfRotations times
   int slowestMovingCharIndex;
-  for (int counter = 0; counter < numberOfRotations;){
+  for (int counter = 0; counter < numberOfRotations;)
+  {
 
     slowestMovingCharIndex = minimum(currentYSpeeds, 3);
 
     //DRAW CHARACTERS
     matrix.fillScreen(blackColor); //FILL SCREEN 'black'
     //for cylinder/character 1, 2, 3 respectively, draw character
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++)
+    {
       //extract character from character pointer
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, redColor);
@@ -444,27 +468,34 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
 
     //UPDATE COORDINATES
     //for each character in cylinder 1, 2, 3, move yCoordinate of character by its respective ySpeed
-    for (int i = 0; i < 3; i++){
+    int musicCounter = 0;
+    for (int i = 0; i < 3; i++)
+    {
       //move character down by scrollSpeed scaled by weights
       currentYPositions[i] += round(currentYSpeeds[i] * spdWeights[counter]);
       //check if current character has exited matrix
-      if (currentYPositions[i] >= matrix.height() + 21){
+      if (currentYPositions[i] >= matrix.height() + 21) //text ht = 21
+      {
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
-        tone(buzzer, 5000, 50);
+        rollingMusic[musicCounter%8];//tone(buzzer, 5000, 50);
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
-        if (slowestMovingCharIndex == i){ //counter value limited by slowest moving character
+        if (slowestMovingCharIndex == i)
+        { //counter value limited by slowest moving character
           counter++;
+          musicCounter++;
         }
       }
     }
   }
 
   //PRINT ENDING FRAME
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++)
+  {
     currentCharacter[i] = endingFrame; //set each char pointer to point at endingFrame
   }
+
 
   //ending animation: draw ending frame
   //the following code aims to pull character to the center of the matrix
@@ -473,21 +504,28 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   //this code will be significant if speed diff is huge for each character
   bool frameArrivedAtCenter[] = {false, false, false}; //for cylinders 1, 2, 3 respectively
   uint16_t colour;
-  while (true){
+  while (true)
+  {
     matrix.fillScreen(blackColor);
-    for (int i = 0; i < 3; i++){ //for each character of each cylinder,
+    for (int i = 0; i < 3; i++) //for each character of each cylinder,
+    {
       //DRAW CHARACTERS
       char characterToPrint = extractCharFromFrameList(currentCharacter[i], i); //row, col respectively
       drawCharacter(currentXPositions[i], currentYPositions[i], characterToPrint, colour);
 
       //UPDATE COORDINATES
-      if (currentYPositions[i] <= yPosCenter){ //if character hasn't reached middle of matrix
+      if (currentYPositions[i] <= yPosCenter) //if character hasn't reached middle of matrix
+      {
         currentYPositions[i] += currentYSpeeds[i]; //move character down by its respective speed in ySpeed[]
-      }else{ //this character has arrived/passed at/the center. Proceed to oscillate about center
+      }
+      else //this character has arrived/passed at/the center. Proceed to oscillate about center
+      {
         tone(buzzer, 5000, 50);
         //update character status: char has reached or passed the center
         frameArrivedAtCenter[i] = true;
-        if (frameArrivedAtCenter[i] == true){
+        if (frameArrivedAtCenter[i] == true)
+        {
+
           currentYPositions[i] = 4; //force to (matrix center - 2) position. Position hardcoded, need to draw to visualise.
           currentYSpeeds[i] = 2;    //for oscillating logic. Char will osscilate about center of matrix w amplitude = 2 (+/- 2 about center)
         }
@@ -495,30 +533,38 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       }
 
       //CHOOSE COLOUR OF CHARACTERS TO PRINT
-      if (frameArrivedAtCenter[i] == true){ //if char has passed the center, print winning condition colour
+      if (frameArrivedAtCenter[i] == true) //if char has passed the center, print winning condition colour
+      {
         colour = getColourToPrintBasedOnEndingFrame(endingFrame);
-      }else{ //else, use original colour
+      }
+      else //else, use original colour
+      {
         colour = redColor;
       }
     }
     matrix.swapBuffers(false);
 
-    if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]){ //if all frames has arrived at the center
+    if (frameArrivedAtCenter[0] && frameArrivedAtCenter[1] && frameArrivedAtCenter[2]) //if all frames has arrived at the center
       break;                                                                           //exit
-    }
   }
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
+  Serial.println("Before globalDemoVariable is updated");
+  globalDemoVariable++;
+  Serial.println("After globalDemoVariable is updated");
   machineUpdates(endingFrame);
 }
 
 //LED MATRIX METHOD: TO GET INDEX OF MIN VALUE IN ARRAY METHOD
-int minimum(float array[], int size){ //return index of min value in array
+int minimum(float array[], int size) //return index of min value in array
+{
   float min = array[0];
   int index;
-  for (int i = 1; i < size; i++){
-    if (min > array[i]){
+  for (int i = 1; i < size; i++)
+  {
+    if (min > array[i])
+    {
       min = array[i];
       index = i;
     }
@@ -527,28 +573,41 @@ int minimum(float array[], int size){ //return index of min value in array
 }
 
 //LED MATRIX METHOD: SET COLOR BASED ON COMBINATIONS
-uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame){
+uint16_t getColourToPrintBasedOnEndingFrame(int endingFrame)
+{
+  uint16_t colour;
   String frameToPrint = combo[endingFrame];
-
-  if (frameToPrint.equalsIgnoreCase("IEM")){ //JACKPOT
-    return blueColor;
-  }else if (frameToPrint.equalsIgnoreCase("EEE")){ //EEE
-    return greenColor;
-  }else{ //OTHERS
-    return greenColor;
+  //set character colour
+  if (frameToPrint.equalsIgnoreCase("IEM"))
+  { //JACKPOT
+    colour = blueColor;
   }
+  else if (frameToPrint.equalsIgnoreCase("EEE"))
+  { //EEE
+    colour = greenColor;
+  }
+  else
+  { //OTHERS
+    colour = greenColor;
+  }
+
+  return colour;
 }
 
 //LED MATRIX METHOD: OSCILLATION ANIMATION ALGORITHMN
-void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int currentYPositions[], int currentCharacter[], int endingFrame){ //(int endingFrame, int currentXPos, int[] currentYPositions)
+void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int currentYPositions[], int currentCharacter[], int endingFrame) //(int endingFrame, int currentXPos, int[] currentYPositions)
+{
+
   //String frameToPrint = combo[endingFrame];
   uint16_t colour = getColourToPrintBasedOnEndingFrame(endingFrame);
 
   //oscillateAnimation
   int yPositionsOscillate[] = {8, 4, 8, 4, 8, 6};
-  for (int j = 0; j < 6; j++){
+  for (int j = 0; j < 6; j++)
+  {
     matrix.fillScreen(blackColor); //FILL SCREEN 'black'
-    for (int i = 0; i < 3; i++){ //for each character in cylinder 1, 2, 3 respectively
+    for (int i = 0; i < 3; i++)
+    { //for each character in cylinder 1, 2, 3 respectively
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
@@ -559,17 +618,20 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
 }
 
 // LED MATRIX METHOD: EXTRACT CHAT FROM COMBO
-char extractCharFromFrameList(int rowNumber, int colNumber){
+char extractCharFromFrameList(int rowNumber, int colNumber)
+{
   return combo[rowNumber].charAt(colNumber); //eg. combo[1] returns "NBS". combo[1].at(2) returns "B".
 }
 
 //LED MATRIX METHOD: DRAW CHARACTER, SET COLOR & POSITION
-void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
+void drawCharacter(int xPos, int yPos, char characterToPrint, uint16_t color)
+{
   // DRAW Text
   uint8_t w = 0;
   matrix.setTextColor(color);
   matrix.setCursor(xPos, yPos);
   matrix.print(characterToPrint);
+  
 }
 
 //SERVER MOTOR METHOD: TO DISPENSE COIN
@@ -604,14 +666,15 @@ bool AdminCoinInsert(){
 void machineUpdates(int endFrameIndex){
   String endingFrame = combo[endFrameIndex];
   if(endingFrame.equalsIgnoreCase(Jackpot)){
-    Serial.println("Jackpot");
+    Serial.println("JAckpot");
     LcdMessage(4);
     JackpotSFX();
-    
-    dispenseCoin(totalCoinsInside);
+
     //TODO: JACKPOT LED ANIMATION
     firework();
+    dispenseCoin(5);//(totalCoinsInside);
     LcdMessage(5);
+    
   }else if(endingFrame.equalsIgnoreCase(Win)){
     Serial.println("Win");
     LcdMessage(3);
@@ -620,7 +683,7 @@ void machineUpdates(int endFrameIndex){
     //TODO: WIN LED ANIMATION
     radiation();
     unsigned long time = millis();
-    dispenseCoin(currentBetAmt*winRate);
+    dispenseCoin(currentBetAmt*winRate);                 
     Serial.print("Time spent: ");
     Serial.print(millis() - time);
 
@@ -751,8 +814,10 @@ void JackpotSFX() {
   delay(450);
   tone(buzzer, 659);
   delay(450);
+
   noTone(buzzer);
   delay(50);
+
   tone(buzzer, 116);
   delay(150);
   tone(buzzer, 294);
@@ -802,7 +867,7 @@ void JackpotSFX() {
   noTone(buzzer);
   delay(10);
   tone(buzzer, 1047);
-  delay(550);
+  delay(550);  
   noTone(buzzer);
   delay(2000);
 }
@@ -821,30 +886,45 @@ void DispenseCoinsSFX() {
   delay(2000);
 }
 
+void drawAnimationCharacter(int xPos, int yPos, char characterToPrint, uint16_t color){
+  // DRAW Text
+  uint8_t w = 0;
+  matrix.setTextSize(1);            
+  matrix.setTextColor(color);
+  matrix.setCursor(xPos, yPos);
+  matrix.print(characterToPrint);
+}
+
 void drawWinningMessage(){
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
-  matrix.setCursor(12,12);
-  matrix.setTextSize(1);
-  matrix.print("YOU WIN");
-  matrix.swapBuffers(false);
+  drawAnimationCharacter(2, 14, 'Y', redColor); // Y 
+  drawAnimationCharacter(12, 14, 'O', redColor); // O 
+  drawAnimationCharacter(22, 14, 'O', redColor); // U 
+  drawAnimationCharacter(34, 14, 'O', redColor); // W 
+  drawAnimationCharacter(44, 14, 'O', redColor); // I 
+  drawAnimationCharacter(54, 14, 'O', redColor); // N
 }
 
 // ANIMATION 1: WATERFALL
-void waterfall(){
-
+void waterfall()
+{
   // Generate waterfall columns             This gives the X0, X1
-  for (int i = 0; i < 16; i++)  {
+  for (int i = 0; i < 16; i++)
+  {
     waterfallColumns[i] = (4 * i + 1);
   }
   // Generate waterfall starting positions  This gives the Y0
-  for (int i = 0; i < 16; i++)  {
+  for (int i = 0; i < 16; i++)
+  {
     waterfallStartingPos[i] = random(0, 31);
   }
   // Rolling animation
-  for (int i = 0; i < waterfallRotations; i += 3)  {
-    matrix.fillScreen(blackColor);
-    for (int j = 0; j < 8; j++)    {
+  for (int i = 0; i < waterfallRotations; i += 4)
+  {
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    for (int j = 0; j < 8; j++)
+    {
       // Get the starting and ending pos
       int yStart1 = waterfallStartingPos[15 + j + 1] + i;
       int yStart2 = waterfallStartingPos[15 - j] + i;
@@ -863,61 +943,87 @@ void waterfall(){
     delayMicroseconds(120000);
   }
 }
-void drawWaterfall(int yStart, int yEnd, int index){
-  if (yEnd < 0 and yStart < 31){
+void drawWaterfall(int yStart, int yEnd, int index)
+{
+  if (yEnd < 0 and yStart < 31)
+  {
     yEnd = 0;
-  }else if (yStart > 31){
+  }
+  else if (yStart > 31)
+  {
     yStart = 31;
-  }else if (yEnd > 31){
+  }
+  else if (yEnd > 31)
+  {
+    // don't draw anything in the scenario
     yStart = 0;
-    yEnd =0;
+    yEnd = 0;
+    // yStart = yStart - 64;
+    // yEnd = 0;
   }
   // Changing color
+  uint16_t currColor;
   int section1 = 12 + sin(index);
   int section2 = 24 + sin(index);
-  if (yStart < section1){
+  if (yStart < section1)
+  {
     matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor1);
-  }else if (yStart < section2){
+  }
+  else if (yStart < section2)
+  {
     matrix.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
     matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section1, waterfallColor2);
-  }else{
-    if (yEnd < section1){
+  }
+  else
+  {
+    if (yEnd < section1)
+    {
       matrix.drawLine(waterfallColumns[index], section1 - 1, waterfallColumns[index], yEnd, waterfallColor1);
       matrix.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], section1, waterfallColor2);
       matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
-    }else if (yEnd < section2){
+    }
+    else if (yEnd < section2)
+    {
       matrix.drawLine(waterfallColumns[index], section2 - 1, waterfallColumns[index], yEnd, waterfallColor2);
       matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], section2, waterfallColor3);
-    }else{
+    }
+    else
+    {
       matrix.drawLine(waterfallColumns[index], yStart, waterfallColumns[index], yEnd, waterfallColor3);
     }
   }
 }
 
 // ANIMATION 2: RADIATION
-void radiation(){
+void radiation()
+{
   matrix.fillScreen(matrix.Color333(0,0,0));
-  for (int i = 0; i < radiationRotations; i++){
+  for (int i = 0; i < radiationRotations; i++)
+  {
     // section 1 circle
-    for (int r = 1; r < 6; r++){
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+    for (int r = 1; r < 6; r++)
+    {
+      matrix.drawCircle(31, 15, r, Wheel(i%24));
     }
 
     // section 2 circle
-    for (int r = 6; r < 15; r++){
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+    for (int r = 6; r < 15; r++)
+    {
+      matrix.drawCircle(31, 15, r, Wheel((i+3)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(1 + i) % 4]);
     }
 
     // section 3 circle
-    for (int r = 15; r < 24; r++){
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+    for (int r = 15; r < 24; r++)
+    {
+      matrix.drawCircle(31, 15, r, Wheel((i+6)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(2 + i) % 4]);
     }
 
     // section 4 circle
-    for (int r = 24; r < 32; r++){
-      matrix.drawCircle(31, 15, r, Wheel((i+r+10)%24));
+    for (int r = 24; r < 32; r++)
+    {
+      matrix.drawCircle(31, 15, r, Wheel((i+9)%24));
       // matrix.drawCircle(31, 15, r, radiationColors[(3 + i) % 4]);
     }
     matrix.swapBuffers(false);
@@ -926,57 +1032,73 @@ void radiation(){
 }
 
 // ANIMATION 3: TRIANGLE SPINNING
-void triangleSpinning(){
+void triangleSpinning()
+{
   int centerX = 31;
   int centerY = 15;
-  for (int i = 0; i < triangleNumberofRotations; i++){
-    for (int angle = 0; angle < 360; angle += 5){
-      matrix.fillScreen(blackColor);
+  for (int i = 0; i < triangleNumberofRotations; i++)
+  {
+    for (int angle = 0; angle < 360; angle += 5)
+    {
+      matrix.fillScreen(matrix.Color333(0,0,0));
       int x1 = centerX + triangleRadius * cos(angle * (pi / 180));
       int y1 = centerY + triangleRadius * sin(angle * (pi / 180));
+
 
       int x2 = centerX + triangleRadius * cos((angle + 120) * (pi / 180));
       int y2 = centerY + triangleRadius * sin((angle + 120) * (pi / 180));
 
+
+
       int x3 = centerX + triangleRadius * cos((angle + 240) * (pi / 180));
       int y3 = centerY + triangleRadius * sin((angle + 240) * (pi / 180));
 
+
+
       uint16_t color;
-      if (triangleNumberofRotations < 3){
+      if (triangleNumberofRotations < 3)
+      {
         color = triangleColors[0];
-      }else if (triangleNumberofRotations < 6){
+      }
+      else if (triangleNumberofRotations < 6)
+      {
         color = triangleColors[1];
-      }else{
+      }
+      else
+      {
         color = triangleColors[2];
       }
       matrix.drawLine(x1, y1, x2, y2, color);
       matrix.drawLine(x2, y2, x3, y3, color);
       matrix.drawLine(x3, y3, x1, y1, color);
       matrix.swapBuffers(false);
+
       delayMicroseconds(5000);
     }
   }
 }
 
 // ANIMATION 4: FAIL SAD FACE
-void sadFace(){
-  matrix.fillScreen(blackColor);
+void sadFace()
+{
+  matrix.fillScreen(matrix.Color333(0,0,0));
   drawFace(0 + 10, 0 + 10);
   delayMicroseconds(500000);
-  matrix.fillScreen(blackColor);
+  matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 - 10, 31 - 10);
   delayMicroseconds(500000);
-  matrix.fillScreen(blackColor);
+  matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(31 + 10, 0 + 10);
   delayMicroseconds(500000);
-  matrix.fillScreen(blackColor);
+  matrix.fillScreen(matrix.Color333(0,0,0));
 
   drawFace(63 - 10, 31 - 10);
 }
 
-void drawFace(int x, int y){
+void drawFace(int x, int y)
+{
   uint16_t faceColor = matrix.Color333(123, 123, 123);
   matrix.drawCircle(x, y, 10, faceColor);        // Face outline
   matrix.fillCircle(x - 3, y - 3, 2, faceColor); // Left eye
@@ -984,7 +1106,8 @@ void drawFace(int x, int y){
   int centerX = x;
   int centerY = y+7;
   int mouthRadius = 4;
-  for (int angle = 0; angle > -180; angle -= 5){ // Mouth
+  for (int angle = 0; angle > -180; angle -= 5)
+  { // Mouth
     int i = centerX + mouthRadius * cos(angle * (pi / 180));
     int j = centerY + mouthRadius * sin(angle * (pi / 180));
     matrix.drawPixel(i, j, faceColor);
@@ -994,7 +1117,7 @@ void drawFace(int x, int y){
 
 // ANIMATION 5: FIREWORKS
 void firework(){
-  matrix.fillScreen(blackColor);
+  matrix.fillScreen(matrix.Color333(0,0,0));
     if(roll){
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 10);
         drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(0, 7, 0), matrix.Color333(0, 3, 0), 20);
@@ -1007,7 +1130,7 @@ void firework(){
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(5, 3, 0), matrix.Color333(7, 1, 1), 20);
         drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(7, 3, 0), 16);
         drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 18);
-        roll =false;
+        roll = false;
     }
     drawWinningMessage();
 }
@@ -1022,7 +1145,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.swapBuffers(true);
   }
   delayMicroseconds(delayTime*1000);
-  matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);;
+  matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);
   matrix.drawCircle(x, y, 1, blackColor);
 
   for ( byte j=1;j<4; j++) {
@@ -1063,7 +1186,6 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.swapBuffers(true);
     matrix.drawLine((x-1)-(j-1), (y-1)-(j-1), (x-3)-(j-1), (y-3)-(j-1), blackColor);
     matrix.swapBuffers(true);
-
     delayMicroseconds(delayTime*2000);
 
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, blackColor);
@@ -1083,112 +1205,15 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
     matrix.swapBuffers(true);
+
+    
   }
 }
 
-void rocketAnimation(){
-  for(int x0=3; x0 <68; x0+=3){
-   matrix.fillScreen(blackColor);
-   //drawTriangle(15, uint16_t 8, uint16_t 19, uint16_t 13, uint16_t 15, uint16_t 18, uint16_t redColor);
-   matrix.fillTriangle(x5+x0, 9, x6+x0, 13, x5+x0, 17, blueColor);
-   matrix.fillTriangle(x4+x0, 18, x3+x0, 21, x3+x0, 18, blueColor);
-   matrix.fillTriangle(x4+x0, 8, x3+x0, 5, x3+x0, 8, blueColor);
-   matrix.fillRect(x3+x0,9,8, 9, greenColor);
-   matrix.drawLine(x0,9, x2+x0,9 ,redColor);
-   matrix.drawLine(x1+x0,11, x2+x0,11 ,redColor);
-   matrix.drawLine(x0,13, x2+x0,13 ,redColor);
-   matrix.drawLine(x1+x0,15, x2+x0,15 ,redColor);
-   matrix.drawLine(x0,17, x2+x0,17 ,redColor);
-   delayMicroseconds(4000);
-   matrix.swapBuffers(false);
- }
-}
-
-// ANIMATION 6: COMB
-/*
-void comb(){
-  //VARIABLES - Raindrop properties
-  //common parameters
-  int minLineLength = 5;
-  int maxLineLength = 8;
-  int lineLengths[32];
-  int ySpeed = 10;
-  int numOfRainDrops = 32;
-
-  //falling Rectangles parameters
-  int fallingRectXStarts[numOfRainDrops];
-  int fallingRectYHeads[numOfRainDrops];
-  int fallingRectYEnds[numOfRainDrops];
-
-  //rising rectangles parameters
-  int risingRectXStarts[numOfRainDrops];
-  int risingRectYHeads[numOfRainDrops];
-  int risingRectYEnds[numOfRainDrops];
-
-  //CYLINDER/PANEL PROPERTY
-  int rectHeight = matrix.height(); //32-1;
-  int rectWidth = 64 - 1;
-
-  //initialise VARIABLES, create 32 rain drops
-  for (int i = 0; i < numOfRainDrops; i++)  {
-    //XPOS of rects
-    fallingRectXStarts[i] = i * 2;    //print raindrop every even interval
-    risingRectXStarts[i] = i * 2 + 1; //every odd interval
-
-    lineLengths[i] = random(minLineLength, maxLineLength); //generate length between 5&9 inclusive? todo: check
-
-    //YPos of rects
-    fallingRectYHeads[i] = 0 - lineLengths[i] * 2;
-    fallingRectYEnds[i] = fallingRectYHeads[i] + lineLengths[i];
-
-    risingRectYEnds[i] = rectHeight + 2 * lineLengths[i];
-    risingRectYHeads[i] = risingRectYEnds[i] - lineLengths[i];
-  }
-
-  //DRAW ALL RAINDROPS/RECTANGLES
-  for (int i = 0; i < numOfRainDrops; i++)
-  {
-    //draw falling rect
-    drawLine(fallingRectXStarts[i], fallingRectYHeads[i], fallingRectYEnds[i]);
-    //draw rising rect
-    drawLine(risingRectXStarts[i], risingRectYHeads[i], risingRectYEnds[i]);
-  }
-  int longestLineIndex = minimum(lineLengths, numOfRainDrops);
-
-  //MOVE COORDINATES
-  bool longestLineInMatrix = true;
-  do
-  {
-    for (int i = 0; i < numOfRainDrops; i++)
-    {
-      //move falling rect
-      fallingRectYHeads[i] += ySpeed;
-      fallingRectYEnds[i] += ySpeed;
-      //move rising rect
-      risingRectYHeads[i] -= ySpeed;
-      risingRectYEnds[i] -= ySpeed;
-
-      if (fallingRectYHeads[longestLineIndex] > matrix.height())
-      {
-        longestLineInMatrix = false;
-      }
-    }
-  } while (longestLineInMatrix == true);
-}
-int minimum(int array[], int size){//return index of min value in array
-  float min = array[0];
-  int index;
-  for (int i = 1; i < size; i++){
-    if (min > array[i]){
-      min = array[i];
-      index = i;
-    }
-  }
-  return index;
-}
-*/
-void drawLine(int xStart, int yStart, int length){
-  for (int i = yStart; i < length; i++)  { //todo: length or length+1?
+void drawLine(int xStart, int yStart, int length)
+{
+  for (int i = yStart; i < length; i++)
+  { //todo: length or length+1?
     uint16_t colour = Wheel((i + xStart) % 24);
     int currentYPos = i;
     matrix.drawPixel(xStart, currentYPos, colour);
@@ -1196,13 +1221,19 @@ void drawLine(int xStart, int yStart, int length){
 }
 // Input a value 0 to 24 to get a color value.
 // The colours are a transition r - g - b - back to r.
-uint16_t Wheel(byte WheelPos){
-  if (WheelPos < 8)  {
+uint16_t Wheel(byte WheelPos)
+{
+  if (WheelPos < 8)
+  {
     return matrix.Color333(7 - WheelPos, WheelPos, 0);
-  }else if (WheelPos < 16)  {
+  }
+  else if (WheelPos < 16)
+  {
     WheelPos -= 8;
     return matrix.Color333(0, 7 - WheelPos, WheelPos);
-  }else{
+  }
+  else
+  {
     WheelPos -= 16;
     return matrix.Color333(WheelPos, 0, 7 - WheelPos);
   }
