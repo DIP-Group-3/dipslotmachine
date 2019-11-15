@@ -27,6 +27,9 @@
 #define B2 29
 #define pi 3.1415926535897932384626433832795
 
+//MUSIC
+int rollingMusic[] = {523, 622, 784, 622, 466, 622, 784, 622}; //Length 8
+
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
 
@@ -409,9 +412,10 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   // For the frame "EEE" and combo[0],
   // currentCharacter[0] = 0: 'E', currentCharacter[1] = 0: 'E', currentCharacter[2] = 0: 'E'
   int currentCharacter[] = {0, 0, 0};
-
   int currentXPositions[] = {1, 24, 47}; //xPos for character 1, 2 & 3 respectively
   int currentYPositions[] = {0, 0, 0};   //yPos for character 1, 2 & 3 respectively
+
+  int musicCounter = 0;
 
   int startXPos = 1;
   int yPosCenter = 6;
@@ -450,7 +454,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       //check if current character has exited matrix
       if (currentYPositions[i] >= matrix.height() + 21){
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
-        tone(buzzer, 5000, 50);
+        //tone(buzzer, 5000, 50);
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
@@ -459,6 +463,11 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
         }
       }
     }
+
+    //PLAY MUSIC
+    tone(buzzer, rollingMusic[musicCounter], 100);
+    musicCounter += (musicCounter + 1) % 8;
+
   }
 
   //PRINT ENDING FRAME
@@ -484,7 +493,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       if (currentYPositions[i] <= yPosCenter){ //if character hasn't reached middle of matrix
         currentYPositions[i] += currentYSpeeds[i]; //move character down by its respective speed in ySpeed[]
       }else{ //this character has arrived/passed at/the center. Proceed to oscillate about center
-        tone(buzzer, 5000, 50);
+        //tone(buzzer, 5000, 50);
         //update character status: char has reached or passed the center
         frameArrivedAtCenter[i] = true;
         if (frameArrivedAtCenter[i] == true){
