@@ -717,8 +717,8 @@ void StartUpSFX() {
   delay(250);
   tone(buzzer, 523);
   delay(200);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void CoinInsertSFX() {
@@ -726,8 +726,8 @@ void CoinInsertSFX() {
   delay(70);
   tone(buzzer, 1500);
   delay(70);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void BetIncrementSFX() {
@@ -739,8 +739,8 @@ void BetIncrementSFX() {
   delay(90);
   tone(buzzer, 1047);
   delay(200);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void SpinActivateSFX() {
@@ -750,8 +750,8 @@ void SpinActivateSFX() {
     tone(buzzer, 600);
     delay(70);
   }
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void LoseSFX() {
@@ -763,8 +763,8 @@ void LoseSFX() {
   delay(200);
   tone(buzzer, 1100);
   delay(250);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void WinConditionSFX() {
@@ -786,8 +786,8 @@ void WinConditionSFX() {
   delay(100);
   tone(buzzer, 1350);
   delay(300);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void JackpotSFX() {
@@ -859,8 +859,8 @@ void JackpotSFX() {
   delay(10);
   tone(buzzer, 1047);
   delay(550);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void DispenseCoinsSFX() {
@@ -873,8 +873,8 @@ void DispenseCoinsSFX() {
 
   tone(buzzer, 1600);
   delay(100);
-  noTone(buzzer);
-  delay(2000);
+  // noTone(buzzer);
+  // delay(2000);
 }
 
 void drawWinningMessage(){
