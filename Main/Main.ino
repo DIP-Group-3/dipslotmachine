@@ -145,6 +145,8 @@ void setup(){
 }
 
 void loop(){
+  
+  /*
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
     //TODO: IDLE STATE ANIMATION
@@ -152,7 +154,7 @@ void loop(){
     if (creditAmt > 0) {
       buttonPress();
     }
-  }
+  } */
 }
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
@@ -416,11 +418,12 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int currentYPositions[] = {0, 0, 0};   //yPos for character 1, 2 & 3 respectively
 
   int musicCounter = 0;
-
+  int numberOfIterations = 0;
+  
   int startXPos = 1;
   int yPosCenter = 6;
   int yPosTop = -21; //yPos where character is outside of matrix
-
+  
   // initialise initial conditions
   for (int i = 0; i < 3; i++){
     // initial yPos of each character of each cylinder = center of matrix
@@ -465,8 +468,15 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
     }
 
     //PLAY MUSIC
-    tone(buzzer, rollingMusic[musicCounter], 100);
-    musicCounter += (musicCounter + 1) % 8;
+
+    numberOfIterations++;
+    if(numberOfIterations%2 == 0) {
+      tone(buzzer, rollingMusic[musicCounter], 300);
+      musicCounter = (musicCounter+1)%8;
+    }
+//    Serial.print("musicCounter= ");
+//    Serial.println(musicCounter);
+    
 
   }
 
@@ -837,6 +847,7 @@ void drawWinningMessage(){
   matrix.setTextSize(1);
   matrix.print("YOU WIN");
   matrix.swapBuffers(false);
+  matrix.setTextSize(3);
 }
 
 // ANIMATION 1: WATERFALL
