@@ -60,6 +60,7 @@ int endingFrame;
 //LED DESIGN GLOBAL VARIABLE;
 uint16_t blackColor = matrix.Color333(0, 0, 0);
 uint16_t redColor = matrix.Color333(255, 0, 0);
+uint16_t orangeColor = matrix.Color333(255,75,0);
 uint16_t blueColor = matrix.Color333(0, 255, 245);
 uint16_t greenColor = matrix.Color333(76, 255, 56);
 
@@ -123,6 +124,29 @@ bool roll = true;
 //For Rocket ANIMATION
 uint16_t x0=3, x1=4, x2=6, x3=7, x4=10, x5=15, x6= 19;
 
+uint16_t mainRck_EL_R1R = 12, mainRck_ES_R2R = 14, mainRck_EL_R3R = 16, mainRck_ES_R4R = 18, mainRck_EL_R5R = 20,
+         mainRck_EL_Start = -15, mainRck_ES_Start = -13, mainRck_EL_Length = 3, mainRck_ES_Length = 1,
+         mainRck_Rect_X = -11, mainRck_Rect_Y = 12, mainRck_Rect_W = 5, mainRck_Rect_H = 9,
+         mainRck_CenTri_X1 = -11, mainRck_CenTri_X2 = -9,
+         mainRck_TT_Y1 = 9, mainRck_TT_Y2 = 11, mainRck_BT_Y1 = 21, mainRck_BT_Y2 = 23,
+         mainRck_RT_X1 = -6, mainRck_RT_Y1 = 12, mainRck_RT_X2 = -2, mainRck_RT_Y2 = 16,  mainRck_RT_Y3 = 20;
+
+uint16_t leftRect_W = 4, leftRect_H = 5, leftRect_X = -61,
+         leftRck_EL_Start = -63, leftRck_ES_Start = -62,
+         leftRck_EL_Length = 1, leftRck_ES_Length = 0,
+         leftRck_CenTri_X1 = -61, leftRck_CenTri_X2 = -60,
+         leftRck_RT_X1=-57, leftRck_TT_X1 = -61, leftRck_TT_X2 = -60;
+
+uint16_t leftRck_EL_R1R = 3, leftRck_EL_R2R = 5, leftRck_EL_R3R = 7,
+         leftRck_EL_R4R = 24, leftRck_EL_R5R = 26, leftRck_EL_R6R = 28,
+         leftRect_top_Y = 3, leftRect_bottom_Y =  24,
+         leftRck_TT1_Y1 = 1, leftRck_TT1_Y2 = 2, leftRck_TT2_Y1 = 22, leftRck_TT2_Y2 = 23,
+         leftRck_BT1_Y1 = 8, leftRck_BT1_Y2 = 9, leftRck_BT2_Y1 = 29, leftRck_BT2_Y2 = 30,
+         leftRck_RT_Y1 = 3, leftRck_RT_X2 = -55, leftRck_RT_Y2 = 5, leftRck_RT_Y3 = 7,
+         leftRck_RT_Y4 = 24, leftRck_RT_Y5 = 26, leftRck_RT_Y6 = 28;
+
+uint16_t firstChar_X=-54, secondChar_X=-41, thirdChar_X=-28, Char_Y =9;
+
 void setup(){
   Serial.begin(9600);
 
@@ -141,7 +165,6 @@ void setup(){
 
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
-
   rocketAnimation();
 
   //To Test Added
@@ -673,7 +696,7 @@ void machineUpdates(int endFrameIndex){
     Serial.println("Jackpot");
     LcdMessage(4);
     JackpotSFX();
-    
+
     dispenseCoin(totalCoinsInside);
     creditAmt -= creditAmt;
     
@@ -900,7 +923,6 @@ void drawWinningMessage(){
   matrix.print("YOU WIN");
   matrix.swapBuffers(false);
   matrix.setTextSize(3);
-
   //SFX
   tone(buzzer, 1024, 100);
   delay(200);
@@ -912,9 +934,11 @@ void drawWinningMessage(){
 // ANIMATION 1: WATERFALL
 void waterfall(){
   detachButtonInterrupts();
+
   // Generate waterfall columns             This gives the X0, X1
   for (int i = 0; i < 16; i++)  {
     waterfallColumns[i] = (4 * i + 1);
+    Serial.println(waterfallColumns[i]);
   }
   // Generate waterfall starting positions  This gives the Y0
   for (int i = 0; i < 16; i++)  {
@@ -923,7 +947,7 @@ void waterfall(){
   // Rolling animation
   for (int i = 0; i < waterfallRotations; i += 3)  {
     matrix.fillScreen(blackColor);
-    for (int j = 0; j < 8; j++)    {
+    for (int j = 1; j < 8; j++)    {
       // Get the starting and ending pos
       int yStart1 = waterfallStartingPos[15 + j + 1] + i;
       int yStart2 = waterfallStartingPos[15 - j] + i;
@@ -978,6 +1002,7 @@ void drawWaterfall(int yStart, int yEnd, int index){
 void radiation(){
   detachButtonInterrupts();
   matrix.fillScreen(matrix.Color333(0,0,0));
+
   for (int i = 0; i < radiationRotations; i++){
     // section 1 circle
     for (int r = 1; r < 6; r++){
@@ -1180,21 +1205,57 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
 }
 
 void rocketAnimation(){
-  for(int x0=3; x0 <68; x0+=3){
-   matrix.fillScreen(blackColor);
-   //drawTriangle(15, uint16_t 8, uint16_t 19, uint16_t 13, uint16_t 15, uint16_t 18, uint16_t redColor);
-   matrix.fillTriangle(x5+x0, 9, x6+x0, 13, x5+x0, 17, blueColor);
-   matrix.fillTriangle(x4+x0, 18, x3+x0, 21, x3+x0, 18, blueColor);
-   matrix.fillTriangle(x4+x0, 8, x3+x0, 5, x3+x0, 8, blueColor);
-   matrix.fillRect(x3+x0,9,8, 9, greenColor);
-   matrix.drawLine(x0,9, x2+x0,9 ,redColor);
-   matrix.drawLine(x1+x0,11, x2+x0,11 ,redColor);
-   matrix.drawLine(x0,13, x2+x0,13 ,redColor);
-   matrix.drawLine(x1+x0,15, x2+x0,15 ,redColor);
-   matrix.drawLine(x0,17, x2+x0,17 ,redColor);
-   delayMicroseconds(4000);
-   matrix.swapBuffers(false);
- }
+     for(int index = -2; index < 132; index +=6 ){
+    //int index =64;
+    //Clear LED Screen
+    matrix.fillScreen(blackColor);
+
+    //Draw Big Rocket
+    matrix.fillTriangle(mainRck_RT_X1+index, mainRck_RT_Y1, mainRck_RT_X2+index, mainRck_RT_Y2, mainRck_RT_X1+index, mainRck_RT_Y3, orangeColor);
+    matrix.fillTriangle(mainRck_CenTri_X1+index, mainRck_TT_Y1, mainRck_CenTri_X2+index, mainRck_TT_Y2, mainRck_CenTri_X1+index, mainRck_TT_Y2, orangeColor);
+    matrix.fillTriangle(mainRck_CenTri_X1+index, mainRck_BT_Y1, mainRck_CenTri_X2+index, mainRck_BT_Y1, mainRck_CenTri_X1+index, mainRck_BT_Y2, orangeColor);
+
+    matrix.fillRect(mainRck_Rect_X+index, mainRck_Rect_Y, mainRck_Rect_W, mainRck_Rect_H, blueColor);
+
+    matrix.drawLine(mainRck_EL_Start+index, mainRck_EL_R1R, mainRck_EL_Start+mainRck_EL_Length+index,mainRck_EL_R1R, redColor);
+    matrix.drawLine(mainRck_ES_Start+index, mainRck_ES_R2R, mainRck_ES_Start+mainRck_ES_Length+index,mainRck_ES_R2R, redColor);
+    matrix.drawLine(mainRck_EL_Start+index, mainRck_EL_R3R, mainRck_EL_Start+mainRck_EL_Length+index,mainRck_EL_R3R, redColor);
+    matrix.drawLine(mainRck_ES_Start+index, mainRck_ES_R4R, mainRck_ES_Start+mainRck_ES_Length+index,mainRck_ES_R4R, redColor);
+    matrix.drawLine(mainRck_EL_Start+index, mainRck_EL_R5R, mainRck_EL_Start+mainRck_EL_Length+index,mainRck_EL_R5R, redColor);
+
+    //Draw Char
+    matrix.drawChar(firstChar_X+index, Char_Y, 'I', blueColor, blackColor, 2);
+    matrix.drawChar(secondChar_X+index, Char_Y, 'E', blueColor, blackColor, 2);
+    matrix.drawChar(thirdChar_X+index, Char_Y, 'M', blueColor, blackColor, 2);
+
+
+    //Draw Small Rockets
+    matrix.fillTriangle(leftRck_RT_X1+index, leftRck_RT_Y1, leftRck_RT_X2+index, leftRck_RT_Y2, leftRck_RT_X1+index, leftRck_RT_Y3, orangeColor);
+    matrix.fillTriangle(leftRck_RT_X1+index, leftRck_RT_Y4, leftRck_RT_X2+index, leftRck_RT_Y5, leftRck_RT_X1+index, leftRck_RT_Y6, orangeColor);
+
+    matrix.fillRect(leftRect_X+index, leftRect_top_Y, leftRect_W, leftRect_H, blueColor);
+    matrix.fillRect(leftRect_X+index, leftRect_bottom_Y, leftRect_W, leftRect_H, blueColor);
+
+    matrix.fillTriangle(leftRck_CenTri_X1+index, leftRck_TT1_Y1, leftRck_CenTri_X2+index, leftRck_TT1_Y2, leftRck_CenTri_X1+index, leftRck_TT1_Y2, orangeColor);
+    matrix.fillTriangle(leftRck_CenTri_X1+index, leftRck_TT2_Y1, leftRck_CenTri_X2+index, leftRck_TT2_Y2, leftRck_CenTri_X1+index, leftRck_TT2_Y2, orangeColor);
+
+    matrix.fillTriangle(leftRck_CenTri_X1+index, leftRck_BT1_Y1, leftRck_CenTri_X2+index, leftRck_BT1_Y1, leftRck_CenTri_X1+index, leftRck_BT1_Y2, orangeColor);
+    matrix.fillTriangle(leftRck_CenTri_X1+index, leftRck_BT2_Y1, leftRck_CenTri_X2+index, leftRck_BT2_Y1, leftRck_CenTri_X1+index, leftRck_BT2_Y2, orangeColor);
+
+    matrix.drawLine(leftRck_EL_Start+index, leftRck_EL_R1R, leftRck_EL_Start+leftRck_EL_Length+index, leftRck_EL_R1R ,redColor);
+    matrix.drawLine(leftRck_ES_Start+index, leftRck_EL_R2R, leftRck_ES_Start+leftRck_ES_Length+index, leftRck_EL_R2R ,redColor);
+    matrix.drawLine(leftRck_EL_Start+index, leftRck_EL_R3R, leftRck_EL_Start+leftRck_EL_Length+index, leftRck_EL_R3R ,redColor);
+    matrix.drawLine(leftRck_EL_Start+index, leftRck_EL_R4R, leftRck_EL_Start+leftRck_EL_Length+index, leftRck_EL_R4R ,redColor);
+    matrix.drawLine(leftRck_ES_Start+index, leftRck_EL_R5R, leftRck_ES_Start+leftRck_ES_Length+index, leftRck_EL_R5R ,redColor);
+    matrix.drawLine(leftRck_EL_Start+index, leftRck_EL_R6R, leftRck_EL_Start+leftRck_EL_Length+index, leftRck_EL_R6R ,redColor);
+    matrix.swapBuffers(false);
+
+    if(index == 64){
+      StartUpSFX();
+    }else{
+      delayMicroseconds(5);
+    }
+  }
 }
 
 // ANIMATION 6: COMB
