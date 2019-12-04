@@ -27,6 +27,15 @@
 #define B2 29
 #define pi 3.1415926535897932384626433832795
 
+// For demo purpose
+int globalDemoSequence[] = {1,0,2};
+int globalDemoVariable = 0;
+
+
+//Music
+int rollingMusic[] = {523, 622, 784, 622, 466, 622, 784, 622};
+int fallingNotesMusic[] = {784, 622, 523}; 
+
 //Array of Combos & Select, Combinations of all possible Frames (10)
 String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
 
@@ -81,7 +90,7 @@ bool coinInsert = false;
 Servo myservo;
 const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
-int servoStartAngle = 30;
+int servoStartAngle = 35;
 int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
@@ -157,47 +166,95 @@ void setup(){
   //LCD Display "Insert Coin" Message
   LcdMessage(0);
   rocketAnimation();
+
+  //To Test Added
+  StartUpSFX();
+
+  //Software Interrupt
+  attachInterrupts();
 }
 
+//loop flags
+bool coinInsertedFlag = false;
+bool betButtonPressedFlag = false;
+bool spinButtonPressedFlag = false;
+
 void loop(){
-  if(totalCoinsInside >= winRate){
-    irSensorUpdate();
-    //TODO: IDLE STATE ANIMATION
-    //triangleSpinning();
-    if (creditAmt > 0) {
-      buttonPress();
-    }
+  //rocketAnimation();
+  //sadFace();
+  //firework();
+  
+  //radiation();
+  //Serial.println("in loop()");
+
+  if (coinInsertedFlag) { //CASE: IR Sensor detects coin
+    LcdMessage(1); 
+    CoinInsertSFX();
+    coinInsertedFlag = false;
+  }
+  else if(betButtonPressedFlag) { //CASE: BET BUTTON PRESSED
+    LcdMessage(1);    
+    
+    betButtonPressedFlag = false;
+    BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
+  }
+  else if(spinButtonPressedFlag){ //CASE: SPIN BUTTON PRESSED
+    if(creditAmt > 0) {
+      if(totalCoinsInside < (winRate * betAmt)){ //CASE: Need admin to top up coins
+        Serial.println(" inside if");
+        LcdMessage(6);
+        bool admin = true;
+        while(admin){
+          admin = AdminCoinInsert();
+        }
+        adminCoin =0;
+      }
+      LcdMessage(7);
+      SpinActivateSFX();
+      activateSpin(); 
+    } 
+    Serial.println("spinButtonPressedFlag set to false");
+    spinButtonPressedFlag = false;
   }
 }
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
 void irSensorUpdate(){
-  Serial.println("IR Snsr");
+  Serial.println("irSensorUpdate() is called");
   isObstacle = digitalRead(isObstaclePin);
-
+  
   //TODO: IDLE STATE ANIMATION
   if(isObstacle == LOW) {                       // Obstacle detected
     coinInsert = true;
   } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
     updateCredit(1);                            // Incremeent Credit Amt'
-    LcdMessage(1);                              // Display Message in LCD
-    CoinInsertSFX();
-  }
+    coinInsertedFlag = true;
+//    LcdMessage(1);                              // Display Message in LCD
+//    CoinInsertSFX();
+  }  
 }
 
 //BUTTON METHOD: DETERMINE WHICH BUTTON IS PRESSED
-void buttonPress(){
-  if(betAvail()){                               //Check if bet increment could be done
-    updateBet();                                    //Call method to update bet amt
-  }else if(spinAvail()){                        //Ceck if spin could be done
-    LcdMessage(7);
-    SpinActivateSFX();
-    activateSpin();                                 //Call Method to start LED Matrix animation
+void betButtonPress(){
+  Serial.println("betButtonPress() called");
+  if(creditAmt > 0) {
+    Serial.println("spinButtonPressedFlag set to true");
+    Serial.print("spinButtonPressedFlag = ");
+    Serial.println(spinButtonPressedFlag);
+    betButtonPressedFlag = true;
+    updateBet();
+    BetIncrementSFX();
   }
+}
+
+void spinButtonPress() {
+  Serial.println("spinBUttonPress() is called");
+  spinButtonPressedFlag = true;
 }
 
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
 void updateCredit(int addAmt){                  //Method: Update Credit Amount
+Serial.println("updateCredit() is called");
   if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
     betAmt = 1;
     creditAmt += addAmt;
@@ -211,36 +268,24 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     betAmt = 1;
     creditAmt += addAmt;
   }
+
 }
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
+  Serial.println("updateBet() is called");
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     betAmt = 1;
   }else{                                                  //Scenario 2: Current bet amount less than 3
     betAmt++;
   }
-  betPressed = false;
-  LcdMessage(1);
-  BetIncrementSFX();
-}
-
-//BET BTN METHOD: CHECK IF INCREMENT COULD BE ALLOWED
-bool betAvail(){
-  betState = digitalRead(betBtn);                                   //Read Bet Btn Input
-  if(betState == HIGH){
-    betPressed = true;
-    return false;
-  }else if(betState == LOW && creditAmt > 0 && betPressed){        //Bet Btn Pressed && credit Amt greater than 0
-    return true;
-  }else{
-    betPressed = false;
-    return false;
-  }
 }
 
 //SPIN BTN METHOD: ACTIVATE LED MATRIX, UPDATE NECESSARY FIELDS AND DISPLAY
 void activateSpin(){                                            //Method: Activate LED Matrix
+  Serial.println("activateSpin() called");
+  Serial.print("spinButtonPressedFlag = ");
+  Serial.println(spinButtonPressedFlag);
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   updateCredit(betAmt*-1);                                              //Deducted credit based on bet amount
@@ -249,30 +294,27 @@ void activateSpin(){                                            //Method: Activa
   activateLED();
 }
 
-//SPIN BTN METHOD: CHECK IF BTN COULD ACTIVATE LED TO SPIN
-bool spinAvail(){
-  spinState = digitalRead(spinBtn);                               //Read  Spin Btn Input
-  if(spinState == HIGH){
-    spinPressed = true;
-  }else if (spinState == LOW && creditAmt > 0 && spinPressed){
-    if(totalCoinsInside < (winRate * betAmt)){
-      LcdMessage(6);
-      bool admin = true;
-      while(admin){
-        admin = AdminCoinInsert();
-      }
-      adminCoin =0;
-      return false;
-    }
-    return true;
-  }else{
-    spinPressed = false;
-    return false;
-  }
+void attachInterrupts() {
+  attachInterrupt(digitalPinToInterrupt(isObstaclePin), irSensorUpdate, RISING); //IR Sensor
+  attachInterrupt(digitalPinToInterrupt(betBtn), betButtonPress, FALLING);//BET BTTN
+  attachInterrupt(digitalPinToInterrupt(spinBtn), spinButtonPress, FALLING);//Spin BTTN
+}
+
+void detachButtonInterrupts() {
+  detachInterrupt(digitalPinToInterrupt(betBtn));
+  detachInterrupt(digitalPinToInterrupt(spinBtn));
+}
+
+void detachAllInterrupts(){
+  detachInterrupt(digitalPinToInterrupt(betBtn));
+  detachInterrupt(digitalPinToInterrupt(spinBtn));
+  detachInterrupt(digitalPinToInterrupt(isObstaclePin));
 }
 
 //LCD DISPALY METHOD: PRINT MESSAGE BASED ON SITUATION
 void LcdMessage(int scenario){
+  
+  Serial.println("LcdMessage() is called");
   lcd.clear();                                                    //Clear current displayed frame
   switch(scenario){
     //Idle State || Credit 0 Message Frame
@@ -283,12 +325,13 @@ void LcdMessage(int scenario){
               break;
 
     //Credit!=0 && 0<Bet<=3 Message Frame
-    case 1:   lcd.setCursor(1,1);
+    case 1:   Serial.println("LCD Message 1 is called");
+              lcd.setCursor(1,1);
               lcd.print("Credit : ");
               lcd.print(creditAmt);
               lcd.setCursor(1,2);
               lcd.print("Bet    : ");
-              lcd.print(betAmt);
+              lcd.print(betAmt);              
               break;
 
     //Lose Condition Message Frame    - "NBS", "SCE", "ADM"
@@ -346,7 +389,7 @@ void LcdMessage(int scenario){
 //LED MATRIX METHOD: ACTIVATE LED MATRIX
 void activateLED(){
   startingFrame = random(300) % numOfFrames; //choose random start frame
-  endingFrame = random(300) % numOfFrames;   //choose random end frame
+  endingFrame = endingFrame = globalDemoSequence[globalDemoVariable%3]; //random(300) % numOfFrames;   //choose random end frame
 
   displayStartingFrame(startingFrame);
   delay(2000);
@@ -361,7 +404,9 @@ void displayStartingFrame(int startingFrame){
 
   int ySpeed = 7;
   int yPosCenter = 6;
-
+  
+  int musicCounter = 0;
+  
   uint16_t colour = redColor; //red
 
   //INITIALISE
@@ -395,9 +440,11 @@ void displayStartingFrame(int startingFrame){
       //MOVE CHARACTERS
       yPosCurrent[i] += ySpeed;
       if (yPosCurrent[i] >= yPosCenter){
-        tone(buzzer, 5000, 50);
         charArrivedAtCenter[i] = true;
         yPosCurrent[i] = 6;
+        //PLAY MUSIC
+        tone(buzzer, fallingNotesMusic[musicCounter], 70);
+        musicCounter = (musicCounter+1)%8;
         break;
       }
       matrix.swapBuffers(false);
@@ -431,10 +478,19 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int currentXPositions[] = {1, 24, 47}; //xPos for character 1, 2 & 3 respectively
   int currentYPositions[] = {0, 0, 0};   //yPos for character 1, 2 & 3 respectively
 
+  int musicCounter = 0;
+  int numberOfIterations = 0;
   int startXPos = 1;
   int yPosCenter = 6;
   int yPosTop = -21; //yPos where character is outside of matrix
 
+  Serial.println("playAnimation() called");
+  Serial.print("spinButtonPressedFlag = ");
+  Serial.println(spinButtonPressedFlag);
+  
+  //detach interrupt
+  detachButtonInterrupts();
+    
   // initialise initial conditions
   for (int i = 0; i < 3; i++){
     // initial yPos of each character of each cylinder = center of matrix
@@ -468,7 +524,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       //check if current character has exited matrix
       if (currentYPositions[i] >= matrix.height() + 21){
         currentYPositions[i] = yPosTop; //wrap character around/reset to start Position
-        tone(buzzer, 5000, 50);
+        
         //go to next character in column/cylinder
         currentCharacter[i] = (currentCharacter[i] + 1) % numOfFrames;
 
@@ -477,6 +533,16 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
         }
       }
     }
+
+    //PLAY MUSIC
+
+    numberOfIterations++;
+    if(numberOfIterations%2 == 0) {
+      tone(buzzer, rollingMusic[musicCounter], 300);
+      musicCounter = (musicCounter+1)%8;
+    }
+
+
   }
 
   //PRINT ENDING FRAME
@@ -502,7 +568,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
       if (currentYPositions[i] <= yPosCenter){ //if character hasn't reached middle of matrix
         currentYPositions[i] += currentYSpeeds[i]; //move character down by its respective speed in ySpeed[]
       }else{ //this character has arrived/passed at/the center. Proceed to oscillate about center
-        tone(buzzer, 5000, 50);
+        tone(buzzer, 1024, 200);
         //update character status: char has reached or passed the center
         frameArrivedAtCenter[i] = true;
         if (frameArrivedAtCenter[i] == true){
@@ -528,6 +594,10 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
 
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
+  globalDemoVariable++;
+  //reattach interrupts()
+  attachInterrupts();
+  
   machineUpdates(endingFrame);
 }
 
@@ -570,7 +640,7 @@ void oscillateWithDecreasingEnergyAnimation(int currentXPositions[], int current
       //drawFrame
       char charToDraw = extractCharFromFrameList(currentCharacter[i], i);
       drawCharacter(currentXPositions[i], yPositionsOscillate[j], charToDraw, colour);
-      tone(buzzer, 5000, 50);
+      tone(buzzer, 1024, 200);
     }
     matrix.swapBuffers(false);
   }
@@ -620,6 +690,7 @@ bool AdminCoinInsert(){
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
+  Serial.println("machineUpdate() called");
   String endingFrame = combo[endFrameIndex];
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("Jackpot");
@@ -627,9 +698,13 @@ void machineUpdates(int endFrameIndex){
     JackpotSFX();
 
     dispenseCoin(totalCoinsInside);
+    creditAmt -= creditAmt;
+    
     //TODO: JACKPOT LED ANIMATION
     firework();
     LcdMessage(5);
+    detachAllInterrupts(); //do not allow user to insert coin anymore
+    
   }else if(endingFrame.equalsIgnoreCase(Win)){
     Serial.println("Win");
     LcdMessage(3);
@@ -650,6 +725,7 @@ void machineUpdates(int endFrameIndex){
       LcdMessage(1);
     }
   }else{
+    Serial.println("Lose");
     LcdMessage(2);
     LoseSFX();
 
@@ -665,7 +741,6 @@ void machineUpdates(int endFrameIndex){
     }
   }
 }
-
 void StartUpSFX() {
   tone(buzzer, 260);
   delay(250);
@@ -680,7 +755,7 @@ void StartUpSFX() {
   tone(buzzer, 523);
   delay(200);
   noTone(buzzer);
-  delayMicroseconds(500);
+  // delay(2000);
 }
 
 void CoinInsertSFX() {
@@ -689,7 +764,7 @@ void CoinInsertSFX() {
   tone(buzzer, 1500);
   delay(70);
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void BetIncrementSFX() {
@@ -702,7 +777,7 @@ void BetIncrementSFX() {
   tone(buzzer, 1047);
   delay(200);
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void SpinActivateSFX() {
@@ -713,7 +788,7 @@ void SpinActivateSFX() {
     delay(70);
   }
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void LoseSFX() {
@@ -726,7 +801,7 @@ void LoseSFX() {
   tone(buzzer, 1100);
   delay(250);
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void WinConditionSFX() {
@@ -749,7 +824,7 @@ void WinConditionSFX() {
   tone(buzzer, 1350);
   delay(300);
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void JackpotSFX() {
@@ -822,7 +897,7 @@ void JackpotSFX() {
   tone(buzzer, 1047);
   delay(550);
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void DispenseCoinsSFX() {
@@ -836,10 +911,11 @@ void DispenseCoinsSFX() {
   tone(buzzer, 1600);
   delay(100);
   noTone(buzzer);
-  delay(2000);
+  // delay(2000);
 }
 
 void drawWinningMessage(){
+  detachButtonInterrupts();
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
   matrix.setCursor(12,12);
@@ -847,10 +923,18 @@ void drawWinningMessage(){
   matrix.print("YOU WIN");
   matrix.swapBuffers(false);
   matrix.setTextSize(3);
+  //SFX
+  tone(buzzer, 1024, 100);
+  delay(200);
+  tone(buzzer, 1024, 200);
+  delay(1000);
+  attachInterrupts();
 }
 
 // ANIMATION 1: WATERFALL
 void waterfall(){
+  detachButtonInterrupts();
+
   // Generate waterfall columns             This gives the X0, X1
   for (int i = 0; i < 16; i++)  {
     waterfallColumns[i] = (4 * i + 1);
@@ -881,6 +965,7 @@ void waterfall(){
     matrix.swapBuffers(false);
     delayMicroseconds(120000);
   }
+  attachInterrupts();
 }
 void drawWaterfall(int yStart, int yEnd, int index){
   if (yEnd < 0 and yStart < 31){
@@ -915,7 +1000,9 @@ void drawWaterfall(int yStart, int yEnd, int index){
 
 // ANIMATION 2: RADIATION
 void radiation(){
-  matrix.fillScreen(blackColor);
+  detachButtonInterrupts();
+  matrix.fillScreen(matrix.Color333(0,0,0));
+
   for (int i = 0; i < radiationRotations; i++){
     // section 1 circle
     for (int r = 1; r < 6; r++){
@@ -942,6 +1029,7 @@ void radiation(){
     matrix.swapBuffers(false);
   }
   drawWinningMessage();
+  attachInterrupts();
 }
 
 // ANIMATION 3: TRIANGLE SPINNING
@@ -979,20 +1067,29 @@ void triangleSpinning(){
 
 // ANIMATION 4: FAIL SAD FACE
 void sadFace(){
+  detachButtonInterrupts();
   matrix.fillScreen(blackColor);
   drawFace(0 + 10, 0 + 10);
-  delayMicroseconds(500000);
+  tone(buzzer, 523, 500);
+  delay(500);//delayMicroseconds(1000000);
+  
   matrix.fillScreen(blackColor);
-
   drawFace(31 - 10, 31 - 10);
-  delayMicroseconds(500000);
+  tone(buzzer, 494,500);
+  delay(500);//delayMicroseconds(1000000);
+  
+  
   matrix.fillScreen(blackColor);
-
   drawFace(31 + 10, 0 + 10);
-  delayMicroseconds(500000);
-  matrix.fillScreen(blackColor);
+  tone(buzzer, 466, 500);
+  delay(500);//delayMicroseconds(1000000);
 
+  matrix.fillScreen(blackColor);
   drawFace(63 - 10, 31 - 10);
+  tone(buzzer, 440,500);
+  delay(2000);  //delayMicroseconds(1000000);
+
+  attachInterrupts();
 }
 
 void drawFace(int x, int y){
@@ -1013,6 +1110,7 @@ void drawFace(int x, int y){
 
 // ANIMATION 5: FIREWORKS
 void firework(){
+  detachButtonInterrupts();
   matrix.fillScreen(blackColor);
     if(roll){
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 10);
@@ -1029,6 +1127,7 @@ void firework(){
         roll =false;
     }
     drawWinningMessage();
+    attachInterrupts();
 }
 
 void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t delayTime) {
