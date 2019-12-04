@@ -89,7 +89,7 @@ bool coinInsert = false;
 Servo myservo;
 const int minCoinsRequired = 3;
 int totalCoinsInside = 3;
-int servoStartAngle = 30;
+int servoStartAngle = 35;
 int servoEndAngle = 0;
 int winRate = 2;
 int adminCoin =0;
@@ -162,7 +162,8 @@ void loop(){
   //firework();
   
   //radiation();
-  
+  //Serial.println("in loop()");
+
   if (coinInsertedFlag) { //CASE: IR Sensor detects coin
     LcdMessage(1); 
     CoinInsertSFX();
@@ -172,7 +173,7 @@ void loop(){
     LcdMessage(1);    
     
     betButtonPressedFlag = false;
-    //BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
+    BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
   }
   else if(spinButtonPressedFlag){ //CASE: SPIN BUTTON PRESSED
     if(creditAmt > 0) {
@@ -189,6 +190,7 @@ void loop(){
       SpinActivateSFX();
       activateSpin(); 
     } 
+    Serial.println("spinButtonPressedFlag set to false");
     spinButtonPressedFlag = false;
   }
 }
@@ -213,6 +215,9 @@ void irSensorUpdate(){
 void betButtonPress(){
   Serial.println("betButtonPress() called");
   if(creditAmt > 0) {
+    Serial.println("spinButtonPressedFlag set to true");
+    Serial.print("spinButtonPressedFlag = ");
+    Serial.println(spinButtonPressedFlag);
     betButtonPressedFlag = true;
     updateBet();
     BetIncrementSFX();
@@ -255,6 +260,9 @@ void updateBet(){                               //Method: Update Bet Amount when
 
 //SPIN BTN METHOD: ACTIVATE LED MATRIX, UPDATE NECESSARY FIELDS AND DISPLAY
 void activateSpin(){                                            //Method: Activate LED Matrix
+  Serial.println("activateSpin() called");
+  Serial.print("spinButtonPressedFlag = ");
+  Serial.println(spinButtonPressedFlag);
   spinPressed = false;
   currentBetAmt = betAmt;                                           //Used to determine current bet amt
   updateCredit(betAmt*-1);                                              //Deducted credit based on bet amount
@@ -453,6 +461,10 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int yPosCenter = 6;
   int yPosTop = -21; //yPos where character is outside of matrix
 
+  Serial.println("playAnimation() called");
+  Serial.print("spinButtonPressedFlag = ");
+  Serial.println(spinButtonPressedFlag);
+  
   //detach interrupt
   detachButtonInterrupts();
     
@@ -655,6 +667,7 @@ bool AdminCoinInsert(){
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
+  Serial.println("machineUpdate() called");
   String endingFrame = combo[endFrameIndex];
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("Jackpot");
@@ -689,6 +702,7 @@ void machineUpdates(int endFrameIndex){
       LcdMessage(1);
     }
   }else{
+    Serial.println("Lose");
     LcdMessage(2);
     LoseSFX();
 
@@ -717,7 +731,7 @@ void StartUpSFX() {
   delay(250);
   tone(buzzer, 523);
   delay(200);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -726,7 +740,7 @@ void CoinInsertSFX() {
   delay(70);
   tone(buzzer, 1500);
   delay(70);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -739,7 +753,7 @@ void BetIncrementSFX() {
   delay(90);
   tone(buzzer, 1047);
   delay(200);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -750,7 +764,7 @@ void SpinActivateSFX() {
     tone(buzzer, 600);
     delay(70);
   }
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -763,7 +777,7 @@ void LoseSFX() {
   delay(200);
   tone(buzzer, 1100);
   delay(250);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -786,7 +800,7 @@ void WinConditionSFX() {
   delay(100);
   tone(buzzer, 1350);
   delay(300);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -859,7 +873,7 @@ void JackpotSFX() {
   delay(10);
   tone(buzzer, 1047);
   delay(550);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
@@ -873,7 +887,7 @@ void DispenseCoinsSFX() {
 
   tone(buzzer, 1600);
   delay(100);
-  // noTone(buzzer);
+  noTone(buzzer);
   // delay(2000);
 }
 
