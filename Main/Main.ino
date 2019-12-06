@@ -214,7 +214,6 @@ void irSensorUpdate(){
     updateCredit(1);                            // Incremeent Credit Amt'
     LcdMessage(1);                              // Display Message in LCD
     CoinInsertSFX();
-    clearAllFlags();
   }
 }
 

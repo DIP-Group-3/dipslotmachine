@@ -218,7 +218,6 @@ void irSensorUpdate(){
     updateCredit(1);                            // Incremeent Credit Amt'
     LcdMessage(1);                              // Display Message in LCD
     CoinInsertSFX();
-    clearAllFlags();
   }
 }
 
@@ -562,7 +561,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
   globalDemoVariable++;
-  
+
   //reattach interrupts()
   attachInterrupts();
 
