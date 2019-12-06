@@ -875,16 +875,17 @@ void DispenseCoinsSFX() {
 
 void drawMessage(bool isWinning){
   detachAllInterrupts();
-  Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
   if (isWinning){
     matrix.setCursor(12,12);
     matrix.setTextSize(1);
+    matrix.setTextColor(blueColor);
     matrix.print("YOU WON");
   }else{
     matrix.setCursor(8, 12);
     matrix.setTextSize(1);
-    matrix.print("NICE TRY :)");
+    matrix.setTextColor(redColor);
+    matrix.print("NICE TRY");
   }
   matrix.swapBuffers(false);
   matrix.setTextSize(3);

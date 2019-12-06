@@ -900,10 +900,12 @@ void drawMessage(bool isWinning){
   if (isWinning){
     matrix.setCursor(12,12);
     matrix.setTextSize(1);
-    matrix.print("YOU WON");
+    matrix.setTextColor(blueColor);
+    matrix.print("YOU WON");S
   }else{
     matrix.setCursor(8, 12);
     matrix.setTextSize(1);
+    matrix.setTextColor(redColor);
     matrix.print("NICE TRY :)");
   }
   matrix.swapBuffers(false);
