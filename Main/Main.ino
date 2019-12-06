@@ -189,13 +189,9 @@ void loop(){
         BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
       }else if(spinButtonPressedFlag){ //CASE: SPIN BUTTON PRESSED
           spinButtonPressedFlag = false;
-          if(totalCoinsInside < (winRate * betAmt)){ //CASE: Need admin to top up coins
+          if(totalCoinsInside < (winRate * betAmt)){ //Case: Need admin to insert coin 
             LcdMessage(6);
-            bool admin = true;
-            while(admin){
-              admin = AdminCoinInsert();
-            }
-            adminCoin =0;
+            AdminCoinInsert();
           }else{
             LcdMessage(7);
             SpinActivateSFX();
@@ -642,17 +638,15 @@ void dispenseCoin(int amount){
 }
 
 bool AdminCoinInsert(){
-  if(adminCoin <3){
+  while(adminCoin < 3){
     if(isObstacle == LOW) {                       // Obstacle detected
       coinInsert = true;
     } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
       adminCoin += 1;
       totalCoinsInside += adminCoin;
     }
-    return false;
-  }else{
-    return true;
   }
+  adminCoin = 0;
 }
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
