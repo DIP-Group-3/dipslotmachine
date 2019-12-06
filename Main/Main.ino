@@ -210,6 +210,7 @@ void clearAllFlags() {
   betButtonPressedFlag = false;
   spinButtonPressedFlag = false;
 }
+
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
 void irSensorUpdate(){
  
@@ -882,15 +883,20 @@ void DispenseCoinsSFX() {
   // delay(2000);
 }
 
-void drawWinningMessage(){
+void drawMessage(bool isWinning){
   detachAllInterrupts();
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
   matrix.setCursor(12,12);
   matrix.setTextSize(1);
-  matrix.print("YOU WIN");
+  if (isWinning){
+    matrix.print("YOU WON");
+  }else{
+    matrix.print("NICE TRY :)");
+  }
   matrix.swapBuffers(false);
   matrix.setTextSize(3);
+
   //SFX
   tone(buzzer, 1024, 100);
   delay(200);
@@ -996,7 +1002,7 @@ void radiation(){
     }
     matrix.swapBuffers(false);
   }
-  drawWinningMessage();
+  drawMessage(true);
   attachInterrupts();
 }
 
@@ -1057,6 +1063,7 @@ void sadFace(){
   tone(buzzer, 440,500);
   delay(2000);  //delayMicroseconds(1000000);
 
+  drawMessage(false);
   attachInterrupts();
 }
 
@@ -1095,7 +1102,7 @@ void firework(){
         drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 20);//18);
         roll =false;
     }
-    drawWinningMessage();
+    drawMessage(true);
     attachInterrupts();
 }
 
