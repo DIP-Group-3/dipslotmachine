@@ -15,7 +15,7 @@
 #define LAT 10            // LATCH SIGNAL MARKS THE END OF A ROW OF DATA
 #define CLK 11            // USE THIS ON ARDUINO MEGA
 #define betBtn 18
-#define spinBtn 19
+#define spinBtn 3
 #define isObstaclePin 2
 #define reservePin 15
 
@@ -152,6 +152,8 @@ uint16_t firstChar_X=-54, secondChar_X=-41, thirdChar_X=-28, Char_Y =9;
 bool betButtonPressedFlag = false;
 bool spinButtonPressedFlag = false;
 
+bool admin = false;
+
 void setup(){
   Serial.begin(9600);
 
@@ -174,33 +176,30 @@ void setup(){
 
   //Software Interrupt
   attachInterrupts();
-  Serial.print("spinButtonPressedFlag = ");
-  Serial.println(spinButtonPressedFlag);
 }
 
 void loop(){
-  //firework();
-  Serial.println("in loop");
-  Serial.print("spinButtonPressedFlag = ");
-  Serial.println(spinButtonPressedFlag);
-
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
-    if(creditAmt>0){
-      if(betButtonPressedFlag) { //CASE: BET BUTTON PRESSED
+    if(creditAmt > 0){
+      if(betButtonPressedFlag){
         betButtonPressedFlag = false;
         LcdMessage(1);
         BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
-      }else if(spinButtonPressedFlag){ //CASE: SPIN BUTTON PRESSED
-          spinButtonPressedFlag = false;
-          if(totalCoinsInside < (winRate * betAmt)){ //Case: Need admin to insert coin 
-            LcdMessage(6);
-            AdminCoinInsert();
-          }else{
-            LcdMessage(7);
-            SpinActivateSFX();
-            activateSpin();
-          }
+      }else if(spinButtonPressedFlag){
+        spinButtonPressedFlag = false;
+        if(totalCoinsInside < (winRate * betAmt) && adminCoin < 3){
+          LcdMessage(6);
+          admin = true;
+        }else if(adminCoin >= 3){
+          LcdMessage(1);
+          admin = false;
+          adminCoin = 0;
+        }else{
+          LcdMessage(7);
+          SpinActivateSFX();
+          activateSpin();
+        }
       }
     }
   }
@@ -216,8 +215,14 @@ void irSensorUpdate(){
     coinInsert = true;
   } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
     updateCredit(1);                            // Incremeent Credit Amt'
-    LcdMessage(1);                              // Display Message in LCD
+    if(admin){
+      LcdMessage(6);
+    }else{
+      LcdMessage(1);                              // Display Message in LCD
+    }
     CoinInsertSFX();
+    Serial.print("Insert Credit");
+    
   }
 }
 
@@ -238,25 +243,30 @@ void spinButtonPress() {
 
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
 void updateCredit(int addAmt){                  //Method: Update Credit Amount
-  if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
-    betAmt = 1;
-    creditAmt += addAmt;
+  if(admin){
     totalCoinsInside += addAmt;
+    adminCoin += addAmt;
     coinInsert = !coinInsert;
-  }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
-    creditAmt += addAmt;
-    totalCoinsInside += addAmt;
-    coinInsert = !coinInsert;
-  }else{                                        //Scenario 3: Credit deducted when played
-    betAmt = 1;
-    creditAmt += addAmt;
+  }else{
+    if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
+      betAmt = 1;
+      creditAmt += addAmt;
+      totalCoinsInside += addAmt;
+      coinInsert = !coinInsert;
+    }else if(addAmt>0){                           //Scenario 2: Coin inserted when current credit !=0
+      creditAmt += addAmt;
+      totalCoinsInside += addAmt;
+      coinInsert = !coinInsert;
+    }else{                                        //Scenario 3: Credit deducted when played
+      betAmt = 1;
+      creditAmt += addAmt;
+    }
   }
-
 }
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  Serial.println("updateBet() is called");
+  //Serial.println("updateBet() is called");
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     betAmt = 1;
   }else{                                                  //Scenario 2: Current bet amount less than 3
@@ -455,9 +465,9 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int yPosCenter = 6;
   int yPosTop = -21; //yPos where character is outside of matrix
 
-  Serial.println("playAnimation() called");
-  Serial.print("spinButtonPressedFlag = ");
-  Serial.println(spinButtonPressedFlag);
+  //Serial.println("playAnimation() called");
+  //Serial.print("spinButtonPressedFlag = ");
+  //Serial.println(spinButtonPressedFlag);
 
   //detach interrupt
   detachAllInterrupts();
@@ -643,21 +653,25 @@ void dispenseCoin(int amount){
 }
 
 bool AdminCoinInsert(){
-  while(adminCoin < 3){
+  if(adminCoin < 3){
     if(isObstacle == LOW) {                       // Obstacle detected
       coinInsert = true;
     } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
       adminCoin += 1;
       totalCoinsInside += adminCoin;
     }
+    return false;
+  }else{
+    adminCoin = 0;
+    return true;
   }
-  adminCoin = 0;
 }
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
 void machineUpdates(int endFrameIndex){
-  Serial.println("machineUpdate() called");
+  Serial.print("machineUpdate() called = ");
   String endingFrame = combo[endFrameIndex];
+  Serial.println(endingFrame);
   if(endingFrame.equalsIgnoreCase(Jackpot)){
     Serial.println("Jackpot");
     LcdMessage(4);
