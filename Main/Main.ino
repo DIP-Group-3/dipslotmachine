@@ -887,11 +887,13 @@ void drawMessage(bool isWinning){
   detachAllInterrupts();
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
-  matrix.setCursor(12,12);
-  matrix.setTextSize(1);
   if (isWinning){
+    matrix.setCursor(12,12);
+    matrix.setTextSize(1);
     matrix.print("YOU WON");
   }else{
+    matrix.setCursor(8, 12);
+    matrix.setTextSize(1);
     matrix.print("NICE TRY :)");
   }
   matrix.swapBuffers(false);
