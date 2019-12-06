@@ -33,6 +33,8 @@ int globalDemoVariable = 0;
 
 
 //Music
+int musicCounter;
+int fireworkMusic[] = {622, 784, 932, 1244, 1175, 932, 784, 1047, 932, 784, 622, 932, 783, 784, 831, 932, 1046, 784, 698, 1046, 932, 784, 622, 932, 831, 784, 699, 698, 622};
 int rollingMusic[] = {523, 622, 784, 622, 466, 622, 784, 622};
 int fallingNotesMusic[] = {784, 622, 523};
 
@@ -226,7 +228,9 @@ void betButtonPress(){
 }
 
 void spinButtonPress() {
-  spinButtonPressedFlag = true;
+  if(creditAmt > 0) {
+    spinButtonPressedFlag = true;
+  }
 }
 
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
@@ -1103,10 +1107,20 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     delayMicroseconds(delayTime*1000);
     matrix.drawLine(x, i, x, (i+1), blackColor);
     matrix.swapBuffers(true);
+
+    if(i%4==0) {
+      //PLAY MUSIC
+      tone(buzzer, fireworkMusic[musicCounter], 200);
+      musicCounter = (musicCounter+1)%29;
+    }
   }
   delayMicroseconds(delayTime*1000);
   matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);;
   matrix.drawCircle(x, y, 1, blackColor);
+
+  //PLAY MUSIC
+  tone(buzzer, fireworkMusic[musicCounter], 100);
+  musicCounter = (musicCounter+1)%29;
 
   for ( byte j=1;j<4; j++) {
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
@@ -1128,6 +1142,9 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.swapBuffers(true);
 
     delayMicroseconds(delayTime*2000);
+    //PLAY MUSIC
+    tone(buzzer, fireworkMusic[musicCounter], 100);
+    musicCounter = (musicCounter+1)%29;
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
     matrix.swapBuffers(true);
@@ -1166,6 +1183,10 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.swapBuffers(true);
     matrix.drawLine((x-1)-j, (y-1)-j, (x-3)-j, (y-3)-j, blackColor);
     matrix.swapBuffers(true);
+
+    //PLAY MUSIC
+    tone(buzzer, fireworkMusic[musicCounter], 100);
+    musicCounter = (musicCounter+1)%29;
   }
 }
 

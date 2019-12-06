@@ -182,9 +182,9 @@ void loop(){
 
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
-    if(creditAmt>0){    
+    if(creditAmt>0){
       if(betButtonPressedFlag) { //CASE: BET BUTTON PRESSED
-        betButtonPressedFlag = false;     
+        betButtonPressedFlag = false;
         LcdMessage(1);
         BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
       }else if(spinButtonPressedFlag){ //CASE: SPIN BUTTON PRESSED
@@ -203,17 +203,12 @@ void loop(){
           }
       }
     }
-  } 
-}
-
-void clearAllFlags() {
-  betButtonPressedFlag = false;
-  spinButtonPressedFlag = false;
+  }
 }
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
 void irSensorUpdate(){
- 
+
   isObstacle = digitalRead(isObstaclePin);
 
   //TODO: IDLE STATE ANIMATION
@@ -237,7 +232,9 @@ void betButtonPress(){
 }
 
 void spinButtonPress() {
-  spinButtonPressedFlag = true;
+  if(creditAmt > 0) {
+    spinButtonPressedFlag = true;
+  }
 }
 
 //IR SENSOR METHOD: UPDATE CREDIT & DISPLAY LCD MESSAGE
@@ -1114,7 +1111,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     delayMicroseconds(delayTime*1000);
     matrix.drawLine(x, i, x, (i+1), blackColor);
     matrix.swapBuffers(true);
-    
+
     if(i%4==0) {
       //PLAY MUSIC
       tone(buzzer, fireworkMusic[musicCounter], 200);
@@ -1125,12 +1122,16 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
   matrix.drawCircle(x, y, 1, lineColor); delayMicroseconds(delayTime*3000);;
   matrix.drawCircle(x, y, 1, blackColor);
 
+  //PLAY MUSIC
+  tone(buzzer, fireworkMusic[musicCounter], 100);
+  musicCounter = (musicCounter+1)%29;
+
   for ( byte j=1;j<4; j++) {
     matrix.drawLine(x, (y-5)-j, x, (y-4)-j, lineColor);
     matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
     matrix.swapBuffers(true);
-    
+
     matrix.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
     matrix.swapBuffers(true);
     matrix.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
@@ -1149,7 +1150,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     //PLAY MUSIC
     tone(buzzer, fireworkMusic[musicCounter], 100);
     musicCounter = (musicCounter+1)%29;
-    
+
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
     matrix.swapBuffers(true);
