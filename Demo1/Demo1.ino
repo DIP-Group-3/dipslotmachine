@@ -31,7 +31,6 @@
 int globalDemoSequence[] = {1,0,2};
 int globalDemoVariable = 0;
 
-
 //Music
 int musicCounter;
 int fireworkMusic[] = {622, 784, 932, 1244, 1175, 932, 784, 1047, 932, 784, 622, 932, 783, 784, 831, 932, 1046, 784, 698, 1046, 932, 784, 622, 932, 831, 784, 699, 698, 622};
@@ -39,7 +38,7 @@ int rollingMusic[] = {523, 622, 784, 622, 466, 622, 784, 622};
 int fallingNotesMusic[] = {784, 622, 523};
 
 //Array of Combos & Select, Combinations of all possible Frames (10)
-String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE"};
+String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE", "ADM", "NBS", "SCE", "ADM", "SCE", "NBS", "SCE", "ADM", "NBS", "SCE"};
 
 //Array to determine scroll speed
 //ySpeed, or scroll speed is proportional to weights (20)
@@ -175,30 +174,33 @@ void setup(){
 
   //Software Interrupt
   attachInterrupts();
+  Serial.print("spinButtonPressedFlag = ");
+  Serial.println(spinButtonPressedFlag);
 }
 
 void loop(){
+  //firework();
+  Serial.println("in loop");
+  Serial.print("spinButtonPressedFlag = ");
+  Serial.println(spinButtonPressedFlag);
+
   if(totalCoinsInside >= winRate){
     irSensorUpdate();
     if(creditAmt>0){
       if(betButtonPressedFlag) { //CASE: BET BUTTON PRESSED
-        LcdMessage(1);
         betButtonPressedFlag = false;
+        LcdMessage(1);
         BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
       }else if(spinButtonPressedFlag){ //CASE: SPIN BUTTON PRESSED
-          if(totalCoinsInside < (winRate * betAmt)){ //CASE: Need admin to top up coins
+          spinButtonPressedFlag = false;
+          if(totalCoinsInside < (winRate * betAmt)){ //Case: Need admin to insert coin 
             LcdMessage(6);
-            bool admin = true;
-            while(admin){
-              admin = AdminCoinInsert();
-            }
-            adminCoin =0;
+            AdminCoinInsert();
           }else{
             LcdMessage(7);
             SpinActivateSFX();
             activateSpin();
           }
-        spinButtonPressedFlag = false;
       }
     }
   }
@@ -206,6 +208,7 @@ void loop(){
 
 //IR SENSOR METHOD: CHECK FOR COIN DETECTION
 void irSensorUpdate(){
+
   isObstacle = digitalRead(isObstaclePin);
 
   //TODO: IDLE STATE ANIMATION
@@ -215,6 +218,7 @@ void irSensorUpdate(){
     updateCredit(1);                            // Incremeent Credit Amt'
     LcdMessage(1);                              // Display Message in LCD
     CoinInsertSFX();
+    clearAllFlags();
   }
 }
 
@@ -356,8 +360,8 @@ void LcdMessage(int scenario){
 
 //LED MATRIX METHOD: ACTIVATE LED MATRIX
 void activateLED(){
-  startingFrame = random(300) % numOfFrames; //choose random start frame
-  endingFrame = endingFrame = globalDemoSequence[globalDemoVariable%3]; //random(300) % numOfFrames;   //choose random end frame
+  startingFrame = random(300) % numOfFrames;                //choose random start frame
+  endingFrame = globalDemoSequence[globalDemoVariable%3];   //choose random end frame
 
   displayStartingFrame(startingFrame);
   delay(2000);
@@ -558,6 +562,7 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   //final jitter animation to bring frames to a stop
   oscillateWithDecreasingEnergyAnimation(currentXPositions, currentYPositions, currentCharacter, endingFrame);
   globalDemoVariable++;
+  
   //reattach interrupts()
   attachInterrupts();
 
@@ -639,17 +644,15 @@ void dispenseCoin(int amount){
 }
 
 bool AdminCoinInsert(){
-  if(adminCoin <3){
+  while(adminCoin < 3){
     if(isObstacle == LOW) {                       // Obstacle detected
       coinInsert = true;
     } else if(isObstacle == HIGH && coinInsert){  // No Obstacle AND coinInsert == True
       adminCoin += 1;
       totalCoinsInside += adminCoin;
     }
-    return false;
-  }else{
-    return true;
   }
+  adminCoin = 0;
 }
 
 //LCD, SERVER MOTOR METHOD: NECESSARY ACTIONS TAKEN BASED ON CONDITION
@@ -881,11 +884,13 @@ void drawMessage(bool isWinning){
   detachAllInterrupts();
   Serial.println("Winning message is displayed");
   matrix.fillScreen(matrix.Color333(0, 0, 0));
-  matrix.setCursor(12,12);
-  matrix.setTextSize(1);
   if (isWinning){
+    matrix.setCursor(12,12);
+    matrix.setTextSize(1);
     matrix.print("YOU WON");
   }else{
+    matrix.setCursor(8, 12);
+    matrix.setTextSize(1);
     matrix.print("NICE TRY :)");
   }
   matrix.swapBuffers(false);
@@ -1079,20 +1084,21 @@ void drawFace(int x, int y){
 
 // ANIMATION 5: FIREWORKS
 void firework(){
+  musicCounter = 0;
   detachAllInterrupts();
   matrix.fillScreen(blackColor);
     if(roll){
-        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 10);
+        drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(3, 0, 0), 20);//10);
         drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(0, 7, 0), matrix.Color333(0, 3, 0), 20);
-        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(0, 0, 7), matrix.Color333(0, 0, 3), 15);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(0, 0, 7), matrix.Color333(0, 0, 3), 20);//15);
 
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(7, 3, 1), matrix.Color333(3, 1, 0), 20);
-        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 7, 7), matrix.Color333(3, 1, 0), 16);
-        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 0, 7), matrix.Color333(1, 0, 3), 18);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 7, 7), matrix.Color333(3, 1, 0), 20);//16);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 0, 7), matrix.Color333(1, 0, 3), 20);//18);
 
         drawFirework( random(set1XStart, set1XEnd), random(yMin, yMax), matrix.Color333(5, 3, 0), matrix.Color333(7, 1, 1), 20);
-        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(7, 3, 0), 16);
-        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 18);
+        drawFirework( random(set3XStart, set3XEnd), random(yMin, yMax), matrix.Color333(7, 0, 0), matrix.Color333(7, 3, 0), 20);//16);
+        drawFirework( random(set2XStart, set2XEnd), random(yMin, yMax), matrix.Color333(3, 7, 7), matrix.Color333(7, 3, 3), 20);//18);
         roll =false;
     }
     drawMessage(true);
@@ -1127,6 +1133,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     matrix.swapBuffers(true);
     matrix.drawLine(x, (y+2)+j, x, (y+3)+j, lineColor);
     matrix.swapBuffers(true);
+
     matrix.drawLine((x-5)-j, y, (x-4)-j, y, lineColor);
     matrix.swapBuffers(true);
     matrix.drawLine((x+2)+j, y, (x+3)+j, y, lineColor);
@@ -1145,6 +1152,7 @@ void drawFirework(byte x, byte y, uint16_t lineColor, uint16_t radColor, uint8_t
     //PLAY MUSIC
     tone(buzzer, fireworkMusic[musicCounter], 100);
     musicCounter = (musicCounter+1)%29;
+
 
     matrix.drawLine(x, (y-5)-(j-1), x, (y-4)-(j-1), blackColor);
     matrix.swapBuffers(true);

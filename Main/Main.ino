@@ -34,7 +34,7 @@ int rollingMusic[] = {523, 622, 784, 622, 466, 622, 784, 622};
 int fallingNotesMusic[] = {784, 622, 523};
 
 //Array of Combos & Select, Combinations of all possible Frames (10)
-String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE", "AD,", "NBS", "SCE", "ADM", "SCE", "NBS", "SCE", "ADM", "NBS", "SCE"};
+String combo[] = {"EEE", "NBS", "IEM", "ADM", "SCE", "NBS", "SCE", "ADM", "EEE", "SCE", "ADM", "NBS", "SCE", "ADM", "SCE", "NBS", "SCE", "ADM", "NBS", "SCE"};
 
 //Array to determine scroll speed
 //ySpeed, or scroll speed is proportional to weights (20)
