@@ -183,7 +183,6 @@ void loop(){
         LcdMessage(1);
         BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
       }else if(spinButtonPressedFlag){
-        spinButtonPressedFlag = false;
         if(totalCoinsInside < (winRate * betAmt) && adminCoin < 3){
           LcdMessage(6);
           admin = true;
@@ -218,7 +217,7 @@ void irSensorUpdate(){
     }
     CoinInsertSFX();
     Serial.print("Insert Credit");
-    
+
   }
 }
 
@@ -232,7 +231,7 @@ void betButtonPress(){
 }
 
 void spinButtonPress() {
-  if(creditAmt > 0) {
+  if(creditAmt > 0 && !spinButtonPressedFlag) {
     spinButtonPressedFlag = true;
   }
 }
@@ -262,7 +261,6 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
 
 //BET BTN METHOD: UPDATE BET AMOUNT
 void updateBet(){                               //Method: Update Bet Amount when Bet Button Pressed
-  //Serial.println("updateBet() is called");
   if(betAmt>= maxBet || betAmt >= creditAmt){             //Scenario 1: Current bet amount equal to/greater than 3
     betAmt = 1;
   }else{                                                  //Scenario 2: Current bet amount less than 3
@@ -460,10 +458,6 @@ void playAnimation(int startingFrame, int endingFrame, int numberOfRotations){
   int startXPos = 1;
   int yPosCenter = 6;
   int yPosTop = -21; //yPos where character is outside of matrix
-
-  //Serial.println("playAnimation() called");
-  //Serial.print("spinButtonPressedFlag = ");
-  //Serial.println(spinButtonPressedFlag);
 
   //detach interrupt
   detachAllInterrupts();
@@ -714,6 +708,7 @@ void machineUpdates(int endFrameIndex){
       LcdMessage(1);
     }
   }
+  spinButtonPressedFlag = false;
 }
 void StartUpSFX() {
   tone(buzzer, 260);
