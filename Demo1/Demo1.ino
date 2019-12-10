@@ -153,6 +153,7 @@ bool betButtonPressedFlag = false;
 bool spinButtonPressedFlag = false;
 
 bool admin = false;
+bool adminMsg6NotCalled = true;
 
 void setup(){
   Serial.begin(9600);
@@ -188,12 +189,12 @@ void loop(){
         BetIncrementSFX(); //CAUSING LAG!!! no delay if this is commented out
       }else if(spinButtonPressedFlag){
         if(totalCoinsInside < (winRate * betAmt) && adminCoin < 3){
-          LcdMessage(6);
+          if(adminMsg6NotCalled){
+            LcdMessage(6);
+            adminMsg6NotCalled = false;
+            spinButtonPressedFlag = false;
+          }
           admin = true;
-        }else if(adminCoin >= 3){
-          LcdMessage(1);
-          admin = false;
-          adminCoin = 0;
         }else{
           LcdMessage(7);
           SpinActivateSFX();
@@ -246,6 +247,12 @@ void updateCredit(int addAmt){                  //Method: Update Credit Amount
     totalCoinsInside += addAmt;
     adminCoin += addAmt;
     coinInsert = !coinInsert;
+    if(adminCoin >= 3){
+          LcdMessage(1);
+          adminMsg6NotCalled = true;
+          admin = false;
+          adminCoin = 0;
+    }
   }else{
     if(addAmt>0 && creditAmt == 0){               //Scenario 1: Coin inserted when current credit == 0
       betAmt = 1;
@@ -896,7 +903,7 @@ void drawMessage(bool isWinning){
     matrix.setCursor(12,12);
     matrix.setTextSize(1);
     matrix.setTextColor(blueColor);
-    matrix.print("YOU WON");S
+    matrix.print("YOU WON");
   }else{
     matrix.setCursor(8, 12);
     matrix.setTextSize(1);
